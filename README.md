@@ -6,7 +6,7 @@
 
 A **Unity Template** with all the necessary code for integration with the **World Engine** on the Internet Computer blockchain. Features include on-chain login authentication, payments, staking, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, freeing developers from complexity so they can focus on crafting engaging and enjoyable gameplay. 
 
-Simply deploy a game **World** canister using our [Game Launcher](launcher.boomdao.xyz) website, configure your World directly from the website, download and edit the Unity Template to call your World canister, and upload your Unity game client build to the website. Boom. You now have a full on-chain game.
+Simply deploy a game **World** canister using our [Game Launcher](launcher.boomdao.xyz) website, configure your World directly from the website, download and edit the Unity Template to call your World canister, and upload your Unity game client build to the website. Boom. You now have a fully on-chain game.
 
 ## TECH DOCUMENTATION
 
