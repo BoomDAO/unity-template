@@ -16,20 +16,25 @@ using UnityEngine.UI;
 
 public class StakeWidrawWindow : Window
 {
+    [SerializeField] string claimIcpStakeRewardActionId = "stakeIcp";
+    [SerializeField] string claimRcpStakeRewardActionId = "stakeRc";
+    [SerializeField] string claimNftpStakeRewardActionId = "stakeNft";
+
     [SerializeField] TMP_Text stakeText;
 
     [SerializeField] Button stakeIcpButton;
     [SerializeField] Button withdrawIcpButton;
+    [SerializeField] Button claimIcpStakeRewardButton;
 
-    [SerializeField] TMP_Text stakedIcrcText;
+    //[SerializeField] TMP_Text stakedIcrcText;
     [SerializeField] Button stakeIcrcButton;
     [SerializeField] Button withdrawIcrcButton;
+    [SerializeField] Button claimRcStakeRewardButton;
 
-    [SerializeField] TMP_Text stakedNftText;
+    //[SerializeField] TMP_Text stakedNftText;
     [SerializeField] Button stakeNftButton;
     [SerializeField] Button withdrawNftButton;
-
-    [SerializeField] Transaction stakeContent;
+    [SerializeField] Button claimNftStakeRewardButton;
 
     public override bool RequireUnlockCursor()
     {
@@ -40,12 +45,15 @@ public class StakeWidrawWindow : Window
     {
         stakeIcpButton.onClick.AddListener(OnIcpStake);
         withdrawIcpButton.onClick.AddListener(OnIcpWithDraw);
+        claimIcpStakeRewardButton.onClick.AddListener(ClaimIcpStakeReward);
 
         stakeIcrcButton.onClick.AddListener(OnIcrcStake);
         withdrawIcrcButton.onClick.AddListener(OnIcrcWithDraw);
+        claimRcStakeRewardButton.onClick.AddListener(ClaimRcStakeReward);
 
         stakeNftButton.onClick.AddListener(OnNftStake);
         withdrawNftButton.onClick.AddListener(OnNftWithDraw);
+        claimNftStakeRewardButton.onClick.AddListener(ClaimNftStakeReward);
 
         BroadcastState.Register<DataState<StakeData>>(UpdateWindow, true);
     }
@@ -54,19 +62,22 @@ public class StakeWidrawWindow : Window
     {
         stakeIcpButton.onClick.RemoveListener(OnIcpStake);
         withdrawIcpButton.onClick.RemoveListener(OnIcpWithDraw);
+        claimIcpStakeRewardButton.onClick.RemoveListener(ClaimIcpStakeReward);
 
         stakeIcrcButton.onClick.RemoveListener(OnIcrcStake);
         withdrawIcrcButton.onClick.RemoveListener(OnIcrcWithDraw);
+        claimRcStakeRewardButton.onClick.RemoveListener(ClaimRcStakeReward);
 
         stakeNftButton.onClick.RemoveListener(OnNftStake);
         withdrawNftButton.onClick.RemoveListener(OnNftWithDraw);
+        claimNftStakeRewardButton.onClick.RemoveListener(ClaimNftStakeReward);
 
         BroadcastState.Unregister<DataState<StakeData>>(UpdateWindow);
     }
 
     private void UpdateWindow(DataState<StakeData> obj)
     {
-        BroadcastState.TryRead<DataState<IcrcData>>(out var icrcDataState);
+        //BroadcastState.TryRead<DataState<IcrcData>>(out var icrcDataState);
         if (obj.IsReady())
         {
             stakeText.text = obj.data.stakes.Reduce(e => $"Type: {e.TokenType} | Id: {e.CanisterId} | Amt :{e.Amount} | Index?: {e.Index}\n");
@@ -79,66 +90,102 @@ public class StakeWidrawWindow : Window
 
     private async void OnIcpStake()
     {
-        //Debug.Log("Calling Transfer");
-        //var transferResult = await TxUtil.TransferToStakeCanister_ICP(Env.Stacking.ICP_STAKE);
+        Debug.Log("Calling Transfer");
+        var transferResult = await TxUtil.Transfer_ICP(0.005.TokenizeToIcp(), CandidApiManager.PaymentCanisterStakeIdentifier);
 
-        //if (transferResult.State == UResultState.Err)
-        //{
-        //    Debug.Log($"Transfer failed, msg: {transferResult.AsErr()}");
-        //    return;
-        //}
+        if (transferResult.Tag == UResultTag.Err)
+        {
+            Debug.Log($"Stake Failure, msg: {transferResult.AsErr()}");
+            return;
+        }
+        Debug.Log($"Stake Success, msg: {transferResult.AsOk()}");
+        var updateStakeResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateIcpStakes(transferResult.AsOk(), Env.CanisterIds.STAKING_HUB, CandidApiManager.UserPrincipal, 0.005.TokenizeToIcp());
 
-        //var verifyStakeResult = await TxUtil.VerifyStake_ICP(transferResult.AsOk(), Env.Stacking.ICP_STAKE);
-
-        //if(verifyStakeResult.State == UResultState.Ok) Debug.Log("Stake Ok Result: " + verifyStakeResult.AsOk());
-        //else Debug.Log("Stake Err Result: " + verifyStakeResult.AsErr());
+        if(updateStakeResult.Tag == Candid.StakingHub.Models.ResponseTag.Err)
+        {
+            Debug.LogError($"Stake Update Failure {updateStakeResult.AsErr()}");
+        }
     }
     private async void OnIcpWithDraw()
     {
+        Debug.Log("ICP STAKE WITHDRAWAL");
+
         var result = await CandidApiManager.Instance.StakingHubApiClient.DissolveIcp();
 
-        if(result.Tag == Candid.StakingHub.Models.ResultTag.Ok) Debug.Log("Withdrawal Ok result " + result.AsOk());
-        else Debug.Log("Withdrawal Failure result " + result.AsErr());
+        if(result.Tag == Candid.StakingHub.Models.ResultTag.Ok) Debug.Log("ICP Withdrawal Ok result " + result.AsOk());
+        else Debug.Log("ICP Withdrawal Failure result " + result.AsErr());
 
         UserUtil.UpdateBalanceReq_Icp();
     }
+
+    private async void ClaimIcpStakeReward()
+    {
+        Debug.Log("ICP STAKE CLAIM");
+
+        var actionResult = await TxUtil.ProcessActionEntities(new ActionArgValueTypes.ClaimStakingRewardArg(claimIcpStakeRewardActionId));
+
+        if (actionResult.Tag == UResultTag.Ok)
+        {
+            Debug.Log("ICP StakeClaim Success " + actionResult.AsOk());
+        }
+        else
+        {
+            Debug.LogError("ICP StakeClaim Failure " + actionResult.AsErr());
+        }
+    }
+    //
     private async void OnIcrcStake()
     {
-        //BroadcastState.TryRead<DataState<IcrcData>>(out var icrcDataState);
+        Debug.Log("Calling Transfer");
+        var transferResult = await TxUtil.Transfer_RC(0.00001.TokenizeToCkBtc(), Env.CanisterIds.STAKING_HUB);
 
-        //if(icrcDataState.IsReady() == false)
-        //{
-        //    Debug.LogError("Icrc data must be ready");
-        //    return;
-        //}
+        if (transferResult.Tag == UResultTag.Err)
+        {
+            Debug.LogError($"Stake Failure, msg: {transferResult.AsErr()}");
+            return;
+        }
+        Debug.Log($"Stake Success, msg: {transferResult.AsOk()}");
+        var updateStakeResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateIcrcStakes(transferResult.AsOk(), Env.CanisterIds.STAKING_HUB, CandidApiManager.UserPrincipal, 0.00001.TokenizeToCkBtc(), Env.CanisterIds.ICRC_LEDGER);
 
-        //Debug.Log("Calling Transfer");
-        //Debug.Log("Current RC Balance A: "+ icrcDataState.data.amt);
-        //var transferResult = await TxUtil.TransferToStakeCanister_RC(Env.Stacking.ICRC_STAKE, icrcDataState.data.decimalCount);
-        //Debug.Log("Current RC Balance B: " + icrcDataState.data.amt);
-
-        //if (transferResult.State == UResultState.Err)
-        //{
-        //    Debug.Log($"Transfer failed, msg: {transferResult.AsErr()}");
-        //    return;
-        //}
-
-        //var verifyStakeResult = await TxUtil.VerifyStake_RC(transferResult.AsOk(), Env.Stacking.ICRC_STAKE, icrcDataState.data.decimalCount);
-
-        //if (verifyStakeResult.State == UResultState.Ok) Debug.Log("Stake Ok Result: " + verifyStakeResult.AsOk());
-        //else Debug.Log("Stake Err Result: " + verifyStakeResult.AsErr());
+        if (updateStakeResult.Tag == Candid.StakingHub.Models.ResponseTag.Err)
+        {
+            Debug.LogError($"Stake Update Failure {updateStakeResult.AsErr()}");
+        }
     }
     private async void OnIcrcWithDraw()
     {
-        await CandidApiManager.Instance.StakingHubApiClient.DissolveIcrc(Env.CanisterIds.ICRC_LEDGER);
+        Debug.Log("ICRC STAKE WITHDRAWAL");
+
+        var result = await CandidApiManager.Instance.StakingHubApiClient.DissolveIcrc(Env.CanisterIds.STAKING_HUB);
+
+        if (result.Tag == Candid.StakingHub.Models.ResultTag.Ok) Debug.Log("ICRC Withdrawal Ok result " + result.AsOk());
+        else Debug.Log("ICRC Withdrawal Failure result " + result.AsErr());
+
+        UserUtil.UpdateBalanceReq_Rc();
     }
+    private async void ClaimRcStakeReward()
+    {
+        Debug.Log("ICRC STAKE CLAIM");
+
+        var actionResult = await TxUtil.ProcessActionEntities(new ActionArgValueTypes.ClaimStakingRewardArg(claimRcpStakeRewardActionId));
+
+        if (actionResult.Tag == UResultTag.Ok)
+        {
+            Debug.Log("ICRC StakeClaim Success " + actionResult.AsOk());
+        }
+        else
+        {
+            Debug.LogError("ICRC StakeClaim Failure " + actionResult.AsErr());
+        }
+    }
+    //
     private async void OnNftStake()
     {
-        if(DabNftUtil.TryGetNextNftIndex(Env.Nfts.BOOM_COLLECTION, out var index, Env.Nfts.NFT_OF_USAGE_TO_BURN))
+        if(DabNftUtil.TryGetNextNftIndex(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, out var index, Env.Nfts.NFT_OF_USAGE_TO_BURN))
         {
             Debug.Log($"Try stake nft of index "+ index);
 
-            Extv2BoomApiClient collectionInterface = new(CandidApiManager.Instance.Agent, Principal.FromText(Env.Nfts.BOOM_COLLECTION));
+            Extv2BoomApiClient collectionInterface = new(CandidApiManager.Instance.Agent, Principal.FromText(Env.Nfts.BOOM_COLLECTION_CANISTER_ID));
 
             var transferResult = await collectionInterface.Transfer(new Candid.extv2_boom.Models.TransferRequest(
                 1,
@@ -153,7 +200,7 @@ public class StakeWidrawWindow : Window
             if(transferResult.Tag == Candid.extv2_boom.Models.TransferResponseTag.Ok)
             {
                 //var collectionIdentifierResult = await CandidApiManager.Instance.CoreApiClient.GetAccountIdentifier(Env.Nfts.BOOM_COLLECTION);
-                var verificationResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateExtStakes((uint)index, CandidApiManager.PaymentCanisterStakeIdentifier, CandidApiManager.UserAccountIdentity, Env.Nfts.BOOM_COLLECTION);
+                var verificationResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateExtStakes((uint)index, CandidApiManager.PaymentCanisterStakeIdentifier, CandidApiManager.UserAccountIdentity, Env.Nfts.BOOM_COLLECTION_CANISTER_ID);
 
                 if(verificationResult.Tag == Candid.StakingHub.Models.ResponseTag.Success)
                 {
@@ -161,17 +208,17 @@ public class StakeWidrawWindow : Window
                 }
                 else
                 {
-                    Debug.Log($"Verification transfer of nft index {index} failed");
+                    Debug.LogError($"Verification transfer of nft index {index} failed");
                 }
             }
             else
             {
-                Debug.Log($"Transfer of nft index {index} failed");
+                Debug.LogError($"Transfer of nft index {index} failed");
             }
         }
         else
         {
-            Debug.Log($"Failed to fetch a nft index");
+            Debug.LogWarning($"Failed to fetch a nft index");
 
         }
     }
@@ -181,7 +228,7 @@ public class StakeWidrawWindow : Window
         if (stakeData.IsReady())
         {
             //Look for the first stake element of type nft, get its index and use it as the nft to withdraw
-            var withdrawalResult = await CandidApiManager.Instance.StakingHubApiClient.DissolveExt(Env.Nfts.BOOM_COLLECTION, 0);
+            var withdrawalResult = await CandidApiManager.Instance.StakingHubApiClient.DissolveExt(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, 0);
 
             if(withdrawalResult.Tag == Candid.StakingHub.Models.ResultTag.Ok)
             {
@@ -193,9 +240,21 @@ public class StakeWidrawWindow : Window
         }
         else
         {
-            Debug.Log("Stake Data not ready");
+            Debug.LogWarning("Stake Data not ready");
         }
     }
+    private async void ClaimNftStakeReward()
+    {
+        Debug.Log("NFT STAKE CLAIM");
+        var actionResult = await TxUtil.ProcessActionEntities(new ActionArgValueTypes.ClaimStakingRewardArg(claimNftpStakeRewardActionId));
 
-
+        if (actionResult.Tag == UResultTag.Ok)
+        {
+            Debug.Log("NFT StakeClaim Success " + actionResult.AsOk());
+        }
+        else
+        {
+            Debug.LogError("NFT StakeClaim Failure " + actionResult.AsErr());
+        }
+    }
 }

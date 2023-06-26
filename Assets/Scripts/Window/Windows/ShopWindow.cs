@@ -5,6 +5,7 @@ using ItsJackAnton.Patterns.Broadcasts;
 using ItsJackAnton.UI;
 using ItsJackAnton.Utility;
 using ItsJackAnton.Values;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,53 +48,27 @@ public class ShopWindow : Window
     private void UpdateWindow(DataState<UserNodeData> obj)
     {
         var loggedIn = CandidApiManager.IsUserLoggedIn;
-        Debug.Log("A");
+
         if (loggedIn == false) return;
 
         var validActionOffers = GetValidOffers(actionOfferIds);
-        Debug.Log("B: "+validActionOffers.Count);
 
         validActionOffers.Iterate(actionOffer =>
         {
+            if (!actionOffer.value.Tag.HasValue) return;
+            if (!actionOffer.value.Tag.ValueOrDefault.Contains("Offer")) return;
 
-            if (actionOffer.value.ActionDataType.Tag == ActionDataTypeTag.SpendTokens)
+            if (!actionOffer.value.ActionPlugin.HasValue)
             {
-                var config = actionOffer.value.ActionDataType.AsSpendTokens();
                 ActionWidget aw = WindowGod.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                 {
                     id = actionOffer.key,
                     textButtonContent = $"{actionOffer.key}",
-                    content = $"{actionOffer.value.Name.ValueOrDefault}\n\nprice: {config.Amt}",
-                    action = async (m) =>
+                    content = $"{actionOffer.value.Name.ValueOrDefault}",
+                    action = async (m, customData) =>
                     {
-
-                        double amt = config.Amt;
-                        config.BaseZeroCount.TryToUInt64(out var baseZeroCount);
-                        string tokenCanister = config.TokenCanister.ValueOrDefault;
-                        var tokenizedAmt = CandidUtil.Tokenize(amt, baseZeroCount);
-
-                        Debug.Log($"Call to action of id: SpendTokens - {actionOffer.key}. Tokens to spend: {tokenizedAmt}");
-
-                        UResult<ulong, string> transferResult = default;
-                        if (config.TokenCanister.HasValue == false)
-                        {//IC
-                            var transferArg = CandidUtil.SetupTransfer_IC(tokenizedAmt, CandidApiManager.PaymentCanisterOfferIdentifier);
-                            transferResult = await TxUtil.Transfer_ICP(transferArg);
-                        }
-                        else
-                        {//ICRC
-                            var transferArg = CandidUtil.SetupTransfer_RC(tokenizedAmt, Env.CanisterIds.PAYMENT_HUB);
-                            transferResult = await TxUtil.Transfer_RC(transferArg);
-                        }
-
-                        if (transferResult.Tag != UResultTag.Ok)
-                        {
-                            Debug.LogError("Transfer Failure, msg: "+ transferResult.AsErr());
-                            return;
-                        }
-
-                        var transferHash = transferResult.AsOk();
-                        var actionResult = await TxUtil.ProcessPlayerAction(new ActionArgValueTypes.SpendTokensArg(m, transferHash));
+                        Debug.Log("Call to action of id: SpendEntities -" + actionOffer.key);
+                        var actionResult = await TxUtil.ProcessActionEntities(new ActionArgValueTypes.DefaultArg(m));
 
                         if (actionResult.Tag != UResultTag.Ok)
                         {
@@ -101,26 +76,81 @@ public class ShopWindow : Window
                             return;
                         }
 
-                        Debug.Log("Spend Token Success");
+                        var resultAsOk = actionResult.AsOk();
+                        Debug.Log($"Spend Entities Success, entityCount: {resultAsOk.F1.Count}");
+                        resultAsOk.F1.Debug(e => $"entity: {JsonConvert.SerializeObject(e)}");
                     }
                 }, content);
             }
-            else if (actionOffer.value.ActionDataType.Tag == ActionDataTypeTag.SpendEntities)
+            else
             {
-                var config = actionOffer.value.ActionDataType.AsSpendEntities();
-
-                ActionWidget aw = WindowGod.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
+                var actionPlugin = actionOffer.value.ActionPlugin.ValueOrDefault;
+                if (actionPlugin.Tag == ActionPluginTag.SpendTokens)
                 {
-                    id = actionOffer.key,
-                    textButtonContent = $"{actionOffer.key}",
-                    content = $"{actionOffer.value.Name.ValueOrDefault}",
-                    action = async (m) =>
+                    var config = actionPlugin.AsSpendTokens();
+                    config.BaseZeroCount.TryToUInt64(out var baseZeroCount);
+
+                    ActionWidget aw = WindowGod.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
-                        Debug.Log("Call to action of id: SpendEntities -" + actionOffer.key);
-                    }
-                }, content);
+                        id = actionOffer.key,
+                        textButtonContent = $"{actionOffer.key}",
+                        content = $"{actionOffer.value.Name.ValueOrDefault}\n\nprice: {config.Amt.ToString("0." + new string('#', 339))}",
+                        action = async (m, customData) =>
+                        {
+
+                            double amt = config.Amt;
+                            string tokenCanister = config.TokenCanister.ValueOrDefault;
+                            var tokenizedAmt = CandidUtil.Tokenize(amt, baseZeroCount);
+
+                            UResult<ulong, string> transferResult = default;
+                            if (config.TokenCanister.HasValue == false)
+                            {//IC
+
+                                double amount = 0;
+                                var balanceResult = UserUtil.GetToken(Env.CanisterIds.ICP_LEDGER);
+                                if (balanceResult.Tag == UResultTag.Ok) amount = balanceResult.AsOk().Amount;
+
+                                Debug.Log($"Call to action of id: Spend ICP Tokens - {actionOffer.key}. Tokens to spend: {amt}, you have {amount}");
+
+                                transferResult = await TxUtil.Transfer_ICP(tokenizedAmt, CandidApiManager.PaymentCanisterOfferIdentifier);
+                            }
+                            else
+                            {//ICRC
+                                double amount = 0;
+                                var balanceResult = UserUtil.GetToken(Env.CanisterIds.ICRC_LEDGER);
+                                if (balanceResult.Tag == UResultTag.Ok) amount = balanceResult.AsOk().Amount;
+
+                                Debug.Log($"Call to action of id: Spend ICRC Tokens - {actionOffer.key}. Tokens to spend: {amt}, you have {amount}");
+                                transferResult = await TxUtil.Transfer_RC(tokenizedAmt, Env.CanisterIds.PAYMENT_HUB);
+                            }
+
+                            if (transferResult.Tag != UResultTag.Ok)
+                            {
+                                Debug.LogError("Transfer Failure, msg: " + transferResult.AsErr());
+                                return;
+                            }
+
+                            var transferHash = transferResult.AsOk();
+
+                            Debug.Log($"SpendToken aid: {m},Transfer Hash: {transferHash}");
+
+                            var actionResult = await TxUtil.ProcessActionEntities(new ActionArgValueTypes.SpendTokensArg(m, transferHash));
+
+                            if (actionResult.Tag != UResultTag.Ok)
+                            {
+                                Debug.LogError("ActionResult Failure, msg: " + actionResult.AsErr());
+                                return;
+                            }
+
+                            var resultAsOk = actionResult.AsOk();
+                            Debug.Log($"Spend Token Success, entityCount: {resultAsOk.F1.Count}");
+                            resultAsOk.F1.Debug(e => $"entity: {JsonConvert.SerializeObject(e)}");
+                        }
+                    }, content);
+                }
+
+                else Debug.Log($"Trying to call wrong action type of id: {actionPlugin.Tag} -" + actionOffer.key);
             }
-            else Debug.Log($"Trying to call wrong action type of id: {actionOffer.value.ActionDataType.Tag} -" + actionOffer.key);
         });
     }
 
@@ -140,14 +170,24 @@ public class ShopWindow : Window
         {
             if (UserUtil.TryGetActionConfigData(e, out var config) == false)
             {
-                Debug.LogError($"id {e} doesn't exist in configs");
                 return;
             }
 
-            if((config.ActionDataType.Tag == ActionDataTypeTag.SpendTokens || config.ActionDataType.Tag == ActionDataTypeTag.SpendEntities) == false)
+            if (!config.Tag.HasValue)
             {
-                Debug.LogError($"id {e} action config is not of type spend tokens nor spend entities");
                 return;
+            }
+            if(!config.Tag.ValueOrDefault.Contains("Offer"))
+            {
+                return;
+            }
+
+            var actionPlugin = config.ActionPlugin.ValueOrDefault;
+
+            if (actionPlugin != null)
+            {
+                Debug.Log($"Action Type TAG: {actionPlugin.Tag}");
+                if (actionPlugin.Tag != ActionPluginTag.SpendTokens) return;
             }
 
             offers.Add(new(e, config));
@@ -155,147 +195,4 @@ public class ShopWindow : Window
 
         return offers;
     }
-
-    //private async void BuyItemOfferHandler_IC()
-    //{
-    //    BroadcastState.TryRead<DataState<OffersConfig>>(out var offersConfig);
-
-    //    if (offersConfig.data.TryGetConfig(itemOfferId_ic, out var offerConfig) == false)
-    //    {
-    //        Debug.LogError($"Offer of id {itemOfferId_ic} doesn't exist");
-    //        return;
-    //    }
-
-    //    buying = true;
-    //    BroadcastState.TryRead<DataState<UserNodeData>>(out var coreUserDataState);
-
-    //    //Lets update the window so button disable based on "buying" state
-    //    UpdateWindow(coreUserDataState);
-
-    //    Debug.Log("Calling Transfer");
-    //    var transferResult = await TxUtil.TransferToOfferCanister_ICP(offerConfig.price);
-
-    //    if (transferResult.State == UResultState.Err)
-    //    {
-    //        buying = false;
-
-    //        Debug.Log($"Transfer failed, msg: {transferResult.AsErr()}");
-    //        return;
-    //    }
-
-    //    var verifyTransResponse =
-    //        await TxUtil.VerifyTx_ICP(transferResult.AsOk(), offerConfig.price, "offer", $"{itemOfferId_ic}");
-    //    buying = false;
-
-    //    if (verifyTransResponse.State == UResultState.Ok)
-    //    {
-    //        Debug.Log("Payment success");
-
-    //        var okValue = verifyTransResponse.AsOk();
-    //        var gameTx = okValue.gameTx;
-    //        var nfts = okValue.nfts;
-
-    //        var addedItems = gameTx.ItemsItem_.Add;
-
-    //        BroadcastState.ForceInvoke<DataState<UserNodeData>>(coreUserDataState =>
-    //        {
-    //            if (gameTx != null)
-    //            {
-    //                addedItems.Iterate(addedItem =>
-    //                {
-    //                    Debug.Log($"Add item off id {addedItem.Id}, quantity: {addedItem.Quantity}");
-
-    //                    if (coreUserDataState.data.items.TryAdd(addedItem.Id, new(addedItem.Id, addedItem.Quantity)) == false)
-    //                    {
-    //                        Debug.Log($"Add item off id {addedItem.Id}, quantity: {addedItem}");
-    //                        coreUserDataState.data.items[addedItem.Id].quantity += addedItem.Quantity;
-    //                    }
-    //                });
-    //            }
-
-    //            return coreUserDataState;
-    //        });
-    //    }
-    //    else
-    //    {
-    //        Debug.Log("Payment failure, msg: "+ verifyTransResponse.AsErr());
-    //    }
-    //}
-
-    private async void BuyNftOfferHandler_IC()
-    {
-
-    }
-
-    //private async void BuyItemOfferHandler_RC()
-    //{
-    //    BroadcastState.TryRead<DataState<IcrcData>>(out var icrcDataState);
-
-    //    if (icrcDataState.IsReady() == false)
-    //    {
-    //        Debug.LogError("Icrc data must be ready");
-    //        return;
-    //    }
-    //    BroadcastState.TryRead<DataState<OffersConfig>>(out var offersConfig);
-
-    //    if (offersConfig.data.TryGetConfig(itemOfferId_rc, out var offerConfig) == false)
-    //    {
-    //        Debug.LogError($"Offer of id {itemOfferId_rc} doesn't exist");
-    //        return;
-    //    }
-
-    //    buying = true;
-    //    BroadcastState.TryRead<DataState<UserNodeData>>(out var coreUserDataState);
-    //    //Lets update the window so button disable based on "buying" state
-    //    UpdateWindow(coreUserDataState);
-
-    //    Debug.Log("Calling Transfer");
-    //    var transferResult = await TxUtil.TransferToOfferCanister_RC(offerConfig.price, icrcDataState.data.decimalCount);
-
-    //    if (transferResult.State == UResultState.Err)
-    //    {
-    //        buying = false;
-
-    //        Debug.Log($"Transfer failed, msg: {transferResult.AsErr()}");
-    //        return;
-    //    }
-
-    //    var verifyTransResponse =
-    //        await TxUtil.VerifyTx_RC(transferResult.AsOk(), offerConfig.price, icrcDataState.data.decimalCount, "offer", $"{itemOfferId_rc}");
-    //    buying = false;
-
-    //    if (verifyTransResponse.State == UResultState.Ok)
-    //    {
-    //        Debug.Log("Payment success");
-
-    //        var okValue = verifyTransResponse.AsOk();
-    //        var gameTx = okValue.gameTx;
-    //        var nfts = okValue.nfts;
-
-    //        var addedItems = gameTx.ItemsItem_.Add;
-
-    //        BroadcastState.ForceInvoke<DataState<UserNodeData>>(coreUserDataState =>
-    //        {
-    //            if (gameTx != null)
-    //            {
-    //                addedItems.Iterate(addedItem =>
-    //                {
-    //                    Debug.Log($"Add item off id {addedItem.Id}, quantity: {addedItem.Quantity}");
-
-    //                    if (coreUserDataState.data.items.TryAdd(addedItem.Id, new(addedItem.Id, addedItem.Quantity)) == false)
-    //                    {
-    //                        Debug.Log($"Add item off id {addedItem.Id}, quantity: {addedItem}");
-    //                        coreUserDataState.data.items[addedItem.Id].quantity += addedItem.Quantity;
-    //                    }
-    //                });
-    //            }
-
-    //            return coreUserDataState;
-    //        });
-    //    }
-    //    else
-    //    {
-    //        Debug.Log("Payment failure, msg: " + verifyTransResponse.AsErr());
-    //    }
-    //}
 }

@@ -10,16 +10,10 @@ using EdjCase.ICP.Candid.Mapping;
 
 namespace Candid.World.Models
 {
-	public class MintNft
+	public class MintToken__1
 	{
-		[CandidName("assetId")]
-		public string AssetId { get; set; }
-
 		[CandidName("canister")]
 		public string Canister { get; set; }
-
-		[CandidName("collection")]
-		public string Collection { get; set; }
 
 		[CandidName("description")]
 		public string Description { get; set; }
@@ -27,24 +21,18 @@ namespace Candid.World.Models
 		[CandidName("imageUrl")]
 		public string ImageUrl { get; set; }
 
-		[CandidName("metadata")]
-		public string Metadata { get; set; }
-
 		[CandidName("name")]
 		public string Name { get; set; }
 
-		public MintNft(string assetId, string canister, string collection, string description, string imageUrl, string metadata, string name)
+		public MintToken__1(string canister, string description, string imageUrl, string name)
 		{
-			this.AssetId = assetId;
 			this.Canister = canister;
-			this.Collection = collection;
 			this.Description = description;
 			this.ImageUrl = imageUrl;
-			this.Metadata = metadata;
 			this.Name = name;
 		}
 
-		public MintNft()
+		public MintToken__1()
 		{
 		}
 	}

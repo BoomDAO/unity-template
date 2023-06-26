@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -37,7 +37,7 @@ namespace Candid.World
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "addAdmin", arg);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_2> BurnNft(string arg0, TokenIndex arg1, string arg2)
+		public async System.Threading.Tasks.Task<Models.Result_2> BurnNft(string arg0, TokenIndex arg1, Principal arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "burnNft", arg);
@@ -88,11 +88,11 @@ namespace Candid.World
 			return reply.ToObjects<List<Models.ActionConfig>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_5> GetAllUserWorldEntities()
+		public async System.Threading.Tasks.Task<Models.Result_6> GetAllUserWorldEntities()
 		{
 			CandidArg arg = CandidArg.FromCandid();
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "getAllUserWorldEntities", arg);
-			return reply.ToObjects<Models.Result_5>(this.Converter);
+			return reply.ToObjects<Models.Result_6>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Models.EntityConfig>> GetEntityConfigs()
@@ -111,10 +111,10 @@ namespace Candid.World
 			return reply.ToObjects<string>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_5> ProcessPlayerAction(Models.ActionArg arg0)
+		public async System.Threading.Tasks.Task<Models.Result_5> ProcessActionEntities(Models.ActionArg arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
-			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "processPlayerAction", arg);
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "processActionEntities", arg);
 			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 

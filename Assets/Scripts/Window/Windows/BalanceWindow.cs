@@ -26,8 +26,7 @@ public class BalanceWindow : Window
 
     public override void Setup(object data)
     {
-        BroadcastState.Register<DataState<IcpData>>(UpdateWindow);
-        BroadcastState.Register<DataState<IcrcData>>(UpdateWindow, true);
+        BroadcastState.Register<DataState<TokensData>>(UpdateWindow, true);
         icpBalanceText.text = "Balance = 0";
         reloadButton.onClick.AddListener(ReloadBalanceHandler);
     }
@@ -40,37 +39,33 @@ public class BalanceWindow : Window
 
     private void OnDestroy()
     {
-        BroadcastState.Unregister<DataState<IcpData>>(UpdateWindow);
-        BroadcastState.Unregister<DataState<IcrcData>>(UpdateWindow);
-    }
-    private void UpdateWindow(DataState<IcrcData> obj)
-    {
-        BroadcastState.TryRead<DataState<IcpData>>(out var icDataState);
-        UpdateWindow(icDataState);
+        BroadcastState.Unregister<DataState<TokensData>>(UpdateWindow);
     }
 
-    private void UpdateWindow(DataState<IcpData> obj)
+    private void UpdateWindow(DataState<TokensData> obj)
     {
-        if (CandidApiManager.IsUserLoggedIn == false)
+        var icpBalanceResult = UserUtil.GetToken(Env.CanisterIds.ICP_LEDGER);
+        var icrcBalanceResult = UserUtil.GetToken(Env.CanisterIds.ICRC_LEDGER);
+
+        icpBalanceText.text = $"ICP : {0}";
+        icrcBalances.text = $"ICRC : {0}";
+
+        if (icpBalanceResult.Tag == ItsJackAnton.Values.UResultTag.Ok)
         {
-            icpBalanceText.text = "ICP = 0";
-            return;
+            icpBalanceText.text = $"ICP : {icpBalanceResult.AsOk().Amount}";
+        }
+        else
+        {
+            Debug.Log(icpBalanceResult.AsErr());
         }
 
-        if(obj.IsReady() == false)
+        if (icrcBalanceResult.Tag == ItsJackAnton.Values.UResultTag.Ok)
         {
-            icpBalanceText.text = "ICP = 0";
-            return;
+            icrcBalances.text = $"ICRC : {icrcBalanceResult.AsOk().Amount}";
         }
-
-        icpBalanceText.text = $"ICP : {obj.data.amt/(float) 100_000_000}";
-
-        if(BroadcastState.TryRead<DataState<IcrcData>>(out var IcrcDataDataState))
+        else
         {
-            if (IcrcDataDataState.IsReady()) icrcBalances.text = $"{IcrcDataDataState.data.name}: {IcrcDataDataState.data.amt / Mathf.Pow(10, (float)IcrcDataDataState.data.decimalCount)}";
-            else if (IcrcDataDataState.IsLoading()) icrcBalances.text = "ICRC: Loading...";
-            else icrcBalances.text = "ICRC: None...";
+            Debug.Log(icrcBalanceResult.AsErr());
         }
-        else icrcBalances.text = "ICRC: None...";
     }
 }

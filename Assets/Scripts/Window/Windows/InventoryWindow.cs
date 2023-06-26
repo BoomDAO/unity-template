@@ -75,7 +75,7 @@ public class InventoryWindow : Window
         {
             if (UserUtil.TryGetEntityConfigData(e.Key, out var configDataType))
             {
-                if(configDataType.Tag.Contains("items"))
+                if(configDataType.Tag.Contains("item"))
                 {
                     WindowGod.Instance.AddWidgets<BasicInventoryWidget>(new BasicInventoryWidget.WindowData()
                     { content = $"{configDataType.Name.ValueOrDefault} x {e.Value.quantity}" }, content);

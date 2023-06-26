@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -8,61 +8,30 @@ using TokenIndex = System.UInt32;
 using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
-using System;
+using System.Collections.Generic;
 using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(ActionConstraintTag))]
 	public class ActionConstraint
 	{
-		[VariantTagProperty()]
-		public ActionConstraintTag Tag { get; set; }
+		[CandidName("entityConstraint")]
+		public OptionalValue<List<ActionConstraint.EntityConstraintItemItem>> EntityConstraint { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[CandidName("timeConstraint")]
+		public OptionalValue<ActionConstraint.TimeConstraintItem> TimeConstraint { get; set; }
 
-		public ActionConstraint(ActionConstraintTag tag, object? value)
+		public ActionConstraint(OptionalValue<List<ActionConstraint.EntityConstraintItemItem>> entityConstraint, OptionalValue<ActionConstraint.TimeConstraintItem> timeConstraint)
 		{
-			this.Tag = tag;
-			this.Value = value;
+			this.EntityConstraint = entityConstraint;
+			this.TimeConstraint = timeConstraint;
 		}
 
-		protected ActionConstraint()
+		public ActionConstraint()
 		{
 		}
 
-		public static ActionConstraint EntityConstraint(ActionConstraint.EntityConstraintInfo info)
-		{
-			return new ActionConstraint(ActionConstraintTag.EntityConstraint, info);
-		}
-
-		public static ActionConstraint TimeConstraint(ActionConstraint.TimeConstraintInfo info)
-		{
-			return new ActionConstraint(ActionConstraintTag.TimeConstraint, info);
-		}
-
-		public ActionConstraint.EntityConstraintInfo AsEntityConstraint()
-		{
-			this.ValidateTag(ActionConstraintTag.EntityConstraint);
-			return (ActionConstraint.EntityConstraintInfo)this.Value!;
-		}
-
-		public ActionConstraint.TimeConstraintInfo AsTimeConstraint()
-		{
-			this.ValidateTag(ActionConstraintTag.TimeConstraint);
-			return (ActionConstraint.TimeConstraintInfo)this.Value!;
-		}
-
-		private void ValidateTag(ActionConstraintTag tag)
-		{
-			if (!this.Tag.Equals(tag))
-			{
-				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
-			}
-		}
-
-		public class EntityConstraintInfo
+		public class EntityConstraintItemItem
 		{
 			[CandidName("entityId")]
 			public string EntityId { get; set; }
@@ -85,7 +54,7 @@ namespace Candid.World.Models
 			[CandidName("worldId")]
 			public string WorldId { get; set; }
 
-			public EntityConstraintInfo(string entityId, OptionalValue<string> equalToAttribute, OptionalValue<double> greaterThanOrEqualQuantity, string groupId, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, string worldId)
+			public EntityConstraintItemItem(string entityId, OptionalValue<string> equalToAttribute, OptionalValue<double> greaterThanOrEqualQuantity, string groupId, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, string worldId)
 			{
 				this.EntityId = entityId;
 				this.EqualToAttribute = equalToAttribute;
@@ -96,12 +65,12 @@ namespace Candid.World.Models
 				this.WorldId = worldId;
 			}
 
-			public EntityConstraintInfo()
+			public EntityConstraintItemItem()
 			{
 			}
 		}
 
-		public class TimeConstraintInfo
+		public class TimeConstraintItem
 		{
 			[CandidName("actionsPerInterval")]
 			public UnboundedUInt ActionsPerInterval { get; set; }
@@ -109,25 +78,15 @@ namespace Candid.World.Models
 			[CandidName("intervalDuration")]
 			public UnboundedUInt IntervalDuration { get; set; }
 
-			public TimeConstraintInfo(UnboundedUInt actionsPerInterval, UnboundedUInt intervalDuration)
+			public TimeConstraintItem(UnboundedUInt actionsPerInterval, UnboundedUInt intervalDuration)
 			{
 				this.ActionsPerInterval = actionsPerInterval;
 				this.IntervalDuration = intervalDuration;
 			}
 
-			public TimeConstraintInfo()
+			public TimeConstraintItem()
 			{
 			}
 		}
-	}
-
-	public enum ActionConstraintTag
-	{
-		[CandidName("entityConstraint")]
-		[VariantOptionType(typeof(ActionConstraint.EntityConstraintInfo))]
-		EntityConstraint,
-		[CandidName("timeConstraint")]
-		[VariantOptionType(typeof(ActionConstraint.TimeConstraintInfo))]
-		TimeConstraint
 	}
 }

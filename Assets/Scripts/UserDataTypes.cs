@@ -1,3 +1,5 @@
+using Candid.extv2_boom;
+using Candid.IcpLedger.Models;
 using Candid.World.Models;
 using ItsJackAnton.Utility;
 using ItsJackAnton.Values;
@@ -108,18 +110,78 @@ public class Stake
 
 [Preserve]
 [Serializable]
-public struct IcpData : IDataState
+public struct Token
 {
-    public long amt;
+    public string canisterId;
+    public string name;
+    public ulong rawAmt;
+    public ulong decimalCount;
+    public ulong baseZeroCount;
+    public readonly double Amount
+    {
+        get
+        {
+            if (baseZeroCount == 0) return rawAmt;
+
+            return rawAmt / (double)baseZeroCount;
+        }
+    }
+
+    public Token(string canisterId, string name, ulong amt, ulong decimalCount)
+    {
+        this.canisterId = canisterId;
+        this.name = name;
+        this.rawAmt = amt;
+        this.decimalCount = decimalCount;
+        this.baseZeroCount = decimalCount == 0? 0 : (ulong)Mathf.Pow(10, decimalCount);
+
+        Debug.Log($"{name} | Amt:{Amount}, RawAmt: {rawAmt}, Decimals: {decimalCount}, baseZeroCount: {baseZeroCount}");
+    }
 }
+
 [Preserve]
 [Serializable]
-public struct IcrcData : IDataState
+public struct TokensData : IDataState
 {
-    public string name;
-    public long amt;
-    public byte decimalCount;
+    public Dictionary<string,Token> tokens;
+
+    public TokensData(List<Token> tokens)
+    {
+        tokens ??= new();
+        this.tokens = new();
+
+        foreach (var item in tokens)
+        {
+            this.tokens.Add(item.canisterId, item);
+        }
+    }
+    public TokensData(TokensData tokenData, params Token[] tokensUpdate)
+    {
+        tokens = new();
+
+        tokenData.tokens ??= new();
+
+        foreach (var item in tokenData.tokens)
+        {
+            tokens.Add(item.Key, item.Value);
+        }
+
+        foreach (var item in tokensUpdate)
+        {
+            Update(item);
+        }
+    }
+
+    private void Update(Token tokenUpdate)
+    {
+        if (tokens.ContainsKey(tokenUpdate.canisterId))
+        {
+            tokens[tokenUpdate.canisterId] = tokenUpdate;
+        }
+        else tokens.Add(tokenUpdate.canisterId, tokenUpdate);
+    }
 }
+
 [Preserve]
 [Serializable]
 public struct WorldConfigsData : IDataState
@@ -134,7 +196,7 @@ public struct WorldConfigsData : IDataState
 
         if(entityConfigs != null)
         {
-            Debug.Log("Debug configs, element count: " +entityConfigs.Count);
+            //Debug.Log("Debug configs, element count: " +entityConfigs.Count);
             foreach (var item in entityConfigs)
             {
                 //Debug.Log($"- Entity Config, ID : {item.Eid}, tag : {item.Tag}");
@@ -147,7 +209,7 @@ public struct WorldConfigsData : IDataState
             Debug.Log("Debug configs, element count: " + actionConfigs.Count);
             foreach (var item in actionConfigs)
             {
-                //Debug.Log($"- Action Config, ID : {item.Aid}, type : {item.ActionDataType.Tag}");
+                Debug.Log($"- Action Config, ID : {item.Aid}, tag : {item.Tag}, content : {JsonConvert.SerializeObject(item)}");
 
                 actions.Add(item.Aid, item);
             }
@@ -204,6 +266,19 @@ public struct DabNftsData : IDataState
 
         Debug.Log($"FETCHED NFTS: {JsonConvert.SerializeObject(this.nonPlethoraNftCollections)}");
         Debug.Log($"FETCHED PLETHORA NFTS: {JsonConvert.SerializeObject(this.plethoraNftCollections)}");
+    }
+}
+[Preserve]
+[Serializable]
+public struct ListingData : IDataState
+{
+    public Dictionary<string, Extv2BoomApiClient.ListingsArg0Item> listing;
+
+    public ListingData(Dictionary<string, Extv2BoomApiClient.ListingsArg0Item> listing = null)
+    {
+        this.listing = listing ?? new();
+
+        Debug.Log($"FETCHED Listing: {JsonConvert.SerializeObject(this.listing)}");
     }
 }
 [Preserve]

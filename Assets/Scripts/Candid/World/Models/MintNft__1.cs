@@ -10,7 +10,7 @@ using EdjCase.ICP.Candid.Mapping;
 
 namespace Candid.World.Models
 {
-	public class MintNft
+	public class MintNft__1
 	{
 		[CandidName("assetId")]
 		public string AssetId { get; set; }
@@ -33,7 +33,7 @@ namespace Candid.World.Models
 		[CandidName("name")]
 		public string Name { get; set; }
 
-		public MintNft(string assetId, string canister, string collection, string description, string imageUrl, string metadata, string name)
+		public MintNft__1(string assetId, string canister, string collection, string description, string imageUrl, string metadata, string name)
 		{
 			this.AssetId = assetId;
 			this.Canister = canister;
@@ -44,7 +44,7 @@ namespace Candid.World.Models
 			this.Name = name;
 		}
 
-		public MintNft()
+		public MintNft__1()
 		{
 		}
 	}

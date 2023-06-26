@@ -15,12 +15,17 @@ public class ActionWidget : Window
 
     [SerializeField] Button button;
     [SerializeField, ShowOnly] string id;
+    [SerializeField, ShowOnly] bool bttnDisabled;
+    public object customData;
+
     public class WindowData
     {
         public string id;
         public string content;
         public string textButtonContent;
-        public UnityAction<string> action;
+        public UnityAction<string, object> action;
+        public bool bttnDisabled;
+        public object customData;
     }
     public override bool RequireUnlockCursor()
     {
@@ -38,12 +43,20 @@ public class ActionWidget : Window
 
         Debug.Log("Setup ActionWidget");
         id = windowData.id;
+        bttnDisabled = windowData.bttnDisabled;
+        customData = windowData.customData;
         text.text = $"- {windowData.content}";
         buttonText.text = $"{(string.IsNullOrEmpty(windowData.textButtonContent) ? "Action" : windowData.textButtonContent)}";
-        button.onClick.AddListener(() =>
+        button.enabled = !bttnDisabled;
+
+        if (!bttnDisabled)
         {
-            windowData.action?.Invoke(id);
-        });
+            button.onClick.AddListener(() =>
+            {
+                windowData.action?.Invoke(id, customData);
+            });
+        }
+
 
         BroadcastState.Register<ToggleActionWidgetState>(OnToggleHandler);
     }
@@ -54,6 +67,6 @@ public class ActionWidget : Window
     }
     private void OnToggleHandler(ToggleActionWidgetState obj)
     {
-        button.enabled = obj.enable;
+        button.enabled = obj.enable & !bttnDisabled;
     }
 }

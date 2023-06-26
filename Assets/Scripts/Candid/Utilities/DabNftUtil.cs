@@ -12,7 +12,7 @@ public static class DabNftUtil
     {
         get
         {
-            return Env.Nfts.BOOM_COLLECTION;
+            return Env.Nfts.BOOM_COLLECTION_CANISTER_ID;
         }
     }
     public static bool TryGetNft(string collectionId, out IEnumerable<DabNftDetails> outValue)
@@ -82,9 +82,9 @@ public static class DabNftUtil
         return 0;
     }
 
-    public static bool TryGetNextNftIndex(string collectionId, out long index, string usage = "")
+    public static bool TryGetNextNftIndex(string collectionId, out uint index, string usage = "")
     {
-        index = -1;
+        index = default;
 
         if (TryGetCollection(collectionId, out var outValue0) == false)
         {
@@ -94,7 +94,7 @@ public static class DabNftUtil
 
         if (string.IsNullOrEmpty(usage))
         {
-            index = outValue0.tokens[0].index;
+            index = (uint)outValue0.tokens[0].index;
             return true;
         }
 
@@ -109,7 +109,7 @@ public static class DabNftUtil
             return false;
         }
 
-        index = outValue1.index;
+        index = (uint)outValue1.index;
         return true;
     }
 

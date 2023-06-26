@@ -5,21 +5,31 @@ using ItsJackAnton.Values;
 using System.Collections.Generic;
 using Candid.World.Models;
 using System.Threading.Tasks;
+using Candid.IcpLedger.Models;
+using EdjCase.ICP.Candid.Models;
+using System.Linq;
+using System;
 
 public static class ActionArgValueTypes
 {
-    public abstract class BaseArg { };
+    public abstract class BaseArg
+    {
+        public abstract System.Object GetGeneratedValue();
+    };
     public class BurnNftArg : BaseArg
     {
         public string ActionId { get; set; }
-        public string Aid { get; set; }
-        public int Index { get; set; }
+        public uint Index { get; set; }
 
-        public BurnNftArg(string actionId, int index, string aid)
+        public BurnNftArg(string actionId, uint index)
         {
             this.ActionId = actionId;
             this.Index = index;
-            this.Aid = aid;
+        }
+
+        public override System.Object GetGeneratedValue()
+        {
+            return new ActionArg.BurnNftInfo(ActionId, Index);
         }
     }
     public class SpendTokensArg : BaseArg
@@ -32,14 +42,24 @@ public static class ActionArgValueTypes
             this.ActionId = actionId;
             this.Hash = hash;
         }
+
+        public override System.Object GetGeneratedValue()
+        {
+            return new ActionArg.SpendTokensInfo(ActionId, Hash);
+        }
     }
-    public class SpendEntitiesArg : BaseArg
+    public class DefaultArg : BaseArg
     {
         public string ActionId { get; set; }
 
-        public SpendEntitiesArg(string actionId)
+        public DefaultArg(string actionId)
         {
             this.ActionId = actionId;
+        }
+
+        public override System.Object GetGeneratedValue()
+        {
+            return new ActionArg.DefaultInfo(ActionId);
         }
     }
     public class ClaimStakingRewardArg : BaseArg
@@ -50,59 +70,71 @@ public static class ActionArgValueTypes
         {
             this.ActionId = actionId;
         }
+
+        public override System.Object GetGeneratedValue()
+        {
+            return new ActionArg.ClaimStakingRewardInfo(ActionId);
+        }
     }
 }
 
 public static class TxUtil
 {
-    public async static UniTask<UResult<List<Entity>, string>> ProcessPlayerAction<T>(T arg) where T : ActionArgValueTypes.BaseArg
+    public async static UniTask<UResult<Response, string>> ProcessActionEntities<T>(T arg) where T : ActionArgValueTypes.BaseArg
     {
         Result_5 verifyTransResponse = null;
         switch (arg)
         {
             case ActionArgValueTypes.SpendTokensArg:
-                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessPlayerAction(new ActionArg(ActionArgTag.SpendTokens, arg));
+                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessActionEntities(new ActionArg(ActionArgTag.SpendTokens, arg.GetGeneratedValue()));
                 break;
-            case ActionArgValueTypes.SpendEntitiesArg:
-                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessPlayerAction(new ActionArg(ActionArgTag.SpendEntities, arg));
+            case ActionArgValueTypes.DefaultArg:
+                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessActionEntities(new ActionArg(ActionArgTag.Default, arg.GetGeneratedValue()));
                 break;
             case ActionArgValueTypes.BurnNftArg:
-                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessPlayerAction(new ActionArg(ActionArgTag.BurnNft, arg));
+                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessActionEntities(new ActionArg(ActionArgTag.BurnNft, arg.GetGeneratedValue()));
                 break;
             case ActionArgValueTypes.ClaimStakingRewardArg:
-                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessPlayerAction(new ActionArg(ActionArgTag.ClaimStakingReward, arg));
+                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessActionEntities(new ActionArg(ActionArgTag.ClaimStakingReward, arg.GetGeneratedValue()));
                 break;
             case ActionArgValueTypes.BaseArg:
                 Debug.LogError("You cannot process an action with an BaseArg");
                 break;
         }
-        var result = new UResult<List<Entity>, string>();
 
-        if (verifyTransResponse == null) return result.Err("verifyTransResponse is null");
+        if (verifyTransResponse == null) return new("verifyTransResponse is null");
 
-        if (verifyTransResponse.Tag == Result_5Tag.Err) return result.Err(verifyTransResponse.AsErr());
+        if (verifyTransResponse.Tag == Result_5Tag.Err) return new(verifyTransResponse.AsErr());
 
         var okVal = verifyTransResponse.AsOk();
-        return result.Ok(okVal);
+
+        okVal.F1 ??= new();
+        okVal.F2 ??= new();
+        okVal.F3 ??= new();
+
+        return new(okVal);
     }
 
     #region ICP
-    public async static UniTask<UResult<ulong, string>> Transfer_ICP(Candid.IcpLedger.Models.TransferArgs arg)
+    private static Candid.IcpLedger.Models.TransferArgs SetupTransfer_IC(ulong amount, string toAddress)
     {
-        var result = await CandidApiManager.Instance.IcpLedgerApiClient.Transfer(arg);
+        List<byte> addressBytes = CandidUtil.HexStringToByteArray(toAddress).ToList();
 
-        if (result.Tag == Candid.IcpLedger.Models.TransferResultTag.Ok)
+        var transferArgs = new TransferArgs
         {
-            UserUtil.UpdateBalanceReq_Icp();
-            return new UResult<ulong, string>(result.AsOk());
-        }
-        else return new UResult<ulong, string>($"Transfer error: {result.AsErr().Tag} : {result.AsErr().Value}");
+            To = addressBytes,
+            Amount = new Candid.IcpLedger.Models.Tokens(amount),
+            Fee = new Candid.IcpLedger.Models.Tokens(10000),
+            CreatedAtTime = OptionalValue<TimeStamp>.NoValue(),
+            Memo = new ulong(),
+            FromSubaccount = new(),
+        };
+
+        return transferArgs;
     }
-
-    public async static UniTask<UResult<ulong, string>> TransferToStakeCanister_ICP(Candid.IcpLedger.Models.TransferArgs arg)
+    public async static UniTask<UResult<ulong, string>> Transfer_ICP(ulong amount, string toAddress)
     {
-        Debug.Log($"Transfer To: {CandidApiManager.PaymentCanisterStakeIdentifier}");
-
+        var arg = SetupTransfer_IC(amount, toAddress);
         var result = await CandidApiManager.Instance.IcpLedgerApiClient.Transfer(arg);
 
         if (result.Tag == Candid.IcpLedger.Models.TransferResultTag.Ok)
@@ -116,22 +148,16 @@ public static class TxUtil
 
 
     #region ICRC
-    public async static UniTask<UResult<ulong, string>> Transfer_RC(Candid.Icrc1Ledger.Models.TransferArg arg)
+    private static Candid.Icrc1Ledger.Models.TransferArg SetupTransfer_RC(ulong amount, string toPrincipal)
+    {
+        return new Candid.Icrc1Ledger.Models.TransferArg(new(), new(Principal.FromText(toPrincipal), new()), amount, new(), new(), new());
+    }
+    public async static UniTask<UResult<ulong, string>> Transfer_RC(ulong amount, string toPrincipal)
     {
         Debug.Log($"Transfer To: {CandidApiManager.PaymentCanisterOfferIdentifier}");
 
-        var result = await CandidApiManager.Instance.rcLedgerApiClient.Icrc1Transfer(arg);
+        var arg = SetupTransfer_RC(amount, toPrincipal);
 
-        if (result.Tag == Candid.Icrc1Ledger.Models.TransferResultTag.Ok)
-        {
-            UserUtil.UpdateBalanceReq_Rc();
-            return new UResult<ulong, string>((ulong)result.AsOk());
-        }
-        else return new UResult<ulong, string>($"Transfer error: {result.AsErr().Tag} : {result.AsErr().Value}");
-    }
-
-    public async static UniTask<UResult<ulong, string>> TransferToStakeCanister_RC(Candid.Icrc1Ledger.Models.TransferArg arg)
-    {
         var result = await CandidApiManager.Instance.rcLedgerApiClient.Icrc1Transfer(arg);
 
         if (result.Tag == Candid.Icrc1Ledger.Models.TransferResultTag.Ok)

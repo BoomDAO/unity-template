@@ -7,22 +7,25 @@ using attribute = System.String;
 using TokenIndex = System.UInt32;
 using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.World.Models;
-using System.Collections.Generic;
+using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
-	public class ActionOutcome
+	public class Action
 	{
-		[CandidName("possibleOutcomes")]
-		public List<ActionOutcomeOption> PossibleOutcomes { get; set; }
+		[CandidName("actionCount")]
+		public UnboundedUInt ActionCount { get; set; }
 
-		public ActionOutcome(List<ActionOutcomeOption> possibleOutcomes)
+		[CandidName("intervalStartTs")]
+		public UnboundedUInt IntervalStartTs { get; set; }
+
+		public Action(UnboundedUInt actionCount, UnboundedUInt intervalStartTs)
 		{
-			this.PossibleOutcomes = possibleOutcomes;
+			this.ActionCount = actionCount;
+			this.IntervalStartTs = intervalStartTs;
 		}
 
-		public ActionOutcome()
+		public Action()
 		{
 		}
 	}

@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -148,23 +148,19 @@ namespace Candid.World.Models
 			public class DeleteEntityInfo
 			{
 				[CandidTag(0U)]
-				public entityId F0 { get; set; }
+				public worldId F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
 
 				[CandidTag(2U)]
-				public worldId F2 { get; set; }
+				public entityId F2 { get; set; }
 
-				[CandidTag(3U)]
-				public entityId F3 { get; set; }
-
-				public DeleteEntityInfo(entityId f0, groupId f1, worldId f2, entityId f3)
+				public DeleteEntityInfo(worldId f0, groupId f1, entityId f2)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
 					this.F2 = f2;
-					this.F3 = f3;
 				}
 
 				public DeleteEntityInfo()
@@ -175,18 +171,18 @@ namespace Candid.World.Models
 			public class ReceiveEntityQuantityInfo
 			{
 				[CandidTag(0U)]
-				public entityId F0 { get; set; }
+				public worldId F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
 
 				[CandidTag(2U)]
-				public worldId F2 { get; set; }
+				public entityId F2 { get; set; }
 
 				[CandidTag(3U)]
 				public quantity F3 { get; set; }
 
-				public ReceiveEntityQuantityInfo(entityId f0, groupId f1, worldId f2, quantity f3)
+				public ReceiveEntityQuantityInfo(worldId f0, groupId f1, entityId f2, quantity f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -202,18 +198,18 @@ namespace Candid.World.Models
 			public class ReduceEntityExpirationInfo
 			{
 				[CandidTag(0U)]
-				public entityId F0 { get; set; }
+				public worldId F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
 
 				[CandidTag(2U)]
-				public worldId F2 { get; set; }
+				public entityId F2 { get; set; }
 
 				[CandidTag(3U)]
 				public duration F3 { get; set; }
 
-				public ReduceEntityExpirationInfo(entityId f0, groupId f1, worldId f2, duration f3)
+				public ReduceEntityExpirationInfo(worldId f0, groupId f1, entityId f2, duration f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -229,18 +225,18 @@ namespace Candid.World.Models
 			public class RenewEntityExpirationInfo
 			{
 				[CandidTag(0U)]
-				public entityId F0 { get; set; }
+				public worldId F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
 
 				[CandidTag(2U)]
-				public worldId F2 { get; set; }
+				public entityId F2 { get; set; }
 
 				[CandidTag(3U)]
 				public duration F3 { get; set; }
 
-				public RenewEntityExpirationInfo(entityId f0, groupId f1, worldId f2, duration f3)
+				public RenewEntityExpirationInfo(worldId f0, groupId f1, entityId f2, duration f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -256,18 +252,18 @@ namespace Candid.World.Models
 			public class SetEntityAttributeInfo
 			{
 				[CandidTag(0U)]
-				public entityId F0 { get; set; }
+				public worldId F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
 
 				[CandidTag(2U)]
-				public worldId F2 { get; set; }
+				public entityId F2 { get; set; }
 
 				[CandidTag(3U)]
 				public attribute F3 { get; set; }
 
-				public SetEntityAttributeInfo(entityId f0, groupId f1, worldId f2, attribute f3)
+				public SetEntityAttributeInfo(worldId f0, groupId f1, entityId f2, attribute f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -283,18 +279,18 @@ namespace Candid.World.Models
 			public class SpendEntityQuantityInfo
 			{
 				[CandidTag(0U)]
-				public entityId F0 { get; set; }
+				public worldId F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
 
 				[CandidTag(2U)]
-				public worldId F2 { get; set; }
+				public entityId F2 { get; set; }
 
 				[CandidTag(3U)]
 				public quantity F3 { get; set; }
 
-				public SpendEntityQuantityInfo(entityId f0, groupId f1, worldId f2, quantity f3)
+				public SpendEntityQuantityInfo(worldId f0, groupId f1, entityId f2, quantity f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;

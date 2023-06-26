@@ -17,7 +17,7 @@ public static class Env
     }
     public static class Nfts
     {
-        public const string BOOM_COLLECTION = "b5kkq-6iaaa-aaaal-qb6ga-cai";
+        public const string BOOM_COLLECTION_CANISTER_ID = "b5kkq-6iaaa-aaaal-qb6ga-cai";
         public const string NFT_OF_USAGE_TO_BURN = "pastry-variable-offer";
     }
 

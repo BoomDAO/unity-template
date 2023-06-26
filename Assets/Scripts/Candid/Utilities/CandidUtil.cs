@@ -52,28 +52,6 @@ public static class CandidUtil
         return reply.ToObjects<T>(null);
     }
 
-
-    public static Candid.IcpLedger.Models.TransferArgs SetupTransfer_IC(ulong amount, string toAddress)
-    {
-        List<byte> addressBytes = HexStringToByteArray(toAddress).ToList();
-
-        var transferArgs = new TransferArgs
-        {
-            To = addressBytes,
-            Amount = new Tokens(amount),
-            Fee = new Tokens(10000),
-            CreatedAtTime = OptionalValue<TimeStamp>.NoValue(),
-            Memo = new ulong(),
-            FromSubaccount = new(),
-        };
-
-        return transferArgs;
-    }
-    public static Candid.Icrc1Ledger.Models.TransferArg SetupTransfer_RC(ulong amount, string toPrincipal)
-    {
-        return new Candid.Icrc1Ledger.Models.TransferArg(new(), new(Principal.FromText(toPrincipal), new()), amount, new(), new(), new());
-    }
-
     public static byte[] HexStringToByteArray(string hexString)
     {
         var bytes = new byte[hexString.Length / 2];
@@ -94,11 +72,15 @@ public static class CandidUtil
     }
     public static ulong TokenizeToCkBtc(this double value)
     {
-        return (ulong)(1_000_000_000_000_000_000 * value);
+        return (ulong)(100_000_000 * value);
     }
 
     public static ulong Tokenize(this double value, ulong baseZeroCount)//Zero
     {
         return (ulong)(baseZeroCount * value);
+    }
+    public static double Destokenize(this ulong value, ulong baseZeroCount)//Zero
+    {
+        return value / (double)baseZeroCount;
     }
 }

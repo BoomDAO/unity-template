@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -13,70 +13,59 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(ActionDataTypeTag))]
-	public class ActionDataType
+	[Variant(typeof(ActionPluginTag))]
+	public class ActionPlugin
 	{
 		[VariantTagProperty()]
-		public ActionDataTypeTag Tag { get; set; }
+		public ActionPluginTag Tag { get; set; }
 
 		[VariantValueProperty()]
 		public System.Object? Value { get; set; }
 
-		public ActionDataType(ActionDataTypeTag tag, object? value)
+		public ActionPlugin(ActionPluginTag tag, object? value)
 		{
 			this.Tag = tag;
 			this.Value = value;
 		}
 
-		protected ActionDataType()
+		protected ActionPlugin()
 		{
 		}
 
-		public static ActionDataType BurnNft(ActionDataType.BurnNftInfo info)
+		public static ActionPlugin BurnNft(ActionPlugin.BurnNftInfo info)
 		{
-			return new ActionDataType(ActionDataTypeTag.BurnNft, info);
+			return new ActionPlugin(ActionPluginTag.BurnNft, info);
 		}
 
-		public static ActionDataType ClaimStakingReward(ActionDataType.ClaimStakingRewardInfo info)
+		public static ActionPlugin ClaimStakingReward(ActionPlugin.ClaimStakingRewardInfo info)
 		{
-			return new ActionDataType(ActionDataTypeTag.ClaimStakingReward, info);
+			return new ActionPlugin(ActionPluginTag.ClaimStakingReward, info);
 		}
 
-		public static ActionDataType SpendEntities(ActionDataType.SpendEntitiesInfo info)
+		public static ActionPlugin SpendTokens(ActionPlugin.SpendTokensInfo info)
 		{
-			return new ActionDataType(ActionDataTypeTag.SpendEntities, info);
+			return new ActionPlugin(ActionPluginTag.SpendTokens, info);
 		}
 
-		public static ActionDataType SpendTokens(ActionDataType.SpendTokensInfo info)
+		public ActionPlugin.BurnNftInfo AsBurnNft()
 		{
-			return new ActionDataType(ActionDataTypeTag.SpendTokens, info);
+			this.ValidateTag(ActionPluginTag.BurnNft);
+			return (ActionPlugin.BurnNftInfo)this.Value!;
 		}
 
-		public ActionDataType.BurnNftInfo AsBurnNft()
+		public ActionPlugin.ClaimStakingRewardInfo AsClaimStakingReward()
 		{
-			this.ValidateTag(ActionDataTypeTag.BurnNft);
-			return (ActionDataType.BurnNftInfo)this.Value!;
+			this.ValidateTag(ActionPluginTag.ClaimStakingReward);
+			return (ActionPlugin.ClaimStakingRewardInfo)this.Value!;
 		}
 
-		public ActionDataType.ClaimStakingRewardInfo AsClaimStakingReward()
+		public ActionPlugin.SpendTokensInfo AsSpendTokens()
 		{
-			this.ValidateTag(ActionDataTypeTag.ClaimStakingReward);
-			return (ActionDataType.ClaimStakingRewardInfo)this.Value!;
+			this.ValidateTag(ActionPluginTag.SpendTokens);
+			return (ActionPlugin.SpendTokensInfo)this.Value!;
 		}
 
-		public ActionDataType.SpendEntitiesInfo AsSpendEntities()
-		{
-			this.ValidateTag(ActionDataTypeTag.SpendEntities);
-			return (ActionDataType.SpendEntitiesInfo)this.Value!;
-		}
-
-		public ActionDataType.SpendTokensInfo AsSpendTokens()
-		{
-			this.ValidateTag(ActionDataTypeTag.SpendTokens);
-			return (ActionDataType.SpendTokensInfo)this.Value!;
-		}
-
-		private void ValidateTag(ActionDataTypeTag tag)
+		private void ValidateTag(ActionPluginTag tag)
 		{
 			if (!this.Tag.Equals(tag))
 			{
@@ -101,26 +90,23 @@ namespace Candid.World.Models
 
 		public class ClaimStakingRewardInfo
 		{
+			[CandidName("baseZeroCount")]
+			public UnboundedUInt BaseZeroCount { get; set; }
+
 			[CandidName("requiredAmount")]
-			public UnboundedUInt RequiredAmount { get; set; }
+			public double RequiredAmount { get; set; }
 
 			[CandidName("tokenCanister")]
 			public string TokenCanister { get; set; }
 
-			public ClaimStakingRewardInfo(UnboundedUInt requiredAmount, string tokenCanister)
+			public ClaimStakingRewardInfo(UnboundedUInt baseZeroCount, double requiredAmount, string tokenCanister)
 			{
+				this.BaseZeroCount = baseZeroCount;
 				this.RequiredAmount = requiredAmount;
 				this.TokenCanister = tokenCanister;
 			}
 
 			public ClaimStakingRewardInfo()
-			{
-			}
-		}
-
-		public class SpendEntitiesInfo
-		{
-			public SpendEntitiesInfo()
 			{
 			}
 		}
@@ -153,19 +139,16 @@ namespace Candid.World.Models
 		}
 	}
 
-	public enum ActionDataTypeTag
+	public enum ActionPluginTag
 	{
 		[CandidName("burnNft")]
-		[VariantOptionType(typeof(ActionDataType.BurnNftInfo))]
+		[VariantOptionType(typeof(ActionPlugin.BurnNftInfo))]
 		BurnNft,
 		[CandidName("claimStakingReward")]
-		[VariantOptionType(typeof(ActionDataType.ClaimStakingRewardInfo))]
+		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardInfo))]
 		ClaimStakingReward,
-		[CandidName("spendEntities")]
-		[VariantOptionType(typeof(ActionDataType.SpendEntitiesInfo))]
-		SpendEntities,
 		[CandidName("spendTokens")]
-		[VariantOptionType(typeof(ActionDataType.SpendTokensInfo))]
+		[VariantOptionType(typeof(ActionPlugin.SpendTokensInfo))]
 		SpendTokens
 	}
 }

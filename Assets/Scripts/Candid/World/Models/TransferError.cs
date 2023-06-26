@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;

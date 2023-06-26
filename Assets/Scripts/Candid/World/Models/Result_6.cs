@@ -8,53 +8,53 @@ using TokenIndex = System.UInt32;
 using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
-using EdjCase.ICP.Candid.Models;
+using System.Collections.Generic;
 using System;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(Result__1Tag))]
-	public class Result__1
+	[Variant(typeof(Result_6Tag))]
+	public class Result_6
 	{
 		[VariantTagProperty()]
-		public Result__1Tag Tag { get; set; }
+		public Result_6Tag Tag { get; set; }
 
 		[VariantValueProperty()]
 		public System.Object? Value { get; set; }
 
-		public Result__1(Result__1Tag tag, object? value)
+		public Result_6(Result_6Tag tag, object? value)
 		{
 			this.Tag = tag;
 			this.Value = value;
 		}
 
-		protected Result__1()
+		protected Result_6()
 		{
 		}
 
-		public static Result__1 Err(TransferError info)
+		public static Result_6 Err(string info)
 		{
-			return new Result__1(Result__1Tag.Err, info);
+			return new Result_6(Result_6Tag.Err, info);
 		}
 
-		public static Result__1 Ok(UnboundedUInt info)
+		public static Result_6 Ok(List<Entity> info)
 		{
-			return new Result__1(Result__1Tag.Ok, info);
+			return new Result_6(Result_6Tag.Ok, info);
 		}
 
-		public TransferError AsErr()
+		public string AsErr()
 		{
-			this.ValidateTag(Result__1Tag.Err);
-			return (TransferError)this.Value!;
+			this.ValidateTag(Result_6Tag.Err);
+			return (string)this.Value!;
 		}
 
-		public UnboundedUInt AsOk()
+		public List<Entity> AsOk()
 		{
-			this.ValidateTag(Result__1Tag.Ok);
-			return (UnboundedUInt)this.Value!;
+			this.ValidateTag(Result_6Tag.Ok);
+			return (List<Entity>)this.Value!;
 		}
 
-		private void ValidateTag(Result__1Tag tag)
+		private void ValidateTag(Result_6Tag tag)
 		{
 			if (!this.Tag.Equals(tag))
 			{
@@ -63,11 +63,13 @@ namespace Candid.World.Models
 		}
 	}
 
-	public enum Result__1Tag
+	public enum Result_6Tag
 	{
-		[VariantOptionType(typeof(TransferError))]
+		[CandidName("err")]
+		[VariantOptionType(typeof(string))]
 		Err,
-		[VariantOptionType(typeof(UnboundedUInt))]
+		[CandidName("ok")]
+		[VariantOptionType(typeof(List<Entity>))]
 		Ok
 	}
 }

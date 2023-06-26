@@ -121,8 +121,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5406023357707918196}
   m_HandleRect: {fileID: 7999162689365677073}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.99954134
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -675,7 +675,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0.476124, y: 0}
+  m_AnchoredPosition: {x: -0.000011265278, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &6660365166024343256
@@ -809,7 +809,7 @@ MonoBehaviour:
   actionOfferIds:
   - buyItem1_Icp
   - buyItem2_Icrc
-  - buyItem2_item1
+  - buyItem1_Item2
   content: {fileID: 6631525212458899429}
   goToBurnButton: {fileID: 4354973355288850451}
   closeButton: {fileID: 299223244791056358}

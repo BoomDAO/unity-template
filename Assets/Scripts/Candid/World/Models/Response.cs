@@ -12,17 +12,29 @@ using System.Collections.Generic;
 
 namespace Candid.World.Models
 {
-	public class ActionOutcome
+	public class Response
 	{
-		[CandidName("possibleOutcomes")]
-		public List<ActionOutcomeOption> PossibleOutcomes { get; set; }
+		[CandidTag(0U)]
+		public Action F0 { get; set; }
 
-		public ActionOutcome(List<ActionOutcomeOption> possibleOutcomes)
+		[CandidTag(1U)]
+		public List<Entity> F1 { get; set; }
+
+		[CandidTag(2U)]
+		public List<MintNft__1> F2 { get; set; }
+
+		[CandidTag(3U)]
+		public List<MintToken__1> F3 { get; set; }
+
+		public Response(Action f0, List<Entity> f1, List<MintNft__1> f2, List<MintToken__1> f3)
 		{
-			this.PossibleOutcomes = possibleOutcomes;
+			this.F0 = f0;
+			this.F1 = f1;
+			this.F2 = f2;
+			this.F3 = f3;
 		}
 
-		public ActionOutcome()
+		public Response()
 		{
 		}
 	}

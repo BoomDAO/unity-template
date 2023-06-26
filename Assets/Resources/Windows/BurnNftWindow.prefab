@@ -777,6 +777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68d0cd98d6cb28042b0396138ae1a411, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  burnNftActionId: burnPastryRewardTiketAction
   loadingText: {fileID: 8744804969766396809}
   burnButton: {fileID: 2502157830768434385}
   mintButton: {fileID: 3321737310292614694}

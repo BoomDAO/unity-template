@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -41,9 +41,9 @@ namespace Candid.World.Models
 			return new ActionArg(ActionArgTag.ClaimStakingReward, info);
 		}
 
-		public static ActionArg SpendEntities(ActionArg.SpendEntitiesInfo info)
+		public static ActionArg Default(ActionArg.DefaultInfo info)
 		{
-			return new ActionArg(ActionArgTag.SpendEntities, info);
+			return new ActionArg(ActionArgTag.Default, info);
 		}
 
 		public static ActionArg SpendTokens(ActionArg.SpendTokensInfo info)
@@ -63,10 +63,10 @@ namespace Candid.World.Models
 			return (ActionArg.ClaimStakingRewardInfo)this.Value!;
 		}
 
-		public ActionArg.SpendEntitiesInfo AsSpendEntities()
+		public ActionArg.DefaultInfo AsDefault()
 		{
-			this.ValidateTag(ActionArgTag.SpendEntities);
-			return (ActionArg.SpendEntitiesInfo)this.Value!;
+			this.ValidateTag(ActionArgTag.Default);
+			return (ActionArg.DefaultInfo)this.Value!;
 		}
 
 		public ActionArg.SpendTokensInfo AsSpendTokens()
@@ -88,16 +88,12 @@ namespace Candid.World.Models
 			[CandidName("actionId")]
 			public string ActionId { get; set; }
 
-			[CandidName("aid")]
-			public string Aid { get; set; }
-
 			[CandidName("index")]
 			public uint Index { get; set; }
 
-			public BurnNftInfo(string actionId, string aid, uint index)
+			public BurnNftInfo(string actionId, uint index)
 			{
 				this.ActionId = actionId;
-				this.Aid = aid;
 				this.Index = index;
 			}
 
@@ -121,17 +117,17 @@ namespace Candid.World.Models
 			}
 		}
 
-		public class SpendEntitiesInfo
+		public class DefaultInfo
 		{
 			[CandidName("actionId")]
 			public string ActionId { get; set; }
 
-			public SpendEntitiesInfo(string actionId)
+			public DefaultInfo(string actionId)
 			{
 				this.ActionId = actionId;
 			}
 
-			public SpendEntitiesInfo()
+			public DefaultInfo()
 			{
 			}
 		}
@@ -164,9 +160,9 @@ namespace Candid.World.Models
 		[CandidName("claimStakingReward")]
 		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardInfo))]
 		ClaimStakingReward,
-		[CandidName("spendEntities")]
-		[VariantOptionType(typeof(ActionArg.SpendEntitiesInfo))]
-		SpendEntities,
+		[CandidName("default")]
+		[VariantOptionType(typeof(ActionArg.DefaultInfo))]
+		Default,
 		[CandidName("spendTokens")]
 		[VariantOptionType(typeof(ActionArg.SpendTokensInfo))]
 		SpendTokens

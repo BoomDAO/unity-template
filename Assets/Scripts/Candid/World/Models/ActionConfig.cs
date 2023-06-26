@@ -1,4 +1,4 @@
-using worldId = System.String;
+using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -8,18 +8,17 @@ using TokenIndex = System.UInt32;
 using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
-using System.Collections.Generic;
 using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
 	public class ActionConfig
 	{
-		[CandidName("actionConstraints")]
-		public OptionalValue<List<ActionConstraint>> ActionConstraints { get; set; }
+		[CandidName("actionConstraint")]
+		public OptionalValue<ActionConstraint> ActionConstraint { get; set; }
 
-		[CandidName("actionDataType")]
-		public ActionDataType ActionDataType { get; set; }
+		[CandidName("actionPlugin")]
+		public OptionalValue<ActionPlugin> ActionPlugin { get; set; }
 
 		[CandidName("actionResult")]
 		public ActionResult ActionResult { get; set; }
@@ -33,14 +32,18 @@ namespace Candid.World.Models
 		[CandidName("name")]
 		public OptionalValue<string> Name { get; set; }
 
-		public ActionConfig(OptionalValue<List<ActionConstraint>> actionConstraints, ActionDataType actionDataType, ActionResult actionResult, string aid, OptionalValue<string> description, OptionalValue<string> name)
+		[CandidName("tag")]
+		public OptionalValue<string> Tag { get; set; }
+
+		public ActionConfig(OptionalValue<ActionConstraint> actionConstraint, OptionalValue<ActionPlugin> actionPlugin, ActionResult actionResult, string aid, OptionalValue<string> description, OptionalValue<string> name, OptionalValue<string> tag)
 		{
-			this.ActionConstraints = actionConstraints;
-			this.ActionDataType = actionDataType;
+			this.ActionConstraint = actionConstraint;
+			this.ActionPlugin = actionPlugin;
 			this.ActionResult = actionResult;
 			this.Aid = aid;
 			this.Description = description;
 			this.Name = name;
+			this.Tag = tag;
 		}
 
 		public ActionConfig()

@@ -3,6 +3,8 @@
 using Candid.World.Models;
 using ItsJackAnton.Patterns.Broadcasts;
 using ItsJackAnton.Utility;
+using ItsJackAnton.Values;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 using static Mono.CSharp.Evaluator;
@@ -48,7 +50,7 @@ public static class UserUtil
 
     #endregion
 
-
+    #region Config
     public static bool TryGetEntityConfigData(string eid, out EntityConfig tagType)
     {
         tagType = default;
@@ -71,107 +73,17 @@ public static class UserUtil
 
         if (config.data.actions == null) return false;
 
-        if (config.data.actions.TryGetValue(aid, out var val) == false) return false;
+        if (config.data.actions.TryGetValue(aid, out var val) == false)
+        {
+            Debug.LogError($"id {aid} doesn't exist in configs");
+            return false;
+        }
 
         tagType = val;
 
         return true;
     }
-
-    //OLD
-
-    //GAME ITEMS
-    public static bool TryGetGameItem(this UserNodeData userData, string itemId, out ItemData outValue)
-    {
-        outValue = default;
-        return default;// return userData.items.TryGetValue(itemId, out outValue);
-    }
-
-    public static double GetGameItemQuantity(this UserNodeData userData, string itemId)
-    {
-        if (TryGetGameItem(userData, itemId, out var itemData))
-        {
-            return itemData.quantity;
-        }
-
-        return 0;
-    }
-
-    public static bool MeetsGameItemRequirements(this UserNodeData userData, List<ItemData> itemRequirements)
-    {
-        bool unfinished = false;
-        foreach (var item in itemRequirements)
-        {
-            if (GetGameItemQuantity(userData, item.id) < item.quantity)
-            {
-                unfinished = true;
-                break;
-            }
-        }
-
-        return !unfinished;
-    }
-
-
-    public static BuffItemData GetGameBuffs(this UserNodeData userData, string itemId)
-    {
-        //var v = userData.buffs.Locate(e => e.Key.Contains(itemId));
-        //return v.Value;
-        return default;//
-    }
-    /// <summary>
-    /// Check for Buff count, if buff configs have isTry = TRUE then the return value will be buffConfig.limit - buff count. If buff usage is specified it can be used as a filter.
-    /// </summary>
-    /// <param name="userData"></param>
-    /// <param name="itemId"></param>
-    /// <param name="buffUsage"></param>
-    /// <returns></returns>
-    public static double GetGameBuffQuantity(this UserNodeData userData, string itemId)
-    {
-        //var v = userData.buffs.Locate(e => e.Key.Contains(itemId));
-
-        //if(v.Value != null)
-        //{
-        //    return v.Value.quantity;
-        //}
-        return 0;
-    }
-
-    /// <summary>
-    /// Return the time left in seconds
-    /// </summary>
-    /// <param name="userData"></param>
-    /// <param name="itemId"></param>
-    /// <param name="buffUsage"></param>
-    /// <returns></returns>
-    public static long GetBuffTimeLeft(this UserNodeData userData, string itemId, string buffUsage = "")
-    {
-        //var buffs = GetGameBuffs(userData, itemId);
-        //if (buffs == null) return 0;
-        //return ((TimeUtil.NowTs() * 1000_000) - buffs.startTs) / 1000_000_000;
-        return default;
-    }
-    public static long GetBuffProgress(this UserNodeData userData, string itemId, string buffUsage = "")
-    {
-        //var seconds = GetBuffTimeLeft(userData, itemId, buffUsage);
-
-        //ConfigUtil.TryFindItem<ItemConfigTypes.BuffConfig>(itemId, out var config);
-
-        //return seconds / config.limit;
-        return default;
-    }
-    public static double GetAchievementCount(string achievementKey, UserNodeData userData)
-    {
-
-        //if (userData.achievements.TryGetValue(achievementKey, out var value))
-        //{
-        //    return value.quantity;
-        //}
-        return 0;
-    }
-
-
-
+    #endregion
 
     #region Balances
 
@@ -183,25 +95,45 @@ public static class UserUtil
     {
         Broadcast.Invoke<FetchckBalanceReqIcrc>();
     }
-    public static void SetBalanceIcp(long amt)
+    public static void UpdateTokenBalance(params Token[] token)
     {
-        BroadcastState.ForceInvoke<DataState<IcpData>>(e =>
+        BroadcastState.ForceInvoke<DataState<TokensData>>(e =>
         {
-            e.data.amt = amt;
+            e.data = new(e.data, token);
             e.SetAsReady();
             return e;
         });
     }
-    public static void SetBalanceIcrc(string name, long amt, byte decimalCount)
+
+    public static UResult<Token, string> GetToken(string canisterId)
     {
-        BroadcastState.ForceInvoke<DataState<IcrcData>>(e =>
+        if(BroadcastState.TryRead<DataState<TokensData>>(out var val) == false)
         {
-            e.data.name = name;
-            e.data.amt = amt;
-            e.data.decimalCount = decimalCount;
-            e.SetAsReady();
-            return e;
-        });
+            return new("TokensData could not be found");
+        }
+
+        if (val.IsReady() == false) return new("TokensData is not yet ready");
+
+        if (val.data.tokens.TryGetValue(canisterId, out var token) == false) return new($"TokensData does not contain token of canister id: {canisterId}");
+        return new(token);
     }
+
+    public static UResult<List<Token>, string> GetTokens()
+    {
+        if (BroadcastState.TryRead<DataState<TokensData>>(out var val) == false)
+        {
+            return new("TokensData could not be found");
+        }
+
+        if (val.IsReady() == false) return new("TokensData is not yet ready");
+
+        List<Token> tokens = new();
+        val.data.tokens.Iterate(e =>
+        {
+            tokens.Add(e.Value);
+        });
+        return new(tokens);
+    }
+
     #endregion
 }

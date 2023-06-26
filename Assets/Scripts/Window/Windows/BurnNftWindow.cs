@@ -1,10 +1,12 @@
 using Candid;
 using Candid.extv2_boom;
 using Candid.extv2_boom.Models;
+using Candid.World.Models;
 using EdjCase.ICP.Candid.Models;
 using ItsJackAnton.Patterns.Broadcasts;
 using ItsJackAnton.UI;
 using ItsJackAnton.Utility;
+using ItsJackAnton.Values;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -15,7 +17,7 @@ using UnityEngine.UI;
 
 public class BurnNftWindow : Window
 {
-
+    [SerializeField] string burnNftActionId;
     [SerializeField] TMP_Text loadingText;
     [SerializeField] Button burnButton;
     [SerializeField] Button mintButton;
@@ -84,79 +86,85 @@ public class BurnNftWindow : Window
 
     private async void Burn()
     {
-        //if (CandidApiManager.IsUserLoggedIn == false)
-        //{
-        //    Debug.Log("> > > You must log in");
+        if (CandidApiManager.IsUserLoggedIn == false)
+        {
+            Debug.Log("> > > You must log in");
 
-        //    return;
-        //}
+            return;
+        }
 
-        //Debug.Log("> > > TryBurnNftAndSpin");
-        //if (burningNft) return;
+        Debug.Log("> > > TryBurnNftAndSpin");
+        if (burningNft) return;
 
-        //var count = DabNftUtil.GetNftCount(DabNftUtil.MainGameCollectionID, Env.Nfts.NFT_OF_USAGE_TO_BURN);
+        BroadcastState.TryRead<DataState<WorldConfigsData>>(out var worldConfigsData);
+        BroadcastState.TryRead<DataState<DabNftsData>>(out var dabNftsData);
 
-        //if (count > 0)
-        //{
-        //    if (DabNftUtil.TryGetNextNftIndex(DabNftUtil.MainGameCollectionID, out long index, Env.Nfts.NFT_OF_USAGE_TO_BURN))
-        //    {
-        //        Debug.Log("Try to burn nft of index: " + index);
+        if (worldConfigsData.IsReady() == false)
+        {
+            Debug.LogError("OffersConfig is not ready");
+            burningNft = false;
+            return;
+        }
+        if (dabNftsData.IsReady() == false)
+        {
+            Debug.LogError("DabNftsData is not ready");
+            burningNft = false;
+            return;
+        }
+        if(!DabNftUtil.TryGetNextNftIndex(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, out uint nftIndex))
+        {
+            Debug.LogError($"Could not find next nft to burn cuz u might not have any of the selected collection {Env.Nfts.BOOM_COLLECTION_CANISTER_ID}");
 
-        //        burningNft = true;
-        //        burnButton.interactable = false;
-        //        closeButton.interactable = false;
-        //        shopButton.interactable = false;
+            return;
+        }
 
-        //        if (DabNftUtil.TryRemoveNftByIndex(DabNftUtil.MainGameCollectionID, index) == false)
-        //        {
-        //            Debug.LogWarning("> > > Burn: was not able to remove burned nft on client");
-        //        }
-        //        var response = await CandidApiManager.Instance.WorldApiClient.BurnNft(DabNftUtil.MainGameCollectionID, (uint)index, CandidApiManager.UserAccountIdentity);
-        //        burningNft = false;
-        //        burnButton.interactable = true;
-        //        closeButton.interactable = true;
-        //        shopButton.interactable = true;
+        if (UserUtil.TryGetActionConfigData(burnNftActionId, out var config) == false)
+        {
+            Debug.LogError($"id {burnNftActionId} doesn't exist in configs");
+            burningNft = false;
+            return;
+        }
 
-        //        if (response.Tag == Candid.game.Models.Result_2Tag.Ok)
-        //        {
-        //            Debug.Log("> > > Burn Success");
-        //            //DabNftUtil.TryGetNft(DabNftUtil.MainGameCollectionID, index, out var dabNftDetails);
-        //            var okValue = response.AsOk();
-        //            var gameTx = okValue.F0;
-        //            var nfts = okValue.F1;
-        //            var ItemsToAdd = ((gameTx.Items.ValueOrDefault ?? new()).Add ?? new()).ValueOrDefault ?? new();
-        //            Debug.Log($"> > > Burn Success, items to add: {JsonConvert.SerializeObject(ItemsToAdd)}");
+        if (!config.Tag.HasValue)
+        {
+            burningNft = false;
+            return;
+        }
+        if (config.Tag.ValueOrDefault != "BurnNft")
+        {
+            Debug.LogError($"id {burnNftActionId} is not of tag BurnNft");
+            burningNft = false;
+            return;
+        }
 
-        //            BroadcastState.ForceInvoke<DataState<UserNodeData>>(gameUserDataState =>
-        //            {
-        //                if (gameTx != null)
-        //                {
-        //                    ItemsToAdd.Iterate(addedItem =>
-        //                    {
-        //                        Debug.Log($"Add item off id {addedItem.Id}, quantity: {addedItem.Quantity}");
+        var actionPlugin = config.ActionPlugin.ValueOrDefault;
 
-        //                        gameUserDataState.data.items = gameUserDataState.data.items ?? new();
-        //                        if (gameUserDataState.data.items.TryAdd(addedItem.Id, new(addedItem.Id, addedItem.Quantity)) == false)
-        //                        {
-        //                            gameUserDataState.data.items[addedItem.Id].quantity += addedItem.Quantity;
-        //                        }
-        //                    });
-        //                }
+        if (actionPlugin != null)
+        {
+            Debug.Log($"Action Type TAG: {actionPlugin.Tag}");
+            if (actionPlugin.Tag != ActionPluginTag.BurnNft)
+            {
+                Debug.LogError($"id {burnNftActionId} is not of type BurnNft");
+                burningNft = false;
+                return;
+            }
+        }
 
-        //                return gameUserDataState;
-        //            });
-        //        }
-        //        else
-        //        {
-        //            Debug.LogError("Failed to retrieve display items on the AbundanceWheel :" + response.AsErr());
-        //        }
-        //    }
-        //}
+        var actionResult = await TxUtil.ProcessActionEntities(new ActionArgValueTypes.BurnNftArg(burnNftActionId, nftIndex));
+
+        if(actionResult.Tag == UResultTag.Ok)
+        {
+            Debug.Log("Burn Success");
+        }
+        else
+        {
+            Debug.Log("Burn Failure");
+        }
     }
 
     private async void Mint()
     {
-        Extv2BoomApiClient collectionInterface = new(CandidApiManager.Instance.Agent, Principal.FromText(Env.Nfts.BOOM_COLLECTION));
+        Extv2BoomApiClient collectionInterface = new(CandidApiManager.Instance.Agent, Principal.FromText(Env.Nfts.BOOM_COLLECTION_CANISTER_ID));
 
         var tokensCountResult = await collectionInterface.GetTotalTokens();
 
