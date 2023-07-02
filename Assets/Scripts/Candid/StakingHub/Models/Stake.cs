@@ -8,14 +8,14 @@ namespace Candid.StakingHub.Models
 		[CandidName("amount")]
 		public UnboundedUInt Amount { get; set; }
 
+		[CandidName("blockIndex")]
+		public OptionalValue<string> BlockIndex { get; set; }
+
 		[CandidName("canister_id")]
 		public string CanisterId { get; set; }
 
 		[CandidName("dissolveAt")]
 		public UnboundedInt DissolveAt { get; set; }
-
-		[CandidName("index")]
-		public OptionalValue<string> Index { get; set; }
 
 		[CandidName("isDissolved")]
 		public bool IsDissolved { get; set; }
@@ -23,12 +23,12 @@ namespace Candid.StakingHub.Models
 		[CandidName("token_type")]
 		public string TokenType { get; set; }
 
-		public Stake(UnboundedUInt amount, string canisterId, UnboundedInt dissolveAt, OptionalValue<string> index, bool isDissolved, string tokenType)
+		public Stake(UnboundedUInt amount, OptionalValue<string> blockIndex, string canisterId, UnboundedInt dissolveAt, bool isDissolved, string tokenType)
 		{
 			this.Amount = amount;
+			this.BlockIndex = blockIndex;
 			this.CanisterId = canisterId;
 			this.DissolveAt = dissolveAt;
-			this.Index = index;
 			this.IsDissolved = isDissolved;
 			this.TokenType = tokenType;
 		}

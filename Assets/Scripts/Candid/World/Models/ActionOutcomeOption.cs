@@ -1,14 +1,14 @@
-using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
+using worldId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
 using TokenIndex = System.UInt32;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
+using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
@@ -148,7 +148,7 @@ namespace Candid.World.Models
 			public class DeleteEntityInfo
 			{
 				[CandidTag(0U)]
-				public worldId F0 { get; set; }
+				public OptionalValue<worldId> F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
@@ -156,7 +156,7 @@ namespace Candid.World.Models
 				[CandidTag(2U)]
 				public entityId F2 { get; set; }
 
-				public DeleteEntityInfo(worldId f0, groupId f1, entityId f2)
+				public DeleteEntityInfo(OptionalValue<worldId> f0, groupId f1, entityId f2)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -171,7 +171,7 @@ namespace Candid.World.Models
 			public class ReceiveEntityQuantityInfo
 			{
 				[CandidTag(0U)]
-				public worldId F0 { get; set; }
+				public OptionalValue<worldId> F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
@@ -182,7 +182,7 @@ namespace Candid.World.Models
 				[CandidTag(3U)]
 				public quantity F3 { get; set; }
 
-				public ReceiveEntityQuantityInfo(worldId f0, groupId f1, entityId f2, quantity f3)
+				public ReceiveEntityQuantityInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, quantity f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -198,7 +198,7 @@ namespace Candid.World.Models
 			public class ReduceEntityExpirationInfo
 			{
 				[CandidTag(0U)]
-				public worldId F0 { get; set; }
+				public OptionalValue<worldId> F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
@@ -209,7 +209,7 @@ namespace Candid.World.Models
 				[CandidTag(3U)]
 				public duration F3 { get; set; }
 
-				public ReduceEntityExpirationInfo(worldId f0, groupId f1, entityId f2, duration f3)
+				public ReduceEntityExpirationInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, duration f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -225,7 +225,7 @@ namespace Candid.World.Models
 			public class RenewEntityExpirationInfo
 			{
 				[CandidTag(0U)]
-				public worldId F0 { get; set; }
+				public OptionalValue<worldId> F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
@@ -236,7 +236,7 @@ namespace Candid.World.Models
 				[CandidTag(3U)]
 				public duration F3 { get; set; }
 
-				public RenewEntityExpirationInfo(worldId f0, groupId f1, entityId f2, duration f3)
+				public RenewEntityExpirationInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, duration f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -252,7 +252,7 @@ namespace Candid.World.Models
 			public class SetEntityAttributeInfo
 			{
 				[CandidTag(0U)]
-				public worldId F0 { get; set; }
+				public OptionalValue<worldId> F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
@@ -263,7 +263,7 @@ namespace Candid.World.Models
 				[CandidTag(3U)]
 				public attribute F3 { get; set; }
 
-				public SetEntityAttributeInfo(worldId f0, groupId f1, entityId f2, attribute f3)
+				public SetEntityAttributeInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, attribute f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;
@@ -279,7 +279,7 @@ namespace Candid.World.Models
 			public class SpendEntityQuantityInfo
 			{
 				[CandidTag(0U)]
-				public worldId F0 { get; set; }
+				public OptionalValue<worldId> F0 { get; set; }
 
 				[CandidTag(1U)]
 				public groupId F1 { get; set; }
@@ -290,7 +290,7 @@ namespace Candid.World.Models
 				[CandidTag(3U)]
 				public quantity F3 { get; set; }
 
-				public SpendEntityQuantityInfo(worldId f0, groupId f1, entityId f2, quantity f3)
+				public SpendEntityQuantityInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, quantity f3)
 				{
 					this.F0 = f0;
 					this.F1 = f1;

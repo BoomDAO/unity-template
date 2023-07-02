@@ -170,9 +170,9 @@ RectTransform:
   m_Father: {fileID: 8744804970558510433}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -301.19562}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0.32977, y: 183}
   m_SizeDelta: {x: 988, y: 407.6088}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4848591064036168875
@@ -213,8 +213,9 @@ GameObject:
   - component: {fileID: 4180211028475218205}
   - component: {fileID: 1469484481307342954}
   - component: {fileID: 4420847208809578698}
+  - component: {fileID: 81119178877455664}
   m_Layer: 5
-  m_Name: ICRC Withdraw [Button]
+  m_Name: ICRC Unstake [Button]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -323,6 +324,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &81119178877455664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1506579526006907284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1781607346801700238
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,6 +486,7 @@ GameObject:
   - component: {fileID: 6348568663144920239}
   - component: {fileID: 3575833698476935202}
   - component: {fileID: 1201836740601716243}
+  - component: {fileID: 2121841544074082990}
   m_Layer: 5
   m_Name: NFT Claim [Button]
   m_TagString: Untagged
@@ -583,6 +597,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2121841544074082990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1845014732032656199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2597311219108487549
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,7 +675,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Stack ICP
+  m_text: Stake ICP
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -986,7 +1012,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Claim  Reward
+  m_text: Claim ICP Staking Reward
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1013,8 +1039,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 20.03
+  m_fontSizeBase: 20.03
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1121,7 +1147,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Withdraw NFT
+  m_text: Unstake NFT
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1256,7 +1282,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Withdraw ICRC
+  m_text: Unstake ICRC
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1391,7 +1417,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Claim  Reward
+  m_text: Claim NFT Staking Reward
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1418,8 +1444,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1472,6 +1498,7 @@ GameObject:
   - component: {fileID: 2292250129513747167}
   - component: {fileID: 5694008301821177924}
   - component: {fileID: 47908079663630981}
+  - component: {fileID: 890499509735974517}
   m_Layer: 5
   m_Name: ICRC Claim [Button]
   m_TagString: Untagged
@@ -1582,6 +1609,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &890499509735974517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3848289161968626699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4145292036027681050
 GameObject:
   m_ObjectHideFlags: 0
@@ -1648,7 +1687,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Stack NFT
+  m_text: Stake NFT
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1817,7 +1856,7 @@ RectTransform:
   m_Children:
   - {fileID: 8744804969613659410}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1841,7 +1880,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -1871,7 +1912,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5631369746714770969}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: caafd4a3e7eb8c54ca730b31bbcc0447, type: 3}
+  m_Script: {fileID: 11500000, guid: c0fe0e79e2fd7f24d83bce87aa11c802, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   claimIcpStakeRewardActionId: stakeIcp
@@ -1879,13 +1920,13 @@ MonoBehaviour:
   claimNftpStakeRewardActionId: stakeNft
   stakeText: {fileID: 5146686877181432005}
   stakeIcpButton: {fileID: 3338667762064655601}
-  withdrawIcpButton: {fileID: 2797802070938169325}
+  unstakeIcpButton: {fileID: 2797802070938169325}
   claimIcpStakeRewardButton: {fileID: 772120245471658855}
   stakeIcrcButton: {fileID: 636676302594418228}
-  withdrawIcrcButton: {fileID: 4420847208809578698}
+  unstakeIcrcButton: {fileID: 4420847208809578698}
   claimRcStakeRewardButton: {fileID: 47908079663630981}
   stakeNftButton: {fileID: 9113386597773675999}
-  withdrawNftButton: {fileID: 4345272356612230103}
+  unstakeNftButton: {fileID: 4345272356612230103}
   claimNftStakeRewardButton: {fileID: 1201836740601716243}
 --- !u!1 &5807995762664143107
 GameObject:
@@ -1899,6 +1940,7 @@ GameObject:
   - component: {fileID: 3168861150849709040}
   - component: {fileID: 8395846160292233081}
   - component: {fileID: 9113386597773675999}
+  - component: {fileID: 455932620885134970}
   m_Layer: 5
   m_Name: NFT Stake [Button]
   m_TagString: Untagged
@@ -2009,6 +2051,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &455932620885134970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5807995762664143107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5885071090420631875
 GameObject:
   m_ObjectHideFlags: 0
@@ -2021,8 +2075,9 @@ GameObject:
   - component: {fileID: 7017949434738353642}
   - component: {fileID: 4189530046709292962}
   - component: {fileID: 2797802070938169325}
+  - component: {fileID: 7121246702560790999}
   m_Layer: 5
-  m_Name: ICP Withdraw [Button]
+  m_Name: ICP Unstake [Button]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2131,6 +2186,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7121246702560790999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5885071090420631875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6608146507273076383
 GameObject:
   m_ObjectHideFlags: 0
@@ -2143,6 +2210,7 @@ GameObject:
   - component: {fileID: 3583186593603342998}
   - component: {fileID: 3865353268345776336}
   - component: {fileID: 772120245471658855}
+  - component: {fileID: 7368024230554098296}
   m_Layer: 5
   m_Name: ICP Claim [Button]
   m_TagString: Untagged
@@ -2253,6 +2321,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7368024230554098296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6608146507273076383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6928957376918464852
 GameObject:
   m_ObjectHideFlags: 0
@@ -2319,7 +2399,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Claim  Reward
+  m_text: Claim ICRC Staking Reward
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2346,8 +2426,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2538,6 +2618,7 @@ GameObject:
   - component: {fileID: 6790023123647469257}
   - component: {fileID: 8519049283758503178}
   - component: {fileID: 636676302594418228}
+  - component: {fileID: 8217909753479552646}
   m_Layer: 5
   m_Name: ICRC Stake [Button]
   m_TagString: Untagged
@@ -2648,6 +2729,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8217909753479552646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7238258294546410885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7330651232857453742
 GameObject:
   m_ObjectHideFlags: 0
@@ -2714,7 +2807,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Withdraw ICP
+  m_text: Unstake ICP
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2987,7 +3080,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Stack ICRC
+  m_text: Stake ICRC
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3068,6 +3161,7 @@ GameObject:
   - component: {fileID: 566029959554118579}
   - component: {fileID: 7563260693954560335}
   - component: {fileID: 3338667762064655601}
+  - component: {fileID: 7889592554030477312}
   m_Layer: 5
   m_Name: ICP Stake [Button]
   m_TagString: Untagged
@@ -3178,6 +3272,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7889592554030477312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8004689944725128020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8103413382005118645
 GameObject:
   m_ObjectHideFlags: 0
@@ -3257,8 +3363,9 @@ GameObject:
   - component: {fileID: 6483784158633912664}
   - component: {fileID: 5758095683631313791}
   - component: {fileID: 4345272356612230103}
+  - component: {fileID: 4958959374511628006}
   m_Layer: 5
-  m_Name: NFT Withdraw [Button]
+  m_Name: NFT Unstake [Button]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3367,6 +3474,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4958959374511628006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8572942737242156476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8685417558322278789
 GameObject:
   m_ObjectHideFlags: 0
@@ -3379,6 +3498,7 @@ GameObject:
   - component: {fileID: 4127370599693300293}
   - component: {fileID: 178132784494796120}
   - component: {fileID: 6701560657772033558}
+  - component: {fileID: 4229588225276363082}
   m_Layer: 5
   m_Name: Close [Button]
   m_TagString: Untagged
@@ -3404,7 +3524,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 17.659424, y: 35.47998}
+  m_AnchoredPosition: {x: 17.659424, y: 0}
   m_SizeDelta: {x: 70, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4127370599693300293
@@ -3501,6 +3621,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &4229588225276363082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8685417558322278789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8744804969613659409
 GameObject:
   m_ObjectHideFlags: 0
@@ -3537,7 +3669,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000061035156}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -886.1804, y: -498.4765}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8744804969613659412
@@ -3613,7 +3745,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.3670044, y: 2.7341003}
+  m_AnchoredPosition: {x: 1.3670044, y: 0}
   m_SizeDelta: {x: -46.4792, y: -76.5541}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &8744804970558510432

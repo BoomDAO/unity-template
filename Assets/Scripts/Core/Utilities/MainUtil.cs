@@ -5,6 +5,46 @@ namespace ItsJackAnton.Utility
 
     public static class MainUtil
     {
+        public static string AddressToShort(this string value)
+        {
+            string newString = "";
+
+            int index = 0;
+            char runner = value[index];
+            while (runner != '-')
+            {
+                newString += runner;
+                ++index;
+
+                if (index == value.Length)
+                {
+                    return newString;
+                }
+                runner = value[index];
+            }
+
+            newString += "...";
+
+            index = value.Length - 1;
+            runner = value[index];
+            while (runner != '-')
+            {
+                newString += runner;
+                --index;
+                runner = value[index];
+            }
+
+            return newString;
+        }
+
+        public static string NotScientificNotation(this double val)
+        {
+            return val.ToString("0." + new string('#', 339));
+        }
+        public static string NotScientificNotation(this float val)
+        {
+            return val.ToString("0." + new string('#', 339));
+        }
         public static void Loop(this int count, System.Action action)
         {
             for (int i = 0; i < count; i++)

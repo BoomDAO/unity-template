@@ -1,14 +1,14 @@
-using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
+using worldId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
 using TokenIndex = System.UInt32;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
+using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
@@ -36,9 +36,19 @@ namespace Candid.World.Models
 			return new ActionArg(ActionArgTag.BurnNft, info);
 		}
 
-		public static ActionArg ClaimStakingReward(ActionArg.ClaimStakingRewardInfo info)
+		public static ActionArg ClaimStakingRewardIcp(ActionArg.ClaimStakingRewardIcpInfo info)
 		{
-			return new ActionArg(ActionArgTag.ClaimStakingReward, info);
+			return new ActionArg(ActionArgTag.ClaimStakingRewardIcp, info);
+		}
+
+		public static ActionArg ClaimStakingRewardIcrc(ActionArg.ClaimStakingRewardIcrcInfo info)
+		{
+			return new ActionArg(ActionArgTag.ClaimStakingRewardIcrc, info);
+		}
+
+		public static ActionArg ClaimStakingRewardNft(ActionArg.ClaimStakingRewardNftInfo info)
+		{
+			return new ActionArg(ActionArgTag.ClaimStakingRewardNft, info);
 		}
 
 		public static ActionArg Default(ActionArg.DefaultInfo info)
@@ -46,9 +56,14 @@ namespace Candid.World.Models
 			return new ActionArg(ActionArgTag.Default, info);
 		}
 
-		public static ActionArg SpendTokens(ActionArg.SpendTokensInfo info)
+		public static ActionArg VerifyTransferIcp(ActionArg.VerifyTransferIcpInfo info)
 		{
-			return new ActionArg(ActionArgTag.SpendTokens, info);
+			return new ActionArg(ActionArgTag.VerifyTransferIcp, info);
+		}
+
+		public static ActionArg VerifyTransferIcrc(ActionArg.VerifyTransferIcrcInfo info)
+		{
+			return new ActionArg(ActionArgTag.VerifyTransferIcrc, info);
 		}
 
 		public ActionArg.BurnNftInfo AsBurnNft()
@@ -57,10 +72,22 @@ namespace Candid.World.Models
 			return (ActionArg.BurnNftInfo)this.Value!;
 		}
 
-		public ActionArg.ClaimStakingRewardInfo AsClaimStakingReward()
+		public ActionArg.ClaimStakingRewardIcpInfo AsClaimStakingRewardIcp()
 		{
-			this.ValidateTag(ActionArgTag.ClaimStakingReward);
-			return (ActionArg.ClaimStakingRewardInfo)this.Value!;
+			this.ValidateTag(ActionArgTag.ClaimStakingRewardIcp);
+			return (ActionArg.ClaimStakingRewardIcpInfo)this.Value!;
+		}
+
+		public ActionArg.ClaimStakingRewardIcrcInfo AsClaimStakingRewardIcrc()
+		{
+			this.ValidateTag(ActionArgTag.ClaimStakingRewardIcrc);
+			return (ActionArg.ClaimStakingRewardIcrcInfo)this.Value!;
+		}
+
+		public ActionArg.ClaimStakingRewardNftInfo AsClaimStakingRewardNft()
+		{
+			this.ValidateTag(ActionArgTag.ClaimStakingRewardNft);
+			return (ActionArg.ClaimStakingRewardNftInfo)this.Value!;
 		}
 
 		public ActionArg.DefaultInfo AsDefault()
@@ -69,10 +96,16 @@ namespace Candid.World.Models
 			return (ActionArg.DefaultInfo)this.Value!;
 		}
 
-		public ActionArg.SpendTokensInfo AsSpendTokens()
+		public ActionArg.VerifyTransferIcpInfo AsVerifyTransferIcp()
 		{
-			this.ValidateTag(ActionArgTag.SpendTokens);
-			return (ActionArg.SpendTokensInfo)this.Value!;
+			this.ValidateTag(ActionArgTag.VerifyTransferIcp);
+			return (ActionArg.VerifyTransferIcpInfo)this.Value!;
+		}
+
+		public ActionArg.VerifyTransferIcrcInfo AsVerifyTransferIcrc()
+		{
+			this.ValidateTag(ActionArgTag.VerifyTransferIcrc);
+			return (ActionArg.VerifyTransferIcrcInfo)this.Value!;
 		}
 
 		private void ValidateTag(ActionArgTag tag)
@@ -102,17 +135,47 @@ namespace Candid.World.Models
 			}
 		}
 
-		public class ClaimStakingRewardInfo
+		public class ClaimStakingRewardIcpInfo
 		{
 			[CandidName("actionId")]
 			public string ActionId { get; set; }
 
-			public ClaimStakingRewardInfo(string actionId)
+			public ClaimStakingRewardIcpInfo(string actionId)
 			{
 				this.ActionId = actionId;
 			}
 
-			public ClaimStakingRewardInfo()
+			public ClaimStakingRewardIcpInfo()
+			{
+			}
+		}
+
+		public class ClaimStakingRewardIcrcInfo
+		{
+			[CandidName("actionId")]
+			public string ActionId { get; set; }
+
+			public ClaimStakingRewardIcrcInfo(string actionId)
+			{
+				this.ActionId = actionId;
+			}
+
+			public ClaimStakingRewardIcrcInfo()
+			{
+			}
+		}
+
+		public class ClaimStakingRewardNftInfo
+		{
+			[CandidName("actionId")]
+			public string ActionId { get; set; }
+
+			public ClaimStakingRewardNftInfo(string actionId)
+			{
+				this.ActionId = actionId;
+			}
+
+			public ClaimStakingRewardNftInfo()
 			{
 			}
 		}
@@ -132,21 +195,40 @@ namespace Candid.World.Models
 			}
 		}
 
-		public class SpendTokensInfo
+		public class VerifyTransferIcpInfo
 		{
 			[CandidName("actionId")]
 			public string ActionId { get; set; }
 
-			[CandidName("hash")]
-			public ulong Hash { get; set; }
+			[CandidName("blockIndex")]
+			public ulong BlockIndex { get; set; }
 
-			public SpendTokensInfo(string actionId, ulong hash)
+			public VerifyTransferIcpInfo(string actionId, ulong blockIndex)
 			{
 				this.ActionId = actionId;
-				this.Hash = hash;
+				this.BlockIndex = blockIndex;
 			}
 
-			public SpendTokensInfo()
+			public VerifyTransferIcpInfo()
+			{
+			}
+		}
+
+		public class VerifyTransferIcrcInfo
+		{
+			[CandidName("actionId")]
+			public string ActionId { get; set; }
+
+			[CandidName("blockIndex")]
+			public UnboundedUInt BlockIndex { get; set; }
+
+			public VerifyTransferIcrcInfo(string actionId, UnboundedUInt blockIndex)
+			{
+				this.ActionId = actionId;
+				this.BlockIndex = blockIndex;
+			}
+
+			public VerifyTransferIcrcInfo()
 			{
 			}
 		}
@@ -157,14 +239,23 @@ namespace Candid.World.Models
 		[CandidName("burnNft")]
 		[VariantOptionType(typeof(ActionArg.BurnNftInfo))]
 		BurnNft,
-		[CandidName("claimStakingReward")]
-		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardInfo))]
-		ClaimStakingReward,
+		[CandidName("claimStakingRewardIcp")]
+		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardIcpInfo))]
+		ClaimStakingRewardIcp,
+		[CandidName("claimStakingRewardIcrc")]
+		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardIcrcInfo))]
+		ClaimStakingRewardIcrc,
+		[CandidName("claimStakingRewardNft")]
+		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardNftInfo))]
+		ClaimStakingRewardNft,
 		[CandidName("default")]
 		[VariantOptionType(typeof(ActionArg.DefaultInfo))]
 		Default,
-		[CandidName("spendTokens")]
-		[VariantOptionType(typeof(ActionArg.SpendTokensInfo))]
-		SpendTokens
+		[CandidName("verifyTransferIcp")]
+		[VariantOptionType(typeof(ActionArg.VerifyTransferIcpInfo))]
+		VerifyTransferIcp,
+		[CandidName("verifyTransferIcrc")]
+		[VariantOptionType(typeof(ActionArg.VerifyTransferIcrcInfo))]
+		VerifyTransferIcrc
 	}
 }

@@ -32,12 +32,6 @@ namespace Candid.WorldHub
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "addAdmin", arg);
 		}
 
-		public async Task AddEntityPermission(string arg0, string arg1, Models.EntityPermission arg2)
-		{
-			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
-			await this.Agent.CallAndWaitAsync(this.CanisterId, "addEntityPermission", arg);
-		}
-
 		public async System.Threading.Tasks.Task<Models.Result> AdminCreateUser(string arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
@@ -59,9 +53,9 @@ namespace Candid.WorldHub
 			return reply.ToObjects<bool>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result> CreateNewUser()
+		public async System.Threading.Tasks.Task<Models.Result> CreateNewUser(Principal arg0)
 		{
-			CandidArg arg = CandidArg.FromCandid();
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "createNewUser", arg);
 			return reply.ToObjects<Models.Result>(this.Converter);
 		}
@@ -114,6 +108,12 @@ namespace Candid.WorldHub
 			return reply.ToObjects<Models.Result>(this.Converter);
 		}
 
+		public async Task GrantEntityPermission(string arg0, string arg1, string arg2, Models.EntityPermission arg3)
+		{
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3));
+			await this.Agent.CallAndWaitAsync(this.CanisterId, "grantEntityPermission", arg);
+		}
+
 		public async Task GrantGlobalPermission(string arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
@@ -126,9 +126,9 @@ namespace Candid.WorldHub
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "removeAdmin", arg);
 		}
 
-		public async Task RemoveEntityPermission(string arg0, string arg1)
+		public async Task RemoveEntityPermission(string arg0, string arg1, string arg2)
 		{
-			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1));
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "removeEntityPermission", arg);
 		}
 
@@ -151,6 +151,13 @@ namespace Candid.WorldHub
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "totalUsers", arg);
 			CandidArg reply = response.ThrowOrGetReply();
 			return reply.ToObjects<UnboundedUInt>(this.Converter);
+		}
+
+		public async System.Threading.Tasks.Task<string> Whoami()
+		{
+			CandidArg arg = CandidArg.FromCandid();
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "whoami", arg);
+			return reply.ToObjects<string>(this.Converter);
 		}
 	}
 }

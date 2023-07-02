@@ -22,14 +22,21 @@ namespace ItsJackAnton.Values
         }
 
         public UResultTag Tag { get; private set; } = UResultTag.None;
+
         public OK AsOk()
         {
+            return (OK)value;
+        }
+        public OK AsOkorDefault(OK defaultVal = default)
+        {
+            if (Tag != UResultTag.Ok) return defaultVal;
             return (OK)value;
         }
         public ERR AsErr()
         {
             return (ERR)value;
         }
+
         public UResult<OK, ERR> Ok(object value)
         {
             this.value = value;

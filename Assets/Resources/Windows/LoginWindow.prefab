@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 7943199767828236858}
   - component: {fileID: 7642397784037124790}
   - component: {fileID: 3177773523040696397}
+  - component: {fileID: 454585254655395210}
   m_Layer: 5
   m_Name: Stack [Button]
   m_TagString: Untagged
@@ -286,6 +287,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowName: StakeWidrawWindow
   openOnAwake: 0
+--- !u!114 &454585254655395210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091062927246630307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1745233871746402185
 GameObject:
   m_ObjectHideFlags: 0
@@ -780,6 +793,7 @@ GameObject:
   - component: {fileID: 2505451908395294804}
   - component: {fileID: 9018127900444613198}
   - component: {fileID: 1656605668719762399}
+  - component: {fileID: 72334097684204766}
   m_Layer: 5
   m_Name: Shop [Button]
   m_TagString: Untagged
@@ -916,6 +930,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowName: ShopWindow
   openOnAwake: 0
+--- !u!114 &72334097684204766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101434441565217370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3342693711620210794
 GameObject:
   m_ObjectHideFlags: 0
@@ -928,7 +954,7 @@ GameObject:
   - component: {fileID: 4978637666330409228}
   - component: {fileID: 1938714050974348642}
   m_Layer: 5
-  m_Name: Burn  [Text]
+  m_Name: Mint&Burn  [Text]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -982,7 +1008,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'BURN NFT
+  m_text: 'MINT & BURN NFT
 
 '
   m_isRightToLeft: 0
@@ -1011,11 +1037,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
+  m_fontSize: 17.55
   m_fontSizeBase: 24
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 14.33
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
@@ -1047,7 +1073,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 4.123108, y: 0, z: 3.298462, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1119,7 +1145,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Markerplace
+  m_text: Marketplace
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1201,6 +1227,7 @@ GameObject:
   - component: {fileID: 3863052857090155515}
   - component: {fileID: 5047557193801063875}
   - component: {fileID: 1774790632799100729}
+  - component: {fileID: 1335761535256617883}
   m_Layer: 5
   m_Name: Marketplace [Button]
   m_TagString: Untagged
@@ -1337,6 +1364,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowName: MarketPlaceWindow
   openOnAwake: 0
+--- !u!114 &1335761535256617883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4882485472609585640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5631369746714770969
 GameObject:
   m_ObjectHideFlags: 0
@@ -1372,7 +1411,7 @@ RectTransform:
   m_Children:
   - {fileID: 8744804969613659410}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1396,7 +1435,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -1409,10 +1450,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5631369746714770969}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be713ca8f488af241ac84264feed4d4f, type: 3}
+  m_Script: {fileID: 11500000, guid: f8ed2378a1359d34bac2740e8c631642, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataState: 0
   logInBtn: {fileID: 7508893272695187221}
   logOutBtn: {fileID: 1086336287078378497}
   logInStateTxt: {fileID: 1890393973598112863}
@@ -1621,6 +1661,7 @@ GameObject:
   - component: {fileID: 1938854145873373756}
   - component: {fileID: 6906463912851091943}
   - component: {fileID: 7508893272695187221}
+  - component: {fileID: 9146607323310599802}
   m_Layer: 5
   m_Name: LogIn [Btn]
   m_TagString: Untagged
@@ -1731,6 +1772,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &9146607323310599802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5991191626183517542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6165820042932872181
 GameObject:
   m_ObjectHideFlags: 0
@@ -1880,6 +1933,7 @@ GameObject:
   - component: {fileID: 8003790322938031590}
   - component: {fileID: 7810295517527738066}
   - component: {fileID: 1086336287078378497}
+  - component: {fileID: 7408585789872559425}
   m_Layer: 5
   m_Name: LogOut [Btn]
   m_TagString: Untagged
@@ -1990,6 +2044,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7408585789872559425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6804949155636709857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7501236949181375456
 GameObject:
   m_ObjectHideFlags: 0
@@ -2003,8 +2069,9 @@ GameObject:
   - component: {fileID: 8195191286875304083}
   - component: {fileID: 7362167721022004864}
   - component: {fileID: 330631249281883127}
+  - component: {fileID: 7422852814295196338}
   m_Layer: 5
-  m_Name: Burn Nft [Button] (2)
+  m_Name: Mint&Burn Nft [Button] (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2137,8 +2204,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7788a17b759378e499914a1693c6c627, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowName: BurnNftWindow
+  windowName: MintBurnNftWindow
   openOnAwake: 0
+--- !u!114 &7422852814295196338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7501236949181375456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7746664978619711957
 GameObject:
   m_ObjectHideFlags: 0

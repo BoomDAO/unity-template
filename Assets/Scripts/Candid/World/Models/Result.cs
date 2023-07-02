@@ -1,11 +1,10 @@
-using worldId = EdjCase.ICP.Candid.Models.OptionalValue<System.String>;
+using worldId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
 using TokenIndex = System.UInt32;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
@@ -31,26 +30,20 @@ namespace Candid.World.Models
 		{
 		}
 
-		public static Result Err(Result.ErrInfo info)
+		public static Result Err(string info)
 		{
 			return new Result(ResultTag.Err, info);
 		}
 
-		public static Result Ok(Result__1 info)
+		public static Result Ok()
 		{
-			return new Result(ResultTag.Ok, info);
+			return new Result(ResultTag.Ok, null);
 		}
 
-		public Result.ErrInfo AsErr()
+		public string AsErr()
 		{
 			this.ValidateTag(ResultTag.Err);
-			return (Result.ErrInfo)this.Value!;
-		}
-
-		public Result__1 AsOk()
-		{
-			this.ValidateTag(ResultTag.Ok);
-			return (Result__1)this.Value!;
+			return (string)this.Value!;
 		}
 
 		private void ValidateTag(ResultTag tag)
@@ -60,73 +53,14 @@ namespace Candid.World.Models
 				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
 			}
 		}
-
-		[Variant(typeof(Result.ErrInfoTag))]
-		public class ErrInfo
-		{
-			[VariantTagProperty()]
-			public Result.ErrInfoTag Tag { get; set; }
-
-			[VariantValueProperty()]
-			public System.Object? Value { get; set; }
-
-			public ErrInfo(Result.ErrInfoTag tag, object? value)
-			{
-				this.Tag = tag;
-				this.Value = value;
-			}
-
-			protected ErrInfo()
-			{
-			}
-
-			public static Result.ErrInfo Err(string info)
-			{
-				return new Result.ErrInfo(Result.ErrInfoTag.Err, info);
-			}
-
-			public static Result.ErrInfo TxErr(TransferError info)
-			{
-				return new Result.ErrInfo(Result.ErrInfoTag.TxErr, info);
-			}
-
-			public string AsErr()
-			{
-				this.ValidateTag(Result.ErrInfoTag.Err);
-				return (string)this.Value!;
-			}
-
-			public TransferError AsTxErr()
-			{
-				this.ValidateTag(Result.ErrInfoTag.TxErr);
-				return (TransferError)this.Value!;
-			}
-
-			private void ValidateTag(Result.ErrInfoTag tag)
-			{
-				if (!this.Tag.Equals(tag))
-				{
-					throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
-				}
-			}
-		}
-
-		public enum ErrInfoTag
-		{
-			[VariantOptionType(typeof(string))]
-			Err,
-			[VariantOptionType(typeof(TransferError))]
-			TxErr
-		}
 	}
 
 	public enum ResultTag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(Result.ErrInfo))]
+		[VariantOptionType(typeof(string))]
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(Result__1))]
 		Ok
 	}
 }

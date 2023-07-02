@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EdjCase.ICP.Agent.Agents;
 using ItsJackAnton.Patterns.Broadcasts;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -59,91 +60,108 @@ public class DataState<T> : IBroadcastState where T : struct, IDataState
         State = DataState.Ready;
     }
 }
-
-
-public struct ToggleActionWidgetState : IBroadcastState
+public struct Data<T> : IDataState
 {
-    public bool enable;
+    public Dictionary<string, T> elements;
 
-    public ToggleActionWidgetState(bool value)
+    public Data(List<T> elements, Func<T, string> getKey)
     {
-        this.enable = value;
+        elements ??= new();
+        this.elements = new();
+
+        foreach (var item in elements)
+        {
+            this.elements.Add(getKey(item), item);
+        }
+    }
+    public Data(Data<T> tokenData, Func<T, string> getKey, params T[] tokensUpdate)
+    {
+        tokenData.elements ??= new();
+        elements = tokenData.elements;
+
+        foreach (var item in tokensUpdate)
+        {
+            string key = getKey(item);
+
+            if (elements.ContainsKey(key))
+            {
+                elements[key] = item;
+            }
+            else elements.Add(key, item);
+        }
     }
 }
 
-public struct ConfigsState : IBroadcastState
+public struct DisableButtonInteraction : IBroadcastState
 {
-    public bool ready;
+    public bool disable;
 
-    public ConfigsState(bool ready)
+    public DisableButtonInteraction(bool disable)
     {
-        this.ready = ready;
+        this.disable = disable;
     }
 }
-public struct ListingNftState : IBroadcastState
-{
-    public bool isListing;
 
-    public ListingNftState(bool isListing)
+#region MarketPlace
+    public struct ListingNftState : IBroadcastState
     {
-        this.isListing = isListing;
+        public bool isListing;
+
+        public ListingNftState(bool isListing)
+        {
+            this.isListing = isListing;
+        }
+    }
+    public struct PurchasingNftState : IBroadcastState
+    {
+        public bool isPurchasing;
+
+        public PurchasingNftState(bool isPurchasing)
+        {
+            this.isPurchasing = isPurchasing;
+        }
+    }
+#endregion
+
+#region Fetch Data Request
+public struct FetchDataReq<T> : IBroadcast where T : DataTypes.Base
+{
+    public object optional;
+
+    public FetchDataReq(object optional)
+    {
+        this.optional = optional;
     }
 }
-public struct PurchasingNftState : IBroadcastState
-{
-    public bool isPurchasing;
 
-    public PurchasingNftState(bool isPurchasing)
-    {
-        this.isPurchasing = isPurchasing;
-    }
-}
+#endregion
+
 #region User
-
-public struct FetchBalanceReqIcp : IBroadcast { }
-public struct FetchckBalanceReqIcrc : IBroadcast { }
-
-public struct UserLogin: IBroadcast
+public struct StartLogin: IBroadcast
 {
-    public string principal;
-    public string address;
+    public string json;
+    public bool useLocalHost;
 
-    public UserLogin(string principal, string address)
+    public StartLogin(string json, bool useLocalHost)
     {
+        this.json = json;
+        this.useLocalHost = useLocalHost;
+    }
+}
+public struct SignInData: IDataState
+{
+    public IAgent agent;
+    public string principal;
+    public string accountIdentifier;
+    public bool asAnon;
+    public SignInData(IAgent agent, string principal, string accountIdentifier, bool asAnon)
+    {
+        this.agent = agent;
         this.principal = principal;
-        this.address = address;
+        this.accountIdentifier = accountIdentifier;
+        this.asAnon = asAnon;
     }
 }
 
 public struct UserLogout : IBroadcast { }
-public struct AnonLogin : IBroadcast
-{
-    public string principal;
-    public string address;
-
-    public AnonLogin(string principal, string address)
-    {
-        this.principal = principal;
-        this.address = address;
-    }
-}
-
-
-//public struct CoreUserDataState : IBroadcastState
-//{
-//    //From Core Canister
-//    public string uid;
-//    public string profileUserName;
-//    public string profileAvatar;
-//    public string profileLogoUrl;
-//    public Dictionary<string, ItemData> items;
-//    public HashSet<string> boughtOffers;
-//}
-
-//public struct GameUserDataState : IBroadcastState
-//{
-//    public Dictionary<string, ItemData> items;
-//    public Dictionary<string, BuffItemData> buffs;
-//    public Dictionary<string, Achievement> achievements;
-//}
 #endregion

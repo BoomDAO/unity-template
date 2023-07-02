@@ -8,6 +8,7 @@ using Candid.IcpLedger.Models;
 using Candid.Icrc1Ledger;
 using Candid.StakingHub;
 using Candid.World;
+using Candid.World.Models;
 using Candid.WorldHub;
 using Cysharp.Threading.Tasks;
 using EdjCase.ICP.Agent.Agents;
@@ -16,8 +17,11 @@ using EdjCase.ICP.Candid.Models;
 using ItsJackAnton.Patterns.Broadcasts;
 using ItsJackAnton.Utility;
 using ItsJackAnton.Values;
+using Mono.CSharp;
 using Newtonsoft.Json;
 using UnityEngine;
+using WebSocketSharp;
+
 
 namespace Candid
 {
@@ -28,16 +32,8 @@ namespace Candid
             Update,
             Query
         }
-        [SerializeField, ShowOnly] string userNode;
-        [SerializeField, ShowOnly] bool isUserLoggedIn;
-        [SerializeField, ShowOnly] bool isAnonLoggedIn;
-        public static bool IsUserLoggedIn { get { return Instance.isUserLoggedIn; } }
-        public static bool IsAnonLoggedIn { get { return Instance.isAnonLoggedIn; } }
-        public static bool IsLoggedIn { get { return IsUserLoggedIn || IsAnonLoggedIn; } }
-
 
         // ICP.NET
-        public IAgent Agent { get; private set; }
         public InitValue<IAgent> cachedAnonAgent;
 
         // Canister APIs
@@ -46,21 +42,16 @@ namespace Candid
         public StakingHubApiClient StakingHubApiClient { get; private set; }
 
         public IcpLedgerApiClient IcpLedgerApiClient { get; private set; }
-        public Icrc1LedgerApiClient rcLedgerApiClient { get; private set; }
 
         [SerializeField, ShowOnly] string paymentCanisterOfferIdentifier;
         [SerializeField, ShowOnly] string paymentCanisterStakeIdentifier;
         public static string PaymentCanisterOfferIdentifier { get { return Instance.paymentCanisterOfferIdentifier; } }
         public static string PaymentCanisterStakeIdentifier { get { return Instance.paymentCanisterStakeIdentifier; } }
 
-
-        [SerializeField, ShowOnly] string userPrincipal;
-        [SerializeField, ShowOnly] string userAccountIdentity;
-        public static string UserPrincipal { get { return Instance.userPrincipal; } }
-        public static string UserAccountIdentity { get { return Instance.userAccountIdentity; } }
         public InitValue<string> cachedUserAddress;
 
         bool areDependenciesReady;
+        [SerializeField, ShowOnly] bool fetchingEntities;
 
         // Instance
         public static CandidApiManager Instance;
@@ -68,46 +59,60 @@ namespace Candid
 
         private void Awake()
         {
-            //Debug.Log(EnqueueJobManager.Instance);
+            IAgent CreateAgentWithRandomIdentity(bool useLocalHost = false)
+            {
+                IAgent randomAgent = null;
+
+                try
+                {
+                    if (useLocalHost)
+                        randomAgent = new HttpAgent(Ed25519Identity.Generate(), new Uri("http://localhost:4943"));
+                    else
+                        randomAgent = new HttpAgent(Ed25519Identity.Generate());
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.ToString());
+                }
+
+                return randomAgent;
+            }
 
             Instance = this;
 
+            Broadcast.Register<StartLogin>(StartLogin);
             Broadcast.Register<UserLogout>(UserLogoutHandler);
-            Broadcast.Register<FetchBalanceReqIcp>(FetchIcpBalanceReqHandler);
-            Broadcast.Register<FetchckBalanceReqIcrc>(FetchIcrcBalanceReqHandler);
+
+            UserUtil.RegisterToRequestData<DataTypes.Token>(FetchTokens);
+            UserUtil.RegisterToRequestData<DataTypes.Item>(FetchItems);
+            UserUtil.RegisterToRequestData<DataTypes.Stat>(FetchStats);
+            UserUtil.RegisterToRequestData<DataTypes.NftCollection>(FetchNfts);
+            UserUtil.RegisterToRequestData<DataTypes.BoomDaoNftCollection>(FetchBoomDaoNfts);
+            UserUtil.RegisterToRequestData<DataTypes.Stake>(FetchStakes);
+            UserUtil.RegisterToRequestData<DataTypes.Listing>(FetchListings);
 
             InitializeCandidApis(CreateAgentWithRandomIdentity(), true);
         }
-        public IAgent CreateAgentWithRandomIdentity(bool useLocalHost = false)
-        {
-            IAgent randomAgent = null;
-
-            try
-            {
-                if (useLocalHost)
-                    randomAgent = new HttpAgent(Ed25519Identity.Generate(), new Uri("http://localhost:4943"));
-                else
-                    randomAgent = new HttpAgent(Ed25519Identity.Generate());
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.ToString());
-            }
-
-            return randomAgent;
-        }
-
 
         private void OnDestroy()
         {
+            Broadcast.Unregister<StartLogin>(StartLogin);
             Broadcast.Unregister<UserLogout>(UserLogoutHandler);
-            Broadcast.Unregister<FetchBalanceReqIcp>(FetchIcpBalanceReqHandler);
-            Broadcast.Unregister<FetchckBalanceReqIcrc>(FetchIcrcBalanceReqHandler);
-        }
 
+            UserUtil.UnregisterToRequestData<DataTypes.Token>(FetchTokens);
+            UserUtil.UnregisterToRequestData<DataTypes.Item>(FetchItems);
+            UserUtil.UnregisterToRequestData<DataTypes.Stat>(FetchStats);
+            UserUtil.UnregisterToRequestData<DataTypes.NftCollection>(FetchNfts);
+            UserUtil.UnregisterToRequestData<DataTypes.BoomDaoNftCollection>(FetchBoomDaoNfts);
+            UserUtil.UnregisterToRequestData<DataTypes.Stake>(FetchStakes);
+            UserUtil.UnregisterToRequestData<DataTypes.Listing>(FetchListings);
+        }
+        private void StartLogin(StartLogin arg)
+        {
+            CreateAgentUsingIdentityJson(arg.json, arg.useLocalHost).Forget();
+        }
         private void UserLogoutHandler(UserLogout obj)
         {
-            Debug.Log("Log out and log in as anon");
             InitializeCandidApis(cachedAnonAgent.Value, true);
         }
 
@@ -119,13 +124,57 @@ namespace Candid
         /// <returns></returns>
         private async UniTask InitializeCandidApis(IAgent agent, bool asAnon = false)
         {
-            this.Agent = agent;
-
+            //Build Interfaces
             WorldHub = new WorldHubApiClient(agent, Principal.FromText(Env.CanisterIds.WORLD_HUB));
             IcpLedgerApiClient = new IcpLedgerApiClient(agent, Principal.FromText(Env.CanisterIds.ICP_LEDGER));
-            rcLedgerApiClient = new Icrc1LedgerApiClient(agent, Principal.FromText(Env.CanisterIds.ICRC_LEDGER));
             StakingHubApiClient = new StakingHubApiClient(agent, Principal.FromText(Env.CanisterIds.STAKING_HUB));
             WorldApiClient = new WorldApiClient(agent, Principal.FromText(Env.CanisterIds.WORLD));
+
+            var userPrincipal = agent.Identity.GetPublicKey().ToPrincipal().ToText();
+            var userAccountIdentity = "";
+            //Check if anon setup is required
+            if (asAnon)
+            {
+                //If anon Agent is cached then set it up
+                if (cachedAnonAgent.IsInit)
+                {
+                    userAccountIdentity = cachedUserAddress.Value;
+                    agent = cachedAnonAgent.Value;
+
+                }
+                //Else fetch required dependencies and catch it
+                else
+                {
+                    cachedAnonAgent.Value = agent;
+
+                    userAccountIdentity = await WorldHub.GetAccountIdentifier(userPrincipal);
+                    cachedUserAddress.Value = userAccountIdentity;
+                }
+                //Set Login Data
+                UserUtil.UpdateLoginData(agent, userPrincipal, userAccountIdentity, asAnon);
+
+                //Clean up logged in user data
+                UserUtil.CleanUpData();
+            }
+            else
+            {
+                userAccountIdentity = await WorldHub.GetAccountIdentifier(userPrincipal);
+
+                "Try Fetch User Data".Log(GetType().Name);
+
+                //Set Login Data
+                UserUtil.UpdateLoginData(agent, userPrincipal, userAccountIdentity, asAnon);
+
+                //Fetch userData if not Anon user
+                UserUtil.RequestData<DataTypes.Token>();
+                UserUtil.RequestData<DataTypes.Item>();
+                //UserUtil.RequestData<DataTypes.Stat>();
+                UserUtil.RequestData<DataTypes.NftCollection>();
+                UserUtil.RequestData<DataTypes.BoomDaoNftCollection>();
+                UserUtil.RequestData<DataTypes.Stake>();
+            }
+
+
 
             //INIT CONFIGS
             if (areDependenciesReady == false)
@@ -140,92 +189,20 @@ namespace Candid
                 var actionConfig = await WorldApiClient.GetActionConfigs();
                 Debug.Log("Configs has been Fetch");
 
-                BroadcastState.Invoke(new DataState<WorldConfigsData>(new WorldConfigsData(entitiesConfig, actionConfig)));
-            }
 
-
-            userPrincipal = agent.Identity.GetPublicKey().ToPrincipal().ToText();
-            if (asAnon)
-            {
-                if (cachedAnonAgent.IsInit && cachedAnonAgent.IsInit)
+                //Set Entity Configs
+                UserUtil.UpdateData(entitiesConfig.Map(e =>
                 {
-                    userAccountIdentity = cachedUserAddress.Value;
-                }
-                else
+                    DataTypes.EntityConfig ec = new(e);
+                    return ec;
+                }).ToArray());
+
+                //Set Action Configs
+                UserUtil.UpdateData(actionConfig.Map(e =>
                 {
-                    cachedAnonAgent.Value = agent;
-                    userAccountIdentity = await WorldHub.GetAccountIdentifier(userPrincipal);
-                    cachedUserAddress.Value = userAccountIdentity;
-                }
-
-                UserCleanup();
-            }
-            else
-            {
-                var result = await WorldHub.GetUserNodeCanisterId(userPrincipal);
-
-                if(result.Tag == Candid.WorldHub.Models.ResultTag.Ok)
-                {
-                    userNode = result.AsOk();
-                }
-                userAccountIdentity = await WorldHub.GetAccountIdentifier(userPrincipal);
-
-                //Fetch Core User Data
-                TryFetchGameData();
-
-                //FETCH NFTS DATA
-                FetchUserNfts();
-            }
-        }
-
-        private void UserCleanup()
-        {
-            BroadcastState.ForceInvoke<DataState<UserNodeData>>((e) =>
-            {
-                e.Clear();
-                return e;
-            });
-            BroadcastState.ForceInvoke<DataState<DabNftsData>>((e) =>
-            {
-                e.Clear();
-                return e;
-            });
-            BroadcastState.ForceInvoke<DataState<TokensData>>((e) =>
-            {
-                e.Clear();
-                return e;
-            });
-
-            isAnonLoggedIn = true;
-            isUserLoggedIn = false;
-            Broadcast.Invoke<AnonLogin>(new AnonLogin(userPrincipal, userAccountIdentity));
-        }
-
-        private async UniTask TryFetchGameData()
-        {
-            List<World.Models.Entity> userGameEntities = null;
-            string jobId = EnqueueJobManager.Instance.EnqueueJob(() =>
-            {
-                BroadcastState.ForceInvoke(new DataState<UserNodeData>(new UserNodeData(userGameEntities)));
-            });
-
-            $"> > > Try to fetch game user data. Public key to use: {userPrincipal}".Log();
-
-            ////Fetch Game Data
-            var getUserGameDataResult = await WorldApiClient.GetAllUserWorldEntities();
-
-            if (getUserGameDataResult.Tag == World.Models.Result_6Tag.Ok)
-            {
-                userGameEntities = getUserGameDataResult.AsOk();
-                Debug.Log($"Entities: {JsonConvert.SerializeObject(userGameEntities)}");
-                EnqueueJobManager.Instance.ExecuteJob(jobId);
-
-            }
-            else
-            {
-                EnqueueJobManager.Instance.ExecuteJob(jobId);
-
-                $"> > > Game User Data: Could not find Game data, msg: {getUserGameDataResult.AsErr()}".Warning();
+                    DataTypes.ActionConfig ac = new(e);
+                    return ac;
+                }).ToArray());
             }
         }
 
@@ -241,15 +218,6 @@ namespace Candid
                 else await InitializeCandidApis(new HttpAgent(identity, new Uri("https://icp0.io/")));
 
                 Debug.Log("You have logged in");
-
-
-                isUserLoggedIn = true;
-                isAnonLoggedIn = false;
-                UserUtil.UpdateBalanceReq_Icp();
-                UserUtil.UpdateBalanceReq_Rc();
-                FetchStakesReqHandler();
-
-                Broadcast.Invoke<UserLogin>(new UserLogin(userPrincipal, userAccountIdentity));
             }
             catch (Exception e)
             {
@@ -257,98 +225,25 @@ namespace Candid
             }
         }
 
-
-        // EXAMPLE FUNCTION - PLEASE MOVE TO A BETTER PLACE LATER
-        public async UniTask FetchUserNfts()
+        private async UniTask GetPagedRegistry(Extv2BoomApiClient api, DataTypes.BoomDaoNftCollection collection, uint index)
         {
-            List<DabNftCollection> nonPlethoraNftCollections = new List<DabNftCollection>() // NFT collections we want to fetch that use the EXT V2 standard
-	        {
-                new() {name = "The Moonwalkers", canisterId = "er7d4-6iaaa-aaaaj-qac2q-cai"},
-                new() {name = "Poked Bots", canisterId = "bzsui-sqaaa-aaaah-qce2a-cai"}
-            };
+            var getAccountIdentifierResult = UserUtil.GetAccountIdentifier();
 
-            List<DabNftCollection> plethoraNftCollections = new List<DabNftCollection>() // NFT collections we want to fetch that were deployed by Plethora and that use Hitesh's modified EXT V2 contract
-	        {
-                new() {name = "Plethora Items", canisterId = Env.Nfts.BOOM_COLLECTION_CANISTER_ID },//"4qmvs-qyaaa-aaaal-ab2rq-cai"},
-            };
-
-            string jobId = EnqueueJobManager.Instance.EnqueueJob(() =>
+            if (getAccountIdentifierResult.Tag == UResultTag.Err)
             {
-                BroadcastState.ForceInvoke<DataState<DabNftsData>>(e =>
-                {
-                    e.data = new(nonPlethoraNftCollections, plethoraNftCollections);
-                    e.SetAsReady();
-                    return e;
-                });
-            });
-
-            List<UniTask> asyncFunctions = new List<UniTask>();
-
-
-            foreach (var collection in nonPlethoraNftCollections)
-            {
-                asyncFunctions.Add(GetNonPlethoraNfts(collection));
+                Debug.LogError(getAccountIdentifierResult.AsErr());
+                return;
             }
 
-            foreach (var collection in plethoraNftCollections)
-            {
-                asyncFunctions.Add(GetPlethoraNfts(collection));
-            }
+            var accountIdentifier = getAccountIdentifierResult.AsOk();
 
-
-            await UniTask.WhenAll(asyncFunctions);
-
-            //
-            EnqueueJobManager.Instance.ExecuteJob(jobId);
-        }
-
-        private async UniTask GetNonPlethoraNfts(DabNftCollection collection)
-        {
-            var api = new ExtV2StandardApiClient(Agent, Principal.FromText(collection.canisterId));
-            List<ValueTuple<UInt32, String>> registry = await api.GetRegistry(); // In the returned ValueTuple, the UInt32 is the token index, and the String is the address that owns it
-
-            foreach (var value in registry)
-            {
-                if (string.Equals(value.Item2, userAccountIdentity)) // Checks that the address that owns the NFT is same as your address
-                {
-                    var tokenIdentifier = await WorldHub.GetTokenIdentifier(collection.canisterId, value.Item1);
-                    collection.tokens.Add(new()
-                    {
-                        tokenIdentifier = tokenIdentifier,
-                        name = collection.name,
-                        canister = collection.canisterId,
-                        index = value.Item1,
-                        url = $"https://{collection.canisterId}.raw.icp0.io/?&tokenid={tokenIdentifier}&type=thumbnail"
-                    });
-                }
-            }
-        }
-        private async UniTask GetPlethoraNfts(DabNftCollection collection)
-        {
-            var api = new Extv2BoomApiClient(Agent, Principal.FromText(collection.canisterId));
-            var result = await api.Supply(""); // Query the NFT supply so we can calculate the amount of pages in the NFT registry
-            UnboundedUInt supply = (UnboundedUInt)result.Value;
-            int pages = (int)supply / 10000;
-
-            List<UniTask> asyncFunctions = new List<UniTask>();
-            for (uint i = 0; i <= pages; i++)
-            {
-                asyncFunctions.Add(GetPagedRegistry(api, collection, i));
-            }
-
-            await UniTask.WhenAll(asyncFunctions);
-        }
-
-        private async UniTask GetPagedRegistry(Extv2BoomApiClient api, DabNftCollection collection, uint index)
-        {
             var pagedRegistry = await api.GetPagedRegistry(index); // We used paged registries for Boom NFTs
 
             foreach (var value in pagedRegistry)
             {
                 if (string.Equals(value.F1,
-                    userAccountIdentity)) // Checks that the address that owns the NFT is same as your address
+                    accountIdentifier.value)) // Checks that the address that owns the NFT is same as your address
                 {
-                    //Debug.Log("Boom Nft " + value.F0);
                     var metadataResult = await api.ExtGetTokenMetadata(value.F0);
                     string metadata = metadataResult.ValueOrDefault.AsNonfungible().Metadata.ValueOrDefault
                         .AsJson();
@@ -367,47 +262,305 @@ namespace Candid
             }
         }
 
-        private async void FetchIcpBalanceReqHandler(FetchBalanceReqIcp req)
-        {
-            var rawBalance = await CandidApiManager.Instance.IcpLedgerApiClient.AccountBalance(new AccountBalanceArgs(CandidUtil.HexStringToByteArray(CandidApiManager.UserAccountIdentity).ToList()));
-            var decimalCount = await CandidApiManager.Instance.IcpLedgerApiClient.Decimals();
-            UserUtil.UpdateTokenBalance(new Token(Env.CanisterIds.ICP_LEDGER,"ICP", rawBalance.E8s, decimalCount.Decimals));
-        }
-        private async void FetchIcrcBalanceReqHandler(FetchckBalanceReqIcrc req)
-        {
-            Debug.Log("Try Fetch ICRC balance");
-            var rawBalance = await CandidApiManager.Instance.rcLedgerApiClient.Icrc1BalanceOf(new Icrc1Ledger.Models.Account(Principal.FromText(UserPrincipal), new OptionalValue<List<byte>>()));
-            var decimalCount = await CandidApiManager.Instance.rcLedgerApiClient.Icrc1Decimals();
-            var name = await CandidApiManager.Instance.rcLedgerApiClient.Icrc1Name();
+        #region Fetch
 
-            UserUtil.UpdateTokenBalance(new Token(Env.CanisterIds.ICRC_LEDGER, name, (ulong)rawBalance, decimalCount));
-        }
-
-        private async void FetchStakesReqHandler()
+        private async void FetchEntitiesHandler()
         {
-            Debug.Log("Fetch Staking Data");
-            List<Candid.StakingHub.Models.Stake> stakes = new();
+            if (fetchingEntities) return;
+            fetchingEntities = true;
+
+            List<World.Models.Entity> userGameEntities = null;
             string jobId = EnqueueJobManager.Instance.EnqueueJob(() =>
             {
-                Debug.Log("Staking Data Fetched");
-                BroadcastState.ForceInvoke<DataState<StakeData>>(e =>
-                {
-                    e.data.stakes = new();
-                    stakes.Debug(j => $"id: {j.CanisterId}, type {j.TokenType}, index: {j.Index}, amt: {j.Amount}");
-                    e.data.stakes.Clear();
-                    stakes.Iterate(k =>
-                    {
-                        e.data.stakes.Add(new Stake((uint)k.Amount, k.CanisterId, k.Index.ValueOrDefault, k.TokenType));
-                    });
-                    e.SetAsReady();
+                (DataTypes.Item[] items, DataTypes.Stat[] stats) = userGameEntities.ProcessEntities();
 
-                    return e;
-                });
+                UserUtil.UpdateData(items);
+                UserUtil.UpdateData(stats);
             });
 
-            stakes = await StakingHubApiClient.GetUserStakes(userPrincipal);
+            $"> > > Try to fetch game user data".Log();
+
+            ////Fetch Game Data
+            var getUserGameDataResult = await WorldApiClient.GetAllUserWorldEntities();
+
+            if (getUserGameDataResult.Tag == World.Models.Result_4Tag.Ok)
+            {
+                userGameEntities = getUserGameDataResult.AsOk();
+                Debug.Log($"Entities: {JsonConvert.SerializeObject(userGameEntities)}");
+                EnqueueJobManager.Instance.ExecuteJob(jobId);
+
+            }
+            else
+            {
+                EnqueueJobManager.Instance.ExecuteJob(jobId);
+
+                $"> > > Game User Data: Could not find Game data, msg: {getUserGameDataResult.AsErr()}".Warning();
+            }
+
+            fetchingEntities = false;
+        }
+        //
+        private async void FetchTokens(FetchDataReq<DataTypes.Token> req)
+        {
+            var tokenCanisterId = req.optional == null ? "" : req.optional.ToString();
+
+            try
+            {
+                var getLoginDataResult = UserUtil.GetSignInData();
+
+                if (getLoginDataResult.Tag == UResultTag.Err)
+                {
+                    Debug.LogError(getLoginDataResult.AsErr());
+                    return;
+                }
+
+                var loginData = getLoginDataResult.AsOk();
+
+                ///If "tokenCanisterId" is empty then fetch all tokens
+                if (string.IsNullOrEmpty(tokenCanisterId))
+                {
+                    var rawBalance = await CandidApiManager.Instance.IcpLedgerApiClient.AccountBalance(new AccountBalanceArgs(CandidUtil.HexStringToByteArray(loginData.accountIdentifier).ToList()));
+                    var decimalCount = await CandidApiManager.Instance.IcpLedgerApiClient.Decimals();
+
+                    var icrcLedger = new Icrc1LedgerApiClient(loginData.agent, Principal.FromText(Env.CanisterIds.ICRC_LEDGER));
+                    var icrcRawBalance = await icrcLedger.Icrc1BalanceOf(new Icrc1Ledger.Models.Account(Principal.FromText(loginData.principal), new OptionalValue<List<byte>>()));
+                    var icrcDecimalCount = await icrcLedger.Icrc1Decimals();
+                    var name = await icrcLedger.Icrc1Name();
+
+                    ///YOU CAN FETCH OTHER TOKENS DATA HERE AS DESIRED
+
+                    ///
+
+                    UserUtil.UpdateData(
+                        new DataTypes.Token(Env.CanisterIds.ICP_LEDGER, "ICP", rawBalance.E8s, decimalCount.Decimals),
+                        new DataTypes.Token(Env.CanisterIds.ICRC_LEDGER, name, (ulong)icrcRawBalance, icrcDecimalCount)
+                        ///THEN, AFTER FETCHING MORE TOKENS DATA YOU CAN SET THEM HERE
+                        );
+                }
+                ///If "tokenCanisterId" is ICP_LEDGER then ICP token
+                else if (tokenCanisterId == Env.CanisterIds.ICP_LEDGER)
+                {
+                    var rawBalance = await CandidApiManager.Instance.IcpLedgerApiClient.AccountBalance(new AccountBalanceArgs(CandidUtil.HexStringToByteArray(loginData.accountIdentifier).ToList()));
+                    var decimalCount = await CandidApiManager.Instance.IcpLedgerApiClient.Decimals();
+                    UserUtil.UpdateData(new DataTypes.Token(Env.CanisterIds.ICP_LEDGER, "ICP", rawBalance.E8s, decimalCount.Decimals));
+                }
+                ///Else fetch ICRC token
+                else
+                {
+                    var icrcLedger = new Icrc1LedgerApiClient(loginData.agent, Principal.FromText(Env.CanisterIds.ICRC_LEDGER));
+                    var rawBalance = await icrcLedger.Icrc1BalanceOf(new Icrc1Ledger.Models.Account(Principal.FromText(loginData.principal), new OptionalValue<List<byte>>()));
+                    var decimalCount = await icrcLedger.Icrc1Decimals();
+                    var name = await icrcLedger.Icrc1Name();
+
+                    UserUtil.UpdateData(new DataTypes.Token(Env.CanisterIds.ICRC_LEDGER, name, (ulong)rawBalance, decimalCount));
+                }
+            }
+            catch
+            {
+                ///If "tokenCanisterId" is empty then fetch all tokens
+                if (string.IsNullOrEmpty(tokenCanisterId))
+                {
+                    UserUtil.UpdateData(
+                        new DataTypes.Token(Env.CanisterIds.ICP_LEDGER, "ICP", 0, 0),
+                        new DataTypes.Token(Env.CanisterIds.ICRC_LEDGER, name, 0, 0)
+                        );
+                }
+                ///If "tokenCanisterId" is ICP_LEDGER then ICP token
+                else if (tokenCanisterId == Env.CanisterIds.ICP_LEDGER)
+                {
+                    UserUtil.UpdateData(new DataTypes.Token(Env.CanisterIds.ICP_LEDGER, "ICP", 0, 0));
+                }
+                ///Else fetch ICRC token
+                else
+                {
+                    UserUtil.UpdateData(new DataTypes.Token(Env.CanisterIds.ICRC_LEDGER, name, 0, 0));
+                }
+            }
+        }
+        private void FetchItems(FetchDataReq<DataTypes.Item> req)
+        {
+            FetchEntitiesHandler();
+        }
+        private void FetchStats(FetchDataReq<DataTypes.Stat> req)
+        {
+            FetchEntitiesHandler();
+        }
+
+        private async void FetchNfts(FetchDataReq<DataTypes.NftCollection> req)
+        {
+            async UniTask GetNfts(DataTypes.NftCollection collection)
+            {
+                var getLoginDataResult = UserUtil.GetSignInData();
+
+                if (getLoginDataResult.Tag == UResultTag.Err)
+                {
+                    Debug.LogError(getLoginDataResult.AsErr());
+                    return;
+                }
+
+                var loginData = getLoginDataResult.AsOk();
+
+                var getAgentResult = UserUtil.GetAgent();
+
+                if (getAgentResult.Tag == UResultTag.Err)
+                {
+                    Debug.Log(getAgentResult.AsErr());
+                    return;
+                }
+                var api = new ExtV2StandardApiClient(getAgentResult.AsOk(), Principal.FromText(collection.canisterId));
+                List<ValueTuple<UInt32, String>> registry = await api.GetRegistry(); // In the returned ValueTuple, the UInt32 is the token index, and the String is the address that owns it
+
+                foreach (var value in registry)
+                {
+                    if (string.Equals(value.Item2, loginData.accountIdentifier)) // Checks that the address that owns the NFT is same as your address
+                    {
+                        var tokenIdentifier = await WorldHub.GetTokenIdentifier(collection.canisterId, value.Item1);
+                        collection.tokens.Add(new()
+                        {
+                            tokenIdentifier = tokenIdentifier,
+                            name = collection.name,
+                            canister = collection.canisterId,
+                            index = value.Item1,
+                            url = $"https://{collection.canisterId}.raw.icp0.io/?&tokenid={tokenIdentifier}&type=thumbnail"
+                        });
+                    }
+                }
+            }
+
+            Debug.Log("Try Fetch Nft Collections");
+
+            List<DataTypes.NftCollection> nftsCollections = new List<DataTypes.NftCollection>() // NFT collections we want to fetch that use the EXT V2 standard
+	        {
+                new() {name = "The Moonwalkers", canisterId = "er7d4-6iaaa-aaaaj-qac2q-cai"},
+                new() {name = "Poked Bots", canisterId = "bzsui-sqaaa-aaaah-qce2a-cai"}
+            };
+
+            string jobId = EnqueueJobManager.Instance.EnqueueJob(() =>
+            {
+                UserUtil.UpdateData(nftsCollections.ToArray());
+            });
+
+            List<UniTask> asyncFunctions = new List<UniTask>();
+
+
+            foreach (var collection in nftsCollections)
+            {
+                asyncFunctions.Add(GetNfts(collection));
+            }
+
+            await UniTask.WhenAll(asyncFunctions);
+
+            //
+            EnqueueJobManager.Instance.ExecuteJob(jobId);
+        }
+
+        private async void FetchBoomDaoNfts(FetchDataReq<DataTypes.BoomDaoNftCollection> req)
+        {
+            async UniTask GetBoomDaoNfts(DataTypes.BoomDaoNftCollection collection)
+            {
+                var getAgentResult = UserUtil.GetAgent();
+
+                if (getAgentResult.Tag == UResultTag.Err)
+                {
+                    Debug.Log(getAgentResult.AsErr());
+                    return;
+                }
+
+                var api = new Extv2BoomApiClient(getAgentResult.AsOk(), Principal.FromText(collection.canisterId));
+                var result = await api.Supply(""); // Query the NFT supply so we can calculate the amount of pages in the NFT registry
+                UnboundedUInt supply = (UnboundedUInt)result.Value;
+                int pages = (int)supply / 10000;
+
+                List<UniTask> asyncFunctions = new();
+                for (uint i = 0; i <= pages; i++)
+                {
+                    asyncFunctions.Add(GetPagedRegistry(api, collection, i));
+                }
+
+                await UniTask.WhenAll(asyncFunctions);
+            }
+
+            Debug.Log("Try Fetch BoomDao Nft Collections");
+
+            List<DataTypes.BoomDaoNftCollection> boomDaoNftsCollections = new() // NFT collections we want to fetch that were deployed by Plethora and that use Hitesh's modified EXT V2 contract
+	        {
+                new() {name = "Plethora Items", canisterId = Env.Nfts.BOOM_COLLECTION_CANISTER_ID },
+            };
+
+            string jobId = EnqueueJobManager.Instance.EnqueueJob(() =>
+            {
+                UserUtil.UpdateData(boomDaoNftsCollections.ToArray());
+            });
+
+            List<UniTask> asyncFunctions = new();
+
+            foreach (var collection in boomDaoNftsCollections)
+            {
+                asyncFunctions.Add(GetBoomDaoNfts(collection));
+            }
+
+            await UniTask.WhenAll(asyncFunctions);
+            //
+            EnqueueJobManager.Instance.ExecuteJob(jobId);
+        }
+
+        private async void FetchStakes(FetchDataReq<DataTypes.Stake> req)
+        {
+            Debug.Log("Fetch Staking Data");
+
+            var getLoginDataResult = UserUtil.GetSignInData();
+
+            if (getLoginDataResult.Tag == UResultTag.Err)
+            {
+                Debug.LogError(getLoginDataResult.AsErr());
+                return;
+            }
+
+            var loginData = getLoginDataResult.AsOk();
+
+            List<Candid.StakingHub.Models.Stake> candidStake = new();
+            string jobId = EnqueueJobManager.Instance.EnqueueJob(() =>
+            {
+                var stakes = candidStake.Map(k => new DataTypes.Stake((uint)k.Amount, k.CanisterId, k.BlockIndex.ValueOrDefault, k.TokenType));
+
+                UserUtil.UpdateData(stakes.ToArray());
+
+                Debug.Log("Staking Data Fetched");
+            });
+
+            candidStake = await StakingHubApiClient.GetUserStakes(loginData.principal);
 
             EnqueueJobManager.Instance.ExecuteJob(jobId);
         }
+
+        private async void FetchListings(FetchDataReq<DataTypes.Listing> req)
+        {
+            Debug.Log("Fetch Listings");
+
+            var getAgentResult = UserUtil.GetAgent();
+
+            if (getAgentResult.Tag == UResultTag.Err)
+            {
+                Debug.Log(getAgentResult.AsErr());
+                return;
+            }
+
+            Extv2BoomApiClient collectionInterface = new(getAgentResult.AsOk(), Principal.FromText(Env.Nfts.BOOM_COLLECTION_CANISTER_ID));
+
+            var listingResult = await collectionInterface.Listings();
+
+            Dictionary<string, Extv2BoomApiClient.ListingsArg0Item> listing = new();
+
+            foreach (var item in listingResult)
+            {
+                var tokenIdentifier = await CandidApiManager.Instance.WorldHub.GetTokenIdentifier(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, item.F0);
+                listing.Add(tokenIdentifier, item);
+            }
+
+            Debug.Log("Apply Listings");
+            UserUtil.UpdateData(listing.Map(e => new DataTypes.Listing(e.Key, e.Value)).ToArray());
+        }
+
+        #endregion
     }
 }
