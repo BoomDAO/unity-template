@@ -15,12 +15,16 @@ namespace Candid.World.Models
 		[CandidName("actionCount")]
 		public UnboundedUInt ActionCount { get; set; }
 
+		[CandidName("actionId")]
+		public string ActionId { get; set; }
+
 		[CandidName("intervalStartTs")]
 		public UnboundedUInt IntervalStartTs { get; set; }
 
-		public Action(UnboundedUInt actionCount, UnboundedUInt intervalStartTs)
+		public Action(UnboundedUInt actionCount, string actionId, UnboundedUInt intervalStartTs)
 		{
 			this.ActionCount = actionCount;
+			this.ActionId = actionId;
 			this.IntervalStartTs = intervalStartTs;
 		}
 

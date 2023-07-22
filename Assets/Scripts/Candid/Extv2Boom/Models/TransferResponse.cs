@@ -1,25 +1,25 @@
-using TokenIndex = System.UInt32;
+using TokenIndex__1 = System.UInt32;
+using TokenIdentifier__2 = System.String;
 using TokenIdentifier__1 = System.String;
-using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.extv2_boom.Models.MetadataValue>;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
 using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField = System.ValueTuple<System.String, System.String>;
+using HeaderField__1 = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
 using ChunkId = System.UInt32;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using AssetId = System.UInt32;
-using AssetHandle = System.String;
+using AssetHandle__1 = System.String;
+using AccountIdentifier__2 = System.String;
 using AccountIdentifier__1 = System.String;
-using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.extv2_boom.Models;
+using Candid.Extv2Boom.Models;
 using System;
 
-namespace Candid.extv2_boom.Models
+namespace Candid.Extv2Boom.Models
 {
 	[Variant(typeof(TransferResponseTag))]
 	public class TransferResponse
@@ -89,7 +89,7 @@ namespace Candid.extv2_boom.Models
 			{
 			}
 
-			public static TransferResponse.ErrInfo CannotNotify(AccountIdentifier info)
+			public static TransferResponse.ErrInfo CannotNotify(AccountIdentifier__1 info)
 			{
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.CannotNotify, info);
 			}
@@ -99,7 +99,7 @@ namespace Candid.extv2_boom.Models
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.InsufficientBalance, null);
 			}
 
-			public static TransferResponse.ErrInfo InvalidToken(TokenIdentifier info)
+			public static TransferResponse.ErrInfo InvalidToken(TokenIdentifier__1 info)
 			{
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.InvalidToken, info);
 			}
@@ -114,21 +114,21 @@ namespace Candid.extv2_boom.Models
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.Rejected, null);
 			}
 
-			public static TransferResponse.ErrInfo Unauthorized(AccountIdentifier info)
+			public static TransferResponse.ErrInfo Unauthorized(AccountIdentifier__1 info)
 			{
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.Unauthorized, info);
 			}
 
-			public AccountIdentifier AsCannotNotify()
+			public AccountIdentifier__1 AsCannotNotify()
 			{
 				this.ValidateTag(TransferResponse.ErrInfoTag.CannotNotify);
-				return (AccountIdentifier)this.Value!;
+				return (AccountIdentifier__1)this.Value!;
 			}
 
-			public TokenIdentifier AsInvalidToken()
+			public TokenIdentifier__1 AsInvalidToken()
 			{
 				this.ValidateTag(TransferResponse.ErrInfoTag.InvalidToken);
-				return (TokenIdentifier)this.Value!;
+				return (TokenIdentifier__1)this.Value!;
 			}
 
 			public string AsOther()
@@ -137,10 +137,10 @@ namespace Candid.extv2_boom.Models
 				return (string)this.Value!;
 			}
 
-			public AccountIdentifier AsUnauthorized()
+			public AccountIdentifier__1 AsUnauthorized()
 			{
 				this.ValidateTag(TransferResponse.ErrInfoTag.Unauthorized);
-				return (AccountIdentifier)this.Value!;
+				return (AccountIdentifier__1)this.Value!;
 			}
 
 			private void ValidateTag(TransferResponse.ErrInfoTag tag)
@@ -154,15 +154,15 @@ namespace Candid.extv2_boom.Models
 
 		public enum ErrInfoTag
 		{
-			[VariantOptionType(typeof(AccountIdentifier))]
+			[VariantOptionType(typeof(AccountIdentifier__1))]
 			CannotNotify,
 			InsufficientBalance,
-			[VariantOptionType(typeof(TokenIdentifier))]
+			[VariantOptionType(typeof(TokenIdentifier__1))]
 			InvalidToken,
 			[VariantOptionType(typeof(string))]
 			Other,
 			Rejected,
-			[VariantOptionType(typeof(AccountIdentifier))]
+			[VariantOptionType(typeof(AccountIdentifier__1))]
 			Unauthorized
 		}
 	}

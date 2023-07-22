@@ -137,18 +137,14 @@ namespace Candid.World.Models
 
 		public class ClaimStakingRewardIcrcInfo
 		{
-			[CandidName("baseUnitCount")]
-			public UnboundedUInt BaseUnitCount { get; set; }
-
 			[CandidName("canister")]
 			public string Canister { get; set; }
 
 			[CandidName("requiredAmount")]
 			public double RequiredAmount { get; set; }
 
-			public ClaimStakingRewardIcrcInfo(UnboundedUInt baseUnitCount, string canister, double requiredAmount)
+			public ClaimStakingRewardIcrcInfo(string canister, double requiredAmount)
 			{
-				this.BaseUnitCount = baseUnitCount;
 				this.Canister = canister;
 				this.RequiredAmount = requiredAmount;
 			}
@@ -201,19 +197,15 @@ namespace Candid.World.Models
 			[CandidName("amt")]
 			public double Amt { get; set; }
 
-			[CandidName("baseUnitCount")]
-			public UnboundedUInt BaseUnitCount { get; set; }
-
 			[CandidName("canister")]
 			public string Canister { get; set; }
 
 			[CandidName("toPrincipal")]
 			public string ToPrincipal { get; set; }
 
-			public VerifyTransferIcrcInfo(double amt, UnboundedUInt baseUnitCount, string canister, string toPrincipal)
+			public VerifyTransferIcrcInfo(double amt, string canister, string toPrincipal)
 			{
 				this.Amt = amt;
-				this.BaseUnitCount = baseUnitCount;
 				this.Canister = canister;
 				this.ToPrincipal = toPrincipal;
 			}

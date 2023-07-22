@@ -87,6 +87,13 @@ namespace Candid.World
 			return reply.ToObjects<List<Models.ActionConfig>>(this.Converter);
 		}
 
+		public async System.Threading.Tasks.Task<Models.Result_5> GetAllUserWorldActions()
+		{
+			CandidArg arg = CandidArg.FromCandid();
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "getAllUserWorldActions", arg);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
+		}
+
 		public async System.Threading.Tasks.Task<Models.Result_4> GetAllUserWorldEntities()
 		{
 			CandidArg arg = CandidArg.FromCandid();
@@ -122,10 +129,31 @@ namespace Candid.World
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "grantGlobalPermission", arg);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> ProcessActionEntities(Models.ActionArg arg0)
+		public async System.Threading.Tasks.Task<List<Models.ActionConfig>> ImportActionConfigs()
+		{
+			CandidArg arg = CandidArg.FromCandid();
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "importActionConfigs", arg);
+			return reply.ToObjects<List<Models.ActionConfig>>(this.Converter);
+		}
+
+		public async System.Threading.Tasks.Task<Models.Result_1> ImportAllConfigsOfWorld(string arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
-			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "processActionEntities", arg);
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "importAllConfigsOfWorld", arg);
+			return reply.ToObjects<Models.Result_1>(this.Converter);
+		}
+
+		public async System.Threading.Tasks.Task<List<Models.EntityConfig>> ImportEntityConfigs()
+		{
+			CandidArg arg = CandidArg.FromCandid();
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "importEntityConfigs", arg);
+			return reply.ToObjects<List<Models.EntityConfig>>(this.Converter);
+		}
+
+		public async System.Threading.Tasks.Task<Models.Result_3> ProcessAction(Models.ActionArg arg0)
+		{
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
+			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "processAction", arg);
 			return reply.ToObjects<Models.Result_3>(this.Converter);
 		}
 

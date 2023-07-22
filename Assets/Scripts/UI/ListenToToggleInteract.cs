@@ -1,4 +1,4 @@
-using ItsJackAnton.Patterns.Broadcasts;
+using Boom.Patterns.Broadcasts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,20 +10,34 @@ public class ListenToToggleInteract : MonoBehaviour
 {
     private Button btn;
 
+    bool forceDisable;
+
+    public Button Btn { get { return btn; } }
+
     private void Awake()
     {
         btn = GetComponent<Button>();
 
-        BroadcastState.Register<DisableButtonInteraction>(AllowButtonInteractionHandler, true);
+        BroadcastState.Register<WaitingForResponse>(AllowButtonInteractionHandler, true);
     }
 
     private void OnDestroy()
     {
-        BroadcastState.Unregister<DisableButtonInteraction>(AllowButtonInteractionHandler);
+        BroadcastState.Unregister<WaitingForResponse>(AllowButtonInteractionHandler);
     }
 
-    private void AllowButtonInteractionHandler(DisableButtonInteraction interaction)
+    private void AllowButtonInteractionHandler(WaitingForResponse interaction)
     {
-        if (btn) btn.interactable = !interaction.disable;
+        if (btn) btn.interactable = !interaction.value && !forceDisable;
+    }
+
+    public void ToggleForceDisable(bool val)
+    {
+        forceDisable = val;
+        btn.interactable = !val;
+    }
+    public void ToggleForceDisable()
+    {
+        ToggleForceDisable(!forceDisable);
     }
 }

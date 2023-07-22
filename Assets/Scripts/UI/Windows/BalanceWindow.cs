@@ -1,20 +1,14 @@
-using Candid;
-using Candid.IcpLedger.Models;
-using EdjCase.ICP.Candid.Models;
-using ItsJackAnton.Patterns.Broadcasts;
-using ItsJackAnton.UI;
-using ItsJackAnton.Utility;
-using System;
-using System.Linq;
+using Boom.UI;
+using Boom.Utility;
+using Boom.Values;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BalanceWindow : Window
 {
-    [SerializeField] Button reloadButton;
-    [SerializeField] TMP_Text icpBalanceText;
-    [SerializeField] TMP_Text icrcBalances;
+    [SerializeField] TextMeshProUGUI icpBalanceText;
+    [SerializeField] TextMeshProUGUI icrcBalances;
+    [SerializeField] TextMeshProUGUI nftCountTxt;
 
     public class WindowData
     {
@@ -27,59 +21,103 @@ public class BalanceWindow : Window
 
     public override void Setup(object data)
     {
-        icpBalanceText.text = $"ICP : {0}";
-        icrcBalances.text = $"ICRC : {0}";
-        UserUtil.RegisterToDataChange<DataTypes.Token>(UpdateWindow, true);
+        icpBalanceText.text = $"ICP:  Loading...";
+        icrcBalances.text = $"ICRC: Loading...";
+        nftCountTxt.text = $"NFT Count: {0}";
 
-        reloadButton.onClick.AddListener(ReloadBalanceHandler);
+        UserUtil.RegisterToDataChange<DataTypes.Token>(UpdateWindow);
+        UserUtil.RegisterToDataChange<DataTypes.NftCollection>(UpdateWindow);
     }
-
-    private void ReloadBalanceHandler()
-    {
-        UserUtil.RequestData<DataTypes.Token>();
-    }
-
     private void OnDestroy()
     {
+        UserUtil.UnregisterToDataChange<DataTypes.NftCollection>(UpdateWindow);
         UserUtil.UnregisterToDataChange<DataTypes.Token>(UpdateWindow);
+    }
+    private void UpdateWindow(DataState<Data<DataTypes.NftCollection>> obj)
+    {
+        var result = UserUtil.IsAnonLoggedIn();
+
+        if (result.IsOk)
+        {
+            if (result.AsOk())
+            {
+                nftCountTxt.text = $"NFT Count: 0";
+
+                return;
+            }
+        }
+        else
+        {
+            nftCountTxt.text = $"NFT Count: 0";
+            return;
+        }
+
+
+        var nftCountResult = NftUtil.GetNftCount(Env.Nfts.BOOM_COLLECTION_CANISTER_ID);
+
+        if(nftCountResult.Tag == Boom.Values.UResultTag.Err)
+        {
+            Debug.LogWarning(nftCountResult.AsErr());
+            nftCountTxt.text = $"NFT Count: Loading...";
+            return;
+        }
+
+        var nftCount = nftCountResult.AsOk();
+
+        nftCountTxt.text = $"NFT Count: {nftCount}";
     }
 
     private void UpdateWindow(DataState<Data<DataTypes.Token>> obj)
     {
-        var icpBalanceResult = UserUtil.GetDataElementOfType<DataTypes.Token>(Env.CanisterIds.ICP_LEDGER);
-        var icrcBalanceResult = UserUtil.GetDataElementOfType<DataTypes.Token>(Env.CanisterIds.ICRC_LEDGER);
+        var result = UserUtil.IsAnonLoggedIn();
 
-
-        if (icpBalanceResult.Tag == ItsJackAnton.Values.UResultTag.Ok)
+        if (result.IsOk)
         {
-            icpBalanceText.text = $"ICP : {icpBalanceResult.AsOk().Amount.NotScientificNotation()}";
+            if (result.AsOk())
+            {
+                icpBalanceText.text = $"ICP: {0}";
+                icrcBalances.text = $"ICRC: {0}";
+                return;
+            }
         }
         else
         {
-            var result = UserUtil.IsAnonSignedIn();
+            icpBalanceText.text = $"ICP: Loading...";
+            icrcBalances.text = $"ICRC: Loading...";
 
-            if(result.Tag == ItsJackAnton.Values.UResultTag.Ok)
-            {
-                if(result.AsOk()) icpBalanceText.text = $"ICP : {0}";
-            }
-
-            Debug.LogWarning(icpBalanceResult.AsErr());
+            return;
         }
 
-        if (icrcBalanceResult.Tag == ItsJackAnton.Values.UResultTag.Ok)
+        //
+
+        var icpTokenAndConfigsResult = UserUtil.GetTokenAndConfigs(Env.CanisterIds.ICP_LEDGER);
+
+        if (icpTokenAndConfigsResult.Tag == UResultTag.Err)
         {
-            icrcBalances.text = $"ICRC : {icrcBalanceResult.AsOk().Amount.NotScientificNotation()}";
+            $"{icpTokenAndConfigsResult.AsErr()}".Warning();
+            icpBalanceText.text = $"ICP: {0}";
         }
         else
         {
-            var result = UserUtil.IsAnonSignedIn();
+            var (token, configs) = icpTokenAndConfigsResult.AsOk();
 
-            if (result.Tag == ItsJackAnton.Values.UResultTag.Ok)
-            {
-                if (result.AsOk()) icrcBalances.text = $"ICRC : {0}";
-            }
+            icpBalanceText.text = $"ICP: {token.baseUnitAmount.ConvertToDecimal(configs.decimals).NotScientificNotation()}";
+        }
 
-            Debug.LogWarning(icrcBalanceResult.AsErr());
+        //
+
+        var icrcTokenAndConfigsResult = UserUtil.GetTokenAndConfigs(Env.CanisterIds.ICRC_LEDGER);
+
+        if (icrcTokenAndConfigsResult.Tag == UResultTag.Err)
+        {
+            $"{icrcTokenAndConfigsResult.AsErr()}".Warning();
+            icrcBalances.text = $"ICRC: {0}";
+        }
+        else
+        {
+            var (token, configs) = icrcTokenAndConfigsResult.AsOk();
+
+            icrcBalances.text = $"{configs.name}: {token.baseUnitAmount.ConvertToDecimal(configs.decimals).NotScientificNotation()}";
         }
     }
 }

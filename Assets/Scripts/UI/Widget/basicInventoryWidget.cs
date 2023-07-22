@@ -1,15 +1,11 @@
-using ItsJackAnton.Patterns.Broadcasts;
-using ItsJackAnton.UI;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Boom.UI;
 using TMPro;
 using UnityEngine;
 
-[RequireComponent(typeof(TMP_Text))]
+[RequireComponent(typeof(TextMeshProUGUI))]
 public class BasicInventoryWidget : Window
 {
-    TMP_Text text;
+    TextMeshProUGUI text;
     public class WindowData
     {
         public string content;
@@ -28,7 +24,7 @@ public class BasicInventoryWidget : Window
             return;
         }
 
-        text = GetComponent<TMP_Text>();
+        text = GetComponent<TextMeshProUGUI>();
         text.text = $"- {windowData.content}";
     }
 }

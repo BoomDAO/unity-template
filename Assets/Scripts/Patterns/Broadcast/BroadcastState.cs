@@ -1,9 +1,12 @@
-namespace ItsJackAnton.Patterns.Broadcasts
+namespace Boom.Patterns.Broadcasts
 {
-    using ItsJackAnton.Utility;
-    using ItsJackAnton.Values;
+    using Boom.Utility;
+    using Boom.Values;
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+
     public static class BroadcastState
     {
         private delegate void BroadcastDelegate(IBroadcastState broadcast);

@@ -14,7 +14,6 @@ public class UnityHttpClient : IHttpClient
     {
         using (UnityWebRequest request = UnityWebRequest.Get(GetUri(url)))
         {
-            CancellationToken token = CancellationToken.None;
             await request.SendWebRequest();
             return ParseResponse(request);
         }
@@ -54,5 +53,41 @@ public class UnityHttpClient : IHttpClient
         byte[] data = request.downloadHandler.data;
         return new HttpResponse(statusCode, () => Task.FromResult(data));
     }
+
 }
+
+
+internal class UnityWebRequestAwaiter : INotifyCompletion
+{
+    private UnityWebRequestAsyncOperation asyncOp;
+    private Action continuation;
+
+    public UnityWebRequestAwaiter(UnityWebRequestAsyncOperation asyncOp)
+    {
+        this.asyncOp = asyncOp;
+        asyncOp.completed += OnRequestCompleted;
+    }
+
+    public bool IsCompleted { get { return asyncOp.isDone; } }
+
+    public void GetResult() { }
+
+    public void OnCompleted(Action continuation)
+    {
+        this.continuation = continuation;
+    }
+
+    private void OnRequestCompleted(AsyncOperation obj)
+    {
+        continuation();
+    }
+}
+internal static class ExtensionMethods
+{
+    public static UnityWebRequestAwaiter GetAwaiter(this UnityWebRequestAsyncOperation asyncOp)
+    {
+        return new UnityWebRequestAwaiter(asyncOp);
+    }
+}
+
 

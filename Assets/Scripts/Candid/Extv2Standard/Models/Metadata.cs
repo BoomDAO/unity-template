@@ -4,23 +4,22 @@ using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.ext_v2_standard.Models.MetadataValueItem>;
 using Memo = System.Collections.Generic.List<System.Byte>;
 using HeaderField = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
-using ChunkId = System.UInt32;
+using EXTMetadataValue = System.ValueTuple<System.String, Candid.Extv2Standard.Models.EXTMetadataValue>;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
 using AssetHandle = System.String;
 using AccountIdentifier__1 = System.String;
 using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.ext_v2_standard.Models;
+using Candid.Extv2Standard.Models;
 using System;
+using System.Collections.Generic;
 using EdjCase.ICP.Candid.Models;
 
-namespace Candid.ext_v2_standard.Models
+namespace Candid.Extv2Standard.Models
 {
 	[Variant(typeof(MetadataTag))]
 	public class Metadata
@@ -41,26 +40,26 @@ namespace Candid.ext_v2_standard.Models
 		{
 		}
 
-		public static Metadata Fungible(Metadata.FungibleRecord info)
+		public static Metadata Fungible(Metadata.FungibleInfo info)
 		{
 			return new Metadata(MetadataTag.Fungible, info);
 		}
 
-		public static Metadata Nonfungible(Metadata.NonfungibleRecord info)
+		public static Metadata Nonfungible(Metadata.NonfungibleInfo info)
 		{
 			return new Metadata(MetadataTag.Nonfungible, info);
 		}
 
-		public Metadata.FungibleRecord AsFungible()
+		public Metadata.FungibleInfo AsFungible()
 		{
 			this.ValidateTag(MetadataTag.Fungible);
-			return (Metadata.FungibleRecord)this.Value!;
+			return (Metadata.FungibleInfo)this.Value!;
 		}
 
-		public Metadata.NonfungibleRecord AsNonfungible()
+		public Metadata.NonfungibleInfo AsNonfungible()
 		{
 			this.ValidateTag(MetadataTag.Nonfungible);
-			return (Metadata.NonfungibleRecord)this.Value!;
+			return (Metadata.NonfungibleInfo)this.Value!;
 		}
 
 		private void ValidateTag(MetadataTag tag)
@@ -71,13 +70,13 @@ namespace Candid.ext_v2_standard.Models
 			}
 		}
 
-		public class FungibleRecord
+		public class FungibleInfo
 		{
 			[CandidName("decimals")]
 			public byte Decimals { get; set; }
 
-			[CandidName("metaData")]
-			public OptionalValue<MetadataContainer> Metadata { get; set; }
+			[CandidName("metadata")]
+			public OptionalValue<List<byte>> Metadata { get; set; }
 
 			[CandidName("name")]
 			public string Name { get; set; }
@@ -85,7 +84,7 @@ namespace Candid.ext_v2_standard.Models
 			[CandidName("symbol")]
 			public string Symbol { get; set; }
 
-			public FungibleRecord(byte decimals, OptionalValue<MetadataContainer> metadata, string name, string symbol)
+			public FungibleInfo(byte decimals, OptionalValue<List<byte>> metadata, string name, string symbol)
 			{
 				this.Decimals = decimals;
 				this.Metadata = metadata;
@@ -93,34 +92,22 @@ namespace Candid.ext_v2_standard.Models
 				this.Symbol = symbol;
 			}
 
-			public FungibleRecord()
+			public FungibleInfo()
 			{
 			}
 		}
 
-		public class NonfungibleRecord
+		public class NonfungibleInfo
 		{
-			[CandidName("asset")]
-			public string Asset { get; set; }
+			[CandidName("metadata")]
+			public OptionalValue<List<byte>> Metadata { get; set; }
 
-			[CandidName("metaData")]
-			public OptionalValue<MetadataContainer> Metadata { get; set; }
-
-			[CandidName("name")]
-			public string Name { get; set; }
-
-			[CandidName("thumbnail")]
-			public string Thumbnail { get; set; }
-
-			public NonfungibleRecord(string asset, OptionalValue<MetadataContainer> metadata, string name, string thumbnail)
+			public NonfungibleInfo(OptionalValue<List<byte>> metadata)
 			{
-				this.Asset = asset;
 				this.Metadata = metadata;
-				this.Name = name;
-				this.Thumbnail = thumbnail;
 			}
 
-			public NonfungibleRecord()
+			public NonfungibleInfo()
 			{
 			}
 		}
@@ -129,10 +116,10 @@ namespace Candid.ext_v2_standard.Models
 	public enum MetadataTag
 	{
 		[CandidName("fungible")]
-		[VariantOptionType(typeof(Metadata.FungibleRecord))]
+		[VariantOptionType(typeof(Metadata.FungibleInfo))]
 		Fungible,
 		[CandidName("nonfungible")]
-		[VariantOptionType(typeof(Metadata.NonfungibleRecord))]
+		[VariantOptionType(typeof(Metadata.NonfungibleInfo))]
 		Nonfungible
 	}
 }

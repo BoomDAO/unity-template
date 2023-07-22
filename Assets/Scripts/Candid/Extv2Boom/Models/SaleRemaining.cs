@@ -1,25 +1,25 @@
-using TokenIndex = System.UInt32;
+using TokenIndex__1 = System.UInt32;
+using TokenIdentifier__2 = System.String;
 using TokenIdentifier__1 = System.String;
-using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.extv2_boom.Models.MetadataValue>;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
 using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField = System.ValueTuple<System.String, System.String>;
+using HeaderField__1 = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
 using ChunkId = System.UInt32;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using AssetId = System.UInt32;
-using AssetHandle = System.String;
+using AssetHandle__1 = System.String;
+using AccountIdentifier__2 = System.String;
 using AccountIdentifier__1 = System.String;
-using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.extv2_boom.Models;
+using Candid.Extv2Boom.Models;
 using System;
 
-namespace Candid.extv2_boom.Models
+namespace Candid.Extv2Boom.Models
 {
 	[Variant(typeof(SaleRemainingTag))]
 	public class SaleRemaining
@@ -50,15 +50,15 @@ namespace Candid.extv2_boom.Models
 			return new SaleRemaining(SaleRemainingTag.Retain, null);
 		}
 
-		public static SaleRemaining Send(AccountIdentifier__1 info)
+		public static SaleRemaining Send(AccountIdentifier__2 info)
 		{
 			return new SaleRemaining(SaleRemainingTag.Send, info);
 		}
 
-		public AccountIdentifier__1 AsSend()
+		public AccountIdentifier__2 AsSend()
 		{
 			this.ValidateTag(SaleRemainingTag.Send);
-			return (AccountIdentifier__1)this.Value!;
+			return (AccountIdentifier__2)this.Value!;
 		}
 
 		private void ValidateTag(SaleRemainingTag tag)
@@ -77,7 +77,7 @@ namespace Candid.extv2_boom.Models
 		[CandidName("retain")]
 		Retain,
 		[CandidName("send")]
-		[VariantOptionType(typeof(AccountIdentifier__1))]
+		[VariantOptionType(typeof(AccountIdentifier__2))]
 		Send
 	}
 }

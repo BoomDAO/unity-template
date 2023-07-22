@@ -1,4 +1,4 @@
-namespace ItsJackAnton.Patterns.Broadcasts
+namespace Boom.Patterns.Broadcasts
 {
     public interface IBroadcast
     {

@@ -1,25 +1,25 @@
-using TokenIndex = System.UInt32;
+using TokenIndex__1 = System.UInt32;
+using TokenIdentifier__2 = System.String;
 using TokenIdentifier__1 = System.String;
-using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.extv2_boom.Models.MetadataValue>;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
 using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField = System.ValueTuple<System.String, System.String>;
+using HeaderField__1 = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
 using ChunkId = System.UInt32;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using AssetId = System.UInt32;
-using AssetHandle = System.String;
+using AssetHandle__1 = System.String;
+using AccountIdentifier__2 = System.String;
 using AccountIdentifier__1 = System.String;
-using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.extv2_boom.Models;
+using Candid.Extv2Boom.Models;
 using System;
 
-namespace Candid.extv2_boom.Models
+namespace Candid.Extv2Boom.Models
 {
 	[Variant(typeof(Result_7Tag))]
 	public class Result_7
@@ -40,26 +40,26 @@ namespace Candid.extv2_boom.Models
 		{
 		}
 
-		public static Result_7 Err(CommonError info)
+		public static Result_7 Err(string info)
 		{
 			return new Result_7(Result_7Tag.Err, info);
 		}
 
-		public static Result_7 Ok(AccountIdentifier__1 info)
+		public static Result_7 Ok(Result_7.OkInfo info)
 		{
 			return new Result_7(Result_7Tag.Ok, info);
 		}
 
-		public CommonError AsErr()
+		public string AsErr()
 		{
 			this.ValidateTag(Result_7Tag.Err);
-			return (CommonError)this.Value!;
+			return (string)this.Value!;
 		}
 
-		public AccountIdentifier__1 AsOk()
+		public Result_7.OkInfo AsOk()
 		{
 			this.ValidateTag(Result_7Tag.Ok);
-			return (AccountIdentifier__1)this.Value!;
+			return (Result_7.OkInfo)this.Value!;
 		}
 
 		private void ValidateTag(Result_7Tag tag)
@@ -69,15 +69,34 @@ namespace Candid.extv2_boom.Models
 				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
 			}
 		}
+
+		public class OkInfo
+		{
+			[CandidTag(0U)]
+			public AccountIdentifier__2 F0 { get; set; }
+
+			[CandidTag(1U)]
+			public ulong F1 { get; set; }
+
+			public OkInfo(AccountIdentifier__2 f0, ulong f1)
+			{
+				this.F0 = f0;
+				this.F1 = f1;
+			}
+
+			public OkInfo()
+			{
+			}
+		}
 	}
 
 	public enum Result_7Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(CommonError))]
+		[VariantOptionType(typeof(string))]
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(AccountIdentifier__1))]
+		[VariantOptionType(typeof(Result_7.OkInfo))]
 		Ok
 	}
 }

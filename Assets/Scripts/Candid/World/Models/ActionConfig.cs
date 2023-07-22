@@ -28,19 +28,23 @@ namespace Candid.World.Models
 		[CandidName("description")]
 		public OptionalValue<string> Description { get; set; }
 
+		[CandidName("imageUrl")]
+		public OptionalValue<string> ImageUrl { get; set; }
+
 		[CandidName("name")]
 		public OptionalValue<string> Name { get; set; }
 
 		[CandidName("tag")]
 		public OptionalValue<string> Tag { get; set; }
 
-		public ActionConfig(OptionalValue<ActionConstraint> actionConstraint, OptionalValue<ActionPlugin> actionPlugin, ActionResult actionResult, string aid, OptionalValue<string> description, OptionalValue<string> name, OptionalValue<string> tag)
+		public ActionConfig(OptionalValue<ActionConstraint> actionConstraint, OptionalValue<ActionPlugin> actionPlugin, ActionResult actionResult, string aid, OptionalValue<string> description, OptionalValue<string> imageUrl, OptionalValue<string> name, OptionalValue<string> tag)
 		{
 			this.ActionConstraint = actionConstraint;
 			this.ActionPlugin = actionPlugin;
 			this.ActionResult = actionResult;
 			this.Aid = aid;
 			this.Description = description;
+			this.ImageUrl = imageUrl;
 			this.Name = name;
 			this.Tag = tag;
 		}

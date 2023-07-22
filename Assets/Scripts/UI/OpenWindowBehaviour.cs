@@ -1,9 +1,10 @@
-using ItsJackAnton.UI;
+using Boom.UI;
 using UnityEngine;
 
 public class OpenWindowBehaviour : MonoBehaviour
 {
     [SerializeField] string windowName;
+    [SerializeField] int sortingOrder = 0;
     [SerializeField] bool openOnAwake;
     private Window window;
 
@@ -25,7 +26,7 @@ public class OpenWindowBehaviour : MonoBehaviour
     public void Open()
     {
         if (window) return;
-        WindowGod.Instance.OpenWindow<Window>(windowName, null);
+        WindowManager.Instance.OpenWindow(windowName, null, sortingOrder);
     }
     public void Close()
     {

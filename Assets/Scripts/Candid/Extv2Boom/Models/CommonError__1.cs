@@ -1,25 +1,25 @@
-using TokenIndex = System.UInt32;
+using TokenIndex__1 = System.UInt32;
+using TokenIdentifier__2 = System.String;
 using TokenIdentifier__1 = System.String;
-using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.extv2_boom.Models.MetadataValue>;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
 using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField = System.ValueTuple<System.String, System.String>;
+using HeaderField__1 = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
 using ChunkId = System.UInt32;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using AssetId = System.UInt32;
-using AssetHandle = System.String;
+using AssetHandle__1 = System.String;
+using AccountIdentifier__2 = System.String;
 using AccountIdentifier__1 = System.String;
-using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.extv2_boom.Models;
+using Candid.Extv2Boom.Models;
 using System;
 
-namespace Candid.extv2_boom.Models
+namespace Candid.Extv2Boom.Models
 {
 	[Variant(typeof(CommonError__1Tag))]
 	public class CommonError__1
@@ -40,7 +40,7 @@ namespace Candid.extv2_boom.Models
 		{
 		}
 
-		public static CommonError__1 InvalidToken(TokenIdentifier info)
+		public static CommonError__1 InvalidToken(TokenIdentifier__1 info)
 		{
 			return new CommonError__1(CommonError__1Tag.InvalidToken, info);
 		}
@@ -50,10 +50,10 @@ namespace Candid.extv2_boom.Models
 			return new CommonError__1(CommonError__1Tag.Other, info);
 		}
 
-		public TokenIdentifier AsInvalidToken()
+		public TokenIdentifier__1 AsInvalidToken()
 		{
 			this.ValidateTag(CommonError__1Tag.InvalidToken);
-			return (TokenIdentifier)this.Value!;
+			return (TokenIdentifier__1)this.Value!;
 		}
 
 		public string AsOther()
@@ -73,7 +73,7 @@ namespace Candid.extv2_boom.Models
 
 	public enum CommonError__1Tag
 	{
-		[VariantOptionType(typeof(TokenIdentifier))]
+		[VariantOptionType(typeof(TokenIdentifier__1))]
 		InvalidToken,
 		[VariantOptionType(typeof(string))]
 		Other

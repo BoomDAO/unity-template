@@ -11,7 +11,7 @@
   <body class="{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}">
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas"></canvas>
-      <iframe id="loginIframe" src="https://qyomk-5qaaa-aaaai-ab7ga-cai.icp0.io/"></iframe>
+      <iframe id="loginIframe" src="{{{ LOGIN_WEBPAGE_URL }}}"></iframe>
     </div>
     <div id="loading-cover" style="display:none;">
       <div id="unity-loading-bar">
@@ -102,7 +102,9 @@
 
 window.addEventListener('message', function(e) {
     // Make sure to check the origin property for security reasons
-    if (e.origin !== "https://qyomk-5qaaa-aaaai-ab7ga-cai.icp0.io" && e.origin !== "https://qyomk-5qaaa-aaaai-ab7ga-cai.ic0.app")
+    var loginWebpageUrl = "{{{ LOGIN_WEBPAGE_URL }}}";
+    var sanitizedUrl = loginWebpageUrl.replace(/\/+$/, '');
+    if (e.origin !== sanitizedUrl)
         return;
 
     gameInstance.SendMessage('GameManagers', 'ExecuteCallbackWithJson', e.data);

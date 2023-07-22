@@ -11,8 +11,8 @@ namespace Candid
         private Action<string> callback = null;
 
         [SerializeField]
-        string url = "https://qyomk-5qaaa-aaaai-ab7ga-cai.raw.ic0.app/";
-		
+        string url = "https://7p3gx-jaaaa-aaaal-acbda-cai.raw.ic0.app/";
+
         void Awake()
         {
             Instance = this;
@@ -81,7 +81,7 @@ namespace Candid
         protected override void OnMessage(MessageEventArgs e)
         {
             Debug.Log("Websocket Message Received: " + e.Data);
-			
+
             LoginManager.Instance.CloseSocket(e.Data);
         }
     }

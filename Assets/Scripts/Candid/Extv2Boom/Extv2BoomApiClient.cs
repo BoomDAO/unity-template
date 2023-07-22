@@ -1,31 +1,31 @@
-using TokenIndex = System.UInt32;
+using TokenIndex__1 = System.UInt32;
+using TokenIdentifier__2 = System.String;
 using TokenIdentifier__1 = System.String;
-using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.extv2_boom.Models.MetadataValue>;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
 using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField = System.ValueTuple<System.String, System.String>;
+using HeaderField__1 = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
 using ChunkId = System.UInt32;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using AssetId = System.UInt32;
-using AssetHandle = System.String;
+using AssetHandle__1 = System.String;
+using AccountIdentifier__2 = System.String;
 using AccountIdentifier__1 = System.String;
-using AccountIdentifier = System.String;
 using EdjCase.ICP.Agent.Agents;
 using EdjCase.ICP.Candid.Models;
 using EdjCase.ICP.Candid;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Candid.extv2_boom;
+using Candid.Extv2Boom;
 using EdjCase.ICP.Agent.Responses;
 using System;
 using EdjCase.ICP.Candid.Mapping;
 
-namespace Candid.extv2_boom
+namespace Candid.Extv2Boom
 {
 	public class Extv2BoomApiClient
 	{
@@ -42,20 +42,13 @@ namespace Candid.extv2_boom
 			this.Converter = converter;
 		}
 
-		//public async Task AcceptCycles()
-		//{
-		//	CandidArg arg = CandidArg.FromCandid();
-		//	await this.Agent.CallAndWaitAsync(this.CanisterId, "acceptCycles", arg);
-		//}
+		public async Task AcceptCycles()
+		{
+			CandidArg arg = CandidArg.FromCandid();
+			await this.Agent.CallAndWaitAsync(this.CanisterId, "acceptCycles", arg);
+		}
 
-		//public async System.Threading.Tasks.Task<UnboundedUInt> AcceptCycles()
-		//{
-		//	CandidArg arg = CandidArg.FromCandid();
-		//	CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "accept_cycles", arg);
-		//	return reply.ToObjects<UnboundedUInt>(this.Converter);
-		//}
-
-		public async Task AddAsset(AssetHandle arg0, uint arg1, string arg2, string arg3, string arg4)
+		public async Task AddAsset(AssetHandle__1 arg0, uint arg1, string arg2, string arg3, string arg4)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3), CandidTypedValue.FromObject(arg4));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "addAsset", arg);
@@ -67,7 +60,7 @@ namespace Candid.extv2_boom
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "addMinter", arg);
 		}
 
-		public async Task AddThumbnail(AssetHandle arg0, List<byte> arg1)
+		public async Task AddThumbnail(AssetHandle__1 arg0, List<byte> arg1)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "addThumbnail", arg);
@@ -109,31 +102,23 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<Models.BalanceResponse>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_7> Bearer(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_9> Bearer(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "bearer", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_7>(this.Converter);
+			return reply.ToObjects<Models.Result_9>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<UnboundedUInt> CycleBalance()
-		{
-			CandidArg arg = CandidArg.FromCandid();
-			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "cycleBalance", arg);
-			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<UnboundedUInt>(this.Converter);
-		}
-
-		public async System.Threading.Tasks.Task<Models.Result_10> Details(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_12> Details(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "details", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_10>(this.Converter);
+			return reply.ToObjects<Models.Result_12>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<OptionalValue<Models.Metadata>> ExtGetTokenMetadata(TokenIndex arg0)
+		public async System.Threading.Tasks.Task<OptionalValue<Models.Metadata>> ExtGetTokenMetadata(TokenIndex__1 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "extGetTokenMetadata", arg);
@@ -160,13 +145,13 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<List<Principal>>(this.Converter);
 		}
 
-		public async Task ExtAssetadd(AssetHandle arg0, string arg1, string arg2, Models.AssetType arg3, UnboundedUInt arg4)
+		public async Task ExtAssetadd(AssetHandle__1 arg0, string arg1, string arg2, Models.AssetType arg3, UnboundedUInt arg4)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3), CandidTypedValue.FromObject(arg4));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_assetAdd", arg);
 		}
 
-		public async System.Threading.Tasks.Task<bool> ExtAssetexists(AssetHandle arg0)
+		public async System.Threading.Tasks.Task<bool> ExtAssetexists(AssetHandle__1 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "ext_assetExists", arg);
@@ -182,7 +167,7 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<bool>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<bool> ExtAssetstream(AssetHandle arg0, List<byte> arg1, bool arg2)
+		public async System.Threading.Tasks.Task<bool> ExtAssetstream(AssetHandle__1 arg0, List<byte> arg1, bool arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_assetStream", arg);
@@ -197,19 +182,19 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<Models.BalanceResponse>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_7> ExtBearer(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_9> ExtBearer(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "ext_bearer", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_7>(this.Converter);
+			return reply.ToObjects<Models.Result_9>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> ExtBurn(TokenIdentifier__1 arg0, AccountIdentifier__1 arg1)
+		public async System.Threading.Tasks.Task<Models.Result_5> ExtBurn(TokenIdentifier__2 arg0, AccountIdentifier__2 arg1)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_burn", arg);
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 
 		public async Task ExtCapinit()
@@ -247,18 +232,18 @@ namespace Candid.extv2_boom
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_internal_bulk_burn", arg);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> ExtInternalBurn(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_5> ExtInternalBurn(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_internal_burn", arg);
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> ExtMarketplacelist(Models.ListRequest arg0)
+		public async System.Threading.Tasks.Task<Models.Result_5> ExtMarketplacelist(Models.ListRequest arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_marketplaceList", arg);
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Extv2BoomApiClient.ExtMarketplacelistingsArg0Item>> ExtMarketplacelistings()
@@ -269,18 +254,18 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<List<Extv2BoomApiClient.ExtMarketplacelistingsArg0Item>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_9> ExtMarketplacepurchase(TokenIdentifier__1 arg0, ulong arg1, AccountIdentifier__1 arg2)
+		public async System.Threading.Tasks.Task<Models.Result_11> ExtMarketplacepurchase(TokenIdentifier__2 arg0, ulong arg1, AccountIdentifier__2 arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_marketplacePurchase", arg);
-			return reply.ToObjects<Models.Result_9>(this.Converter);
+			return reply.ToObjects<Models.Result_11>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> ExtMarketplacesettle(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_5> ExtMarketplacesettle(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_marketplaceSettle", arg);
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<(ulong Arg0, ulong Arg1, ulong Arg2, ulong Arg3, UnboundedUInt Arg4, UnboundedUInt Arg5, UnboundedUInt Arg6)> ExtMarketplacestats()
@@ -299,19 +284,19 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<List<Models.Transaction>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_8> ExtMetadata(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_10> ExtMetadata(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "ext_metadata", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_8>(this.Converter);
+			return reply.ToObjects<Models.Result_10>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<List<TokenIndex>> ExtMint(List<Extv2BoomApiClient.ExtMintArg0Item> arg0)
+		public async System.Threading.Tasks.Task<List<TokenIndex__1>> ExtMint(List<Extv2BoomApiClient.ExtMintArg0Item> arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_mint", arg);
-			return reply.ToObjects<List<TokenIndex>>(this.Converter);
+			return reply.ToObjects<List<TokenIndex__1>>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Extv2BoomApiClient.ExtPaymentsArg0Item>> ExtPayments()
@@ -350,7 +335,7 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<bool>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<bool> ExtSaleopen(List<Models.SalePricingGroup> arg0, Models.SaleRemaining arg1, List<AccountIdentifier__1> arg2)
+		public async System.Threading.Tasks.Task<bool> ExtSaleopen(List<Models.SalePricingGroup> arg0, Models.SaleRemaining arg1, List<AccountIdentifier__2> arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_saleOpen", arg);
@@ -364,11 +349,11 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<bool>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_5> ExtSalepurchase(UnboundedUInt arg0, ulong arg1, ulong arg2, AccountIdentifier__1 arg3)
+		public async System.Threading.Tasks.Task<Models.Result_7> ExtSalepurchase(UnboundedUInt arg0, ulong arg1, ulong arg2, AccountIdentifier__2 arg3)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_salePurchase", arg);
-			return reply.ToObjects<Models.Result_5>(this.Converter);
+			return reply.ToObjects<Models.Result_7>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<bool> ExtSaleresume()
@@ -378,7 +363,7 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<bool>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<OptionalValue<Models.SaleDetails>> ExtSalesettings(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<OptionalValue<Models.SaleDetails>> ExtSalesettings(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "ext_saleSettings", arg);
@@ -386,11 +371,11 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<OptionalValue<Models.SaleDetails>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_4> ExtSalesettle(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_6> ExtSalesettle(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_saleSettle", arg);
-			return reply.ToObjects<Models.Result_4>(this.Converter);
+			return reply.ToObjects<Models.Result_6>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Models.SaleTransaction>> ExtSaletransactions()
@@ -401,7 +386,7 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<List<Models.SaleTransaction>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<bool> ExtSaleupdate(OptionalValue<List<Models.SalePricingGroup>> arg0, OptionalValue<Models.SaleRemaining> arg1, OptionalValue<List<AccountIdentifier__1>> arg2)
+		public async System.Threading.Tasks.Task<bool> ExtSaleupdate(OptionalValue<List<Models.SalePricingGroup>> arg0, OptionalValue<Models.SaleRemaining> arg1, OptionalValue<List<AccountIdentifier__2>> arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_saleUpdate", arg);
@@ -432,7 +417,7 @@ namespace Candid.extv2_boom
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "ext_setRoyalty", arg);
 		}
 
-		public async Task ExtSetsaleroyalty(AccountIdentifier__1 arg0)
+		public async Task ExtSetsaleroyalty(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			await this.Agent.CallAsync(this.CanisterId, "ext_setSaleRoyalty", arg);
@@ -445,12 +430,12 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<Models.TransferResponse>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_2> ExtdataSupply(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_4> ExtdataSupply(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "extdata_supply", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_2>(this.Converter);
+			return reply.ToObjects<Models.Result_4>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Extension>> Extensions()
@@ -500,6 +485,14 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<UnboundedUInt>(this.Converter);
 		}
 
+		public async System.Threading.Tasks.Task<OptionalValue<Models.Metadata>> GetTokenMetadata(TokenIndex__1 arg0)
+		{
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
+			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "getTokenMetadata", arg);
+			CandidArg reply = response.ThrowOrGetReply();
+			return reply.ToObjects<OptionalValue<Models.Metadata>>(this.Converter);
+		}
+
 		public async System.Threading.Tasks.Task<List<Extv2BoomApiClient.GetTokensArg0Item>> GetTokens()
 		{
 			CandidArg arg = CandidArg.FromCandid();
@@ -516,20 +509,20 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<UnboundedUInt>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<List<AssetHandle>> GetAllAssethandles()
+		public async System.Threading.Tasks.Task<List<AssetHandle__1>> GetAllAssethandles()
 		{
 			CandidArg arg = CandidArg.FromCandid();
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "get_all_assetHandles", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<List<AssetHandle>>(this.Converter);
+			return reply.ToObjects<List<AssetHandle__1>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<TokenIndex> GetAssethandle(string arg0)
+		public async System.Threading.Tasks.Task<List<byte>> GetAssetEncoding(string arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
-			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "get_assetHandle", arg);
+			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "get_asset_encoding", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<TokenIndex>(this.Converter);
+			return reply.ToObjects<List<byte>>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Extv2BoomApiClient.GetPagedRegistryArg0Item>> GetPagedRegistry(uint arg0)
@@ -598,27 +591,27 @@ namespace Candid.extv2_boom
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "heartbeat_stop", arg);
 		}
 
-		public async System.Threading.Tasks.Task<Models.HttpResponse> HttpRequest(Models.HttpRequest arg0)
+		public async System.Threading.Tasks.Task<Models.HttpResponse__1> HttpRequest(Models.HttpRequest__1 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "http_request", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.HttpResponse>(this.Converter);
+			return reply.ToObjects<Models.HttpResponse__1>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.HttpStreamingCallbackResponse> HttpRequestStreamingCallback(Models.HttpStreamingCallbackToken arg0)
+		public async System.Threading.Tasks.Task<Models.HttpStreamingCallbackResponse__1> HttpRequestStreamingCallback(Models.HttpStreamingCallbackToken__1 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "http_request_streaming_callback", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.HttpStreamingCallbackResponse>(this.Converter);
+			return reply.ToObjects<Models.HttpStreamingCallbackResponse__1>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.HttpResponse> HttpRequestUpdate(Models.HttpRequest arg0)
+		public async System.Threading.Tasks.Task<Models.HttpResponse__1> HttpRequestUpdate(Models.HttpRequest__1 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "http_request_update", arg);
-			return reply.ToObjects<Models.HttpResponse>(this.Converter);
+			return reply.ToObjects<Models.HttpResponse__1>(this.Converter);
 		}
 
 		public async Task InternalExtAddadmin()
@@ -635,11 +628,11 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<bool>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> List(Models.ListRequest arg0)
+		public async System.Threading.Tasks.Task<Models.Result_5> List(Models.ListRequest arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "list", arg);
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Extv2BoomApiClient.ListingsArg0Item>> Listings()
@@ -650,33 +643,33 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<List<Extv2BoomApiClient.ListingsArg0Item>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_7> Lock(TokenIdentifier__1 arg0, ulong arg1, AccountIdentifier__1 arg2, SubAccount__1 arg3)
+		public async System.Threading.Tasks.Task<Models.Result_9> Lock(TokenIdentifier__2 arg0, ulong arg1, AccountIdentifier__2 arg2, SubAccount__1 arg3)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "lock", arg);
-			return reply.ToObjects<Models.Result_7>(this.Converter);
+			return reply.ToObjects<Models.Result_9>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_6> Metadata(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_8> Metadata(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "metadata", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_6>(this.Converter);
+			return reply.ToObjects<Models.Result_8>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_5> Reserve(ulong arg0, ulong arg1, AccountIdentifier__1 arg2, SubAccount__1 arg3)
+		public async System.Threading.Tasks.Task<Models.Result_7> Reserve(ulong arg0, ulong arg1, AccountIdentifier__2 arg2, SubAccount__1 arg3)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "reserve", arg);
-			return reply.ToObjects<Models.Result_5>(this.Converter);
+			return reply.ToObjects<Models.Result_7>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_4> Retreive(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_6> Retreive(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "retreive", arg);
-			return reply.ToObjects<Models.Result_4>(this.Converter);
+			return reply.ToObjects<Models.Result_6>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Models.SaleTransaction>> SaleTransactions()
@@ -687,7 +680,7 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<List<Models.SaleTransaction>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.SaleSettings> SalesSettings(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.SaleSettings> SalesSettings(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "salesSettings", arg);
@@ -695,11 +688,11 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<Models.SaleSettings>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> Settle(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_5> Settle(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "settle", arg);
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_5>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Extv2BoomApiClient.SettlementsArg0Item>> Settlements()
@@ -718,28 +711,28 @@ namespace Candid.extv2_boom
 			return reply.ToObjects<ulong, ulong, ulong, ulong, UnboundedUInt, UnboundedUInt, UnboundedUInt>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_2> Supply(TokenIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_4> Supply(TokenIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "supply", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_2>(this.Converter);
+			return reply.ToObjects<Models.Result_4>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_1> Tokens(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_3> Tokens(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "tokens", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_1>(this.Converter);
+			return reply.ToObjects<Models.Result_3>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result> TokensExt(AccountIdentifier__1 arg0)
+		public async System.Threading.Tasks.Task<Models.Result_2> TokensExt(AccountIdentifier__2 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "tokens_ext", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result>(this.Converter);
+			return reply.ToObjects<Models.Result_2>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<Models.Transaction>> Transactions()
@@ -760,12 +753,12 @@ namespace Candid.extv2_boom
 		public class AllSettlementsArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Extv2BoomApiClient.AllSettlementsArg0Item.F1Info F1 { get; set; }
 
-			public AllSettlementsArg0Item(TokenIndex f0, Extv2BoomApiClient.AllSettlementsArg0Item.F1Info f1)
+			public AllSettlementsArg0Item(TokenIndex__1 f0, Extv2BoomApiClient.AllSettlementsArg0Item.F1Info f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -778,7 +771,7 @@ namespace Candid.extv2_boom
 			public class F1Info
 			{
 				[CandidName("buyer")]
-				public AccountIdentifier__1 Buyer { get; set; }
+				public AccountIdentifier__2 Buyer { get; set; }
 
 				[CandidName("price")]
 				public ulong Price { get; set; }
@@ -789,7 +782,7 @@ namespace Candid.extv2_boom
 				[CandidName("subaccount")]
 				public SubAccount__1 Subaccount { get; set; }
 
-				public F1Info(AccountIdentifier__1 buyer, ulong price, Principal seller, SubAccount__1 subaccount)
+				public F1Info(AccountIdentifier__2 buyer, ulong price, Principal seller, SubAccount__1 subaccount)
 				{
 					this.Buyer = buyer;
 					this.Price = price;
@@ -806,12 +799,12 @@ namespace Candid.extv2_boom
 		public class ExtExpiredArg0Item
 		{
 			[CandidTag(0U)]
-			public AccountIdentifier__1 F0 { get; set; }
+			public AccountIdentifier__2 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public SubAccount__1 F1 { get; set; }
 
-			public ExtExpiredArg0Item(AccountIdentifier__1 f0, SubAccount__1 f1)
+			public ExtExpiredArg0Item(AccountIdentifier__2 f0, SubAccount__1 f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -825,7 +818,7 @@ namespace Candid.extv2_boom
 		public class ExtMarketplacelistingsArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Models.Listing F1 { get; set; }
@@ -833,7 +826,7 @@ namespace Candid.extv2_boom
 			[CandidTag(2U)]
 			public Models.Metadata F2 { get; set; }
 
-			public ExtMarketplacelistingsArg0Item(TokenIndex f0, Models.Listing f1, Models.Metadata f2)
+			public ExtMarketplacelistingsArg0Item(TokenIndex__1 f0, Models.Listing f1, Models.Metadata f2)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -848,12 +841,12 @@ namespace Candid.extv2_boom
 		public class ExtMintArg0Item
 		{
 			[CandidTag(0U)]
-			public AccountIdentifier__1 F0 { get; set; }
+			public AccountIdentifier__2 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Models.Metadata F1 { get; set; }
 
-			public ExtMintArg0Item(AccountIdentifier__1 f0, Models.Metadata f1)
+			public ExtMintArg0Item(AccountIdentifier__2 f0, Models.Metadata f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -867,12 +860,12 @@ namespace Candid.extv2_boom
 		public class ExtPaymentsArg0Item
 		{
 			[CandidTag(0U)]
-			public AccountIdentifier__1 F0 { get; set; }
+			public AccountIdentifier__2 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Models.Payment F1 { get; set; }
 
-			public ExtPaymentsArg0Item(AccountIdentifier__1 f0, Models.Payment f1)
+			public ExtPaymentsArg0Item(AccountIdentifier__2 f0, Models.Payment f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -886,12 +879,12 @@ namespace Candid.extv2_boom
 		public class ExtSetroyaltyArg0Item
 		{
 			[CandidTag(0U)]
-			public AccountIdentifier__1 F0 { get; set; }
+			public AccountIdentifier__2 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public ulong F1 { get; set; }
 
-			public ExtSetroyaltyArg0Item(AccountIdentifier__1 f0, ulong f1)
+			public ExtSetroyaltyArg0Item(AccountIdentifier__2 f0, ulong f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -905,12 +898,12 @@ namespace Candid.extv2_boom
 		public class FailedSalesArg0Item
 		{
 			[CandidTag(0U)]
-			public AccountIdentifier__1 F0 { get; set; }
+			public AccountIdentifier__2 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public SubAccount__1 F1 { get; set; }
 
-			public FailedSalesArg0Item(AccountIdentifier__1 f0, SubAccount__1 f1)
+			public FailedSalesArg0Item(AccountIdentifier__2 f0, SubAccount__1 f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -924,12 +917,12 @@ namespace Candid.extv2_boom
 		public class GetMetadataArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Models.MetadataLegacy F1 { get; set; }
 
-			public GetMetadataArg0Item(TokenIndex f0, Models.MetadataLegacy f1)
+			public GetMetadataArg0Item(TokenIndex__1 f0, Models.MetadataLegacy f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -943,12 +936,12 @@ namespace Candid.extv2_boom
 		public class GetRegistryArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
-			public AccountIdentifier__1 F1 { get; set; }
+			public AccountIdentifier__2 F1 { get; set; }
 
-			public GetRegistryArg0Item(TokenIndex f0, AccountIdentifier__1 f1)
+			public GetRegistryArg0Item(TokenIndex__1 f0, AccountIdentifier__2 f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -962,12 +955,12 @@ namespace Candid.extv2_boom
 		public class GetTokensArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Models.MetadataLegacy F1 { get; set; }
 
-			public GetTokensArg0Item(TokenIndex f0, Models.MetadataLegacy f1)
+			public GetTokensArg0Item(TokenIndex__1 f0, Models.MetadataLegacy f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -981,12 +974,12 @@ namespace Candid.extv2_boom
 		public class GetPagedRegistryArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
-			public AccountIdentifier__1 F1 { get; set; }
+			public AccountIdentifier__2 F1 { get; set; }
 
-			public GetPagedRegistryArg0Item(TokenIndex f0, AccountIdentifier__1 f1)
+			public GetPagedRegistryArg0Item(TokenIndex__1 f0, AccountIdentifier__2 f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -1000,7 +993,7 @@ namespace Candid.extv2_boom
 		public class ListingsArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
 			public Models.Listing F1 { get; set; }
@@ -1008,7 +1001,7 @@ namespace Candid.extv2_boom
 			[CandidTag(2U)]
 			public Models.MetadataLegacy F2 { get; set; }
 
-			public ListingsArg0Item(TokenIndex f0, Models.Listing f1, Models.MetadataLegacy f2)
+			public ListingsArg0Item(TokenIndex__1 f0, Models.Listing f1, Models.MetadataLegacy f2)
 			{
 				this.F0 = f0;
 				this.F1 = f1;
@@ -1023,15 +1016,15 @@ namespace Candid.extv2_boom
 		public class SettlementsArg0Item
 		{
 			[CandidTag(0U)]
-			public TokenIndex F0 { get; set; }
+			public TokenIndex__1 F0 { get; set; }
 
 			[CandidTag(1U)]
-			public AccountIdentifier__1 F1 { get; set; }
+			public AccountIdentifier__2 F1 { get; set; }
 
 			[CandidTag(2U)]
 			public ulong F2 { get; set; }
 
-			public SettlementsArg0Item(TokenIndex f0, AccountIdentifier__1 f1, ulong f2)
+			public SettlementsArg0Item(TokenIndex__1 f0, AccountIdentifier__2 f1, ulong f2)
 			{
 				this.F0 = f0;
 				this.F1 = f1;

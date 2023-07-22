@@ -4,24 +4,22 @@ using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.ext_v2_standard.Models.MetadataValueItem>;
 using Memo = System.Collections.Generic.List<System.Byte>;
 using HeaderField = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
-using ChunkId = System.UInt32;
+using EXTMetadataValue = System.ValueTuple<System.String, Candid.Extv2Standard.Models.EXTMetadataValue>;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
 using AssetHandle = System.String;
 using AccountIdentifier__1 = System.String;
 using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.ext_v2_standard.Models;
-using EdjCase.ICP.Candid.Models;
+using Candid.Extv2Standard.Models;
 using System.Collections.Generic;
 using System;
+using EdjCase.ICP.Candid.Models;
 
-namespace Candid.ext_v2_standard.Models
+namespace Candid.Extv2Standard.Models
 {
 	[Variant(typeof(ResultTag))]
 	public class Result
@@ -47,7 +45,7 @@ namespace Candid.ext_v2_standard.Models
 			return new Result(ResultTag.Err, info);
 		}
 
-		public static Result Ok(List<ValueTuple<TokenIndex, OptionalValue<Listing>, OptionalValue<List<byte>>>> info)
+		public static Result Ok(List<Result.OkItem> info)
 		{
 			return new Result(ResultTag.Ok, info);
 		}
@@ -58,10 +56,10 @@ namespace Candid.ext_v2_standard.Models
 			return (CommonError)this.Value!;
 		}
 
-		public List<ValueTuple<TokenIndex, OptionalValue<Listing>, OptionalValue<List<byte>>>> AsOk()
+		public List<Result.OkItem> AsOk()
 		{
 			this.ValidateTag(ResultTag.Ok);
-			return (List<ValueTuple<TokenIndex, OptionalValue<Listing>, OptionalValue<List<byte>>>>)this.Value!;
+			return (List<Result.OkItem>)this.Value!;
 		}
 
 		private void ValidateTag(ResultTag tag)
@@ -69,6 +67,29 @@ namespace Candid.ext_v2_standard.Models
 			if (!this.Tag.Equals(tag))
 			{
 				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
+			}
+		}
+
+		public class OkItem
+		{
+			[CandidTag(0U)]
+			public TokenIndex F0 { get; set; }
+
+			[CandidTag(1U)]
+			public OptionalValue<Listing> F1 { get; set; }
+
+			[CandidTag(2U)]
+			public OptionalValue<List<byte>> F2 { get; set; }
+
+			public OkItem(TokenIndex f0, OptionalValue<Listing> f1, OptionalValue<List<byte>> f2)
+			{
+				this.F0 = f0;
+				this.F1 = f1;
+				this.F2 = f2;
+			}
+
+			public OkItem()
+			{
 			}
 		}
 	}
@@ -79,7 +100,7 @@ namespace Candid.ext_v2_standard.Models
 		[VariantOptionType(typeof(CommonError))]
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(List<ValueTuple<TokenIndex, OptionalValue<Listing>, OptionalValue<List<byte>>>>))]
+		[VariantOptionType(typeof(List<Result.OkItem>))]
 		Ok
 	}
 }

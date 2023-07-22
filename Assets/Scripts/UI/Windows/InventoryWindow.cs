@@ -1,11 +1,6 @@
-using Candid.World.Models;
-using ItsJackAnton.Patterns.Broadcasts;
-using ItsJackAnton.UI;
-using ItsJackAnton.Utility;
-using ItsJackAnton.Values;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Boom.UI;
+using Boom.Utility;
+using Boom.Values;
 using TMPro;
 using UnityEngine;
 
@@ -31,16 +26,16 @@ public class InventoryWindow : Window
         //    Debug.Log($"Window of name {gameObject.name}, requires data, data cannot be null");
         //    return;
         //}
-        UserUtil.RegisterToDataChange<DataTypes.Item>(UpdateWindow, true);
+        UserUtil.RegisterToDataChange<DataTypes.Entity>(UpdateWindow, true);
     }
 
     private void OnDestroy()
     {
-        UserUtil.UnregisterToDataChange<DataTypes.Item>(UpdateWindow);
+        UserUtil.UnregisterToDataChange<DataTypes.Entity>(UpdateWindow);
 
     }
 
-    private void UpdateWindow(DataState<Data<DataTypes.Item>> state)
+    private void UpdateWindow(DataState<Data<DataTypes.Entity>> state)
     {
         foreach (Transform child in content.transform)
         {
@@ -49,7 +44,7 @@ public class InventoryWindow : Window
 
         if (state.IsNull())
         {
-            loadingText.text = "None";
+            loadingText.text = "Nothing in your inventory";
             return;
         }
 
@@ -64,7 +59,7 @@ public class InventoryWindow : Window
 
         if (itemsCount == 0 && state.IsReady())
         {
-            loadingText.text = "None";
+            loadingText.text = "Nothing in your inventory";
             return;
         }
 
@@ -73,24 +68,17 @@ public class InventoryWindow : Window
 
         state.data.elements.Iterate(e =>
         {
-
-            var actionConfigResonse = UserUtil.GetDataElementOfType<DataTypes.EntityConfig>(e.Key);
-            if (actionConfigResonse.Tag == UResultTag.Err)
+            if (EntityUtil.GetTag(e.Key).Contains("item"))
             {
-                WindowGod.Instance.AddWidgets<BasicInventoryWidget>(new BasicInventoryWidget.WindowData()
-                { content = $"{e.Value.id} x {e.Value.quantity}" }, content);
-                return;
-            }
-
-            var configDataType = actionConfigResonse.AsOk();
-            if (configDataType.Tag.Contains("item"))
-            {
-                WindowGod.Instance.AddWidgets<BasicInventoryWidget>(new BasicInventoryWidget.WindowData()
-                { content = $"{configDataType.Name.ValueOrDefault} x {e.Value.quantity}" }, content);
+                if(e.Value.quantity > 0)
+                {
+                    WindowManager.Instance.AddWidgets<InventoryWidget>(new InventoryWidget.WindowData()
+                    { content = $"{EntityUtil.GetName(e.Key, e.Key)} x {e.Value.quantity}" }, content);
+                }
             }
             else
             {
-                Debug.Log($"Element of id : \"{e.Key}\" is not of type Item");
+                Debug.Log($"Element of id : \"{e.Key}\" doesn't have tag \"item\", it has: \"{EntityUtil.GetTag(e.Key)}\"");
             }
         });
     }

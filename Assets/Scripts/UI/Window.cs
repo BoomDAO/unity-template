@@ -1,6 +1,6 @@
-namespace ItsJackAnton.UI
+namespace Boom.UI
 {
-    using ItsJackAnton.Patterns;
+    using Boom.Patterns;
     using System;
     using UnityEngine;
 
@@ -11,8 +11,6 @@ namespace ItsJackAnton.UI
         protected virtual void Awake()
         {
             RectTransform = GetComponent<RectTransform>();
-            var canvas = GetComponent<Canvas>();
-            if(canvas) canvas.overrideSorting = true;
         }
         //public class WindowData { }
 
@@ -26,9 +24,9 @@ namespace ItsJackAnton.UI
 
         public abstract bool RequireUnlockCursor();
 
-        public void Close()
+        public virtual void Close()
         {
-            WindowGod.Instance.CloseWindow(GetType().Name);
+            WindowManager.Instance.CloseWindow(GetType().Name);
         }
 
         public virtual Type[] GetConflictWindow()

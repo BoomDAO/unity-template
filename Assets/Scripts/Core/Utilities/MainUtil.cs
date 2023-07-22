@@ -1,10 +1,25 @@
-namespace ItsJackAnton.Utility
+namespace Boom.Utility
 {
     using UnityEngine;
-    using UnityEngine.SceneManagement;
 
     public static class MainUtil
     {
+        public static long Now()
+        {
+            return System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        }
+        public static long MilliToSeconds(this long milli)
+        {
+            return milli / 1_000;
+        }
+        public static long NanoToMilliseconds(this long nanoSec)
+        {
+            return nanoSec / 1_000_000;
+        }
+        public static long NanoToMilliseconds(this ulong nanoSec)
+        {
+            return (long)nanoSec / 1_000_000;
+        }
         public static string AddressToShort(this string value)
         {
             string newString = "";
@@ -40,24 +55,6 @@ namespace ItsJackAnton.Utility
         public static string NotScientificNotation(this double val)
         {
             return val.ToString("0." + new string('#', 339));
-        }
-        public static string NotScientificNotation(this float val)
-        {
-            return val.ToString("0." + new string('#', 339));
-        }
-        public static void Loop(this int count, System.Action action)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                action();
-            }
-        }
-        public static void Loop(this int count, System.Action<int> action)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                action(i);
-            }
         }
 
         #region World_UI
@@ -101,59 +98,6 @@ namespace ItsJackAnton.Utility
         public static bool IsCursorVisible()
         {
             return Cursor.visible;
-        }
-        #endregion
-
-        #region Layers
-        public static LayerMask SumLayers(this LayerMask a, LayerMask b)
-        {
-            return a.value | b.value;
-        }
-        public static bool HasLayerOf(this GameObject target, int layerMask)
-        {
-            return (layerMask & (1 << target.layer)) != 0;
-        }
-        #endregion
-
-        #region On Value Change
-        public static T OnChange<T>(this T oldVal, T newVal, System.Action<T> onChange) where T : struct
-        {
-            if (newVal.Equals(oldVal) == false) onChange.Invoke(newVal);
-            return newVal;
-        }
-        public static T OnObjChange<T>(this T oldVal, T newVal, System.Action<T> onChange) where T : Object
-        {
-            if (newVal != oldVal) onChange.Invoke(newVal);
-            return newVal;
-        }
-
-        public static bool OnTrigger(this bool oldVal, bool newVal, System.Action onChange, bool ifNewValIsTrue = true)
-        {
-            if (newVal.Equals(oldVal) == false)
-            {
-                if (newVal == ifNewValIsTrue) onChange.Invoke();
-            }
-            return newVal;
-        }
-        #endregion
-
-        #region GO TO SCENE
-        public static void GoToScene(int index)
-        {
-            if (index < 0 || index >= SceneManager.sceneCountInBuildSettings)
-            {
-                ("Invalid Scene Index: " + index + ". Scene count: " + SceneManager.sceneCountInBuildSettings).Warning(nameof(MainUtil));
-                return;
-            }
-            SceneManager.LoadScene(index);
-        }
-        public static void GoToScene(string name)
-        {
-            int _sceneIndex = SceneUtility.GetBuildIndexByScenePath(name);
-
-            if (_sceneIndex > -1) GoToScene(_sceneIndex);
-            else ("Invalid Scene Name: " + name + " is not valid").Warning(nameof(MainUtil));
-
         }
         #endregion
     }

@@ -1,4 +1,4 @@
-namespace ItsJackAnton.Values
+namespace Boom.Values
 {
     using System;
     using UnityEngine;

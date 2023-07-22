@@ -1,6 +1,6 @@
-namespace ItsJackAnton.Mono
+namespace Boom.Mono
 {
-    using ItsJackAnton.Utility;
+    using Boom.Utility;
     using UnityEngine;
 
     public class HideCursor : MonoBehaviour

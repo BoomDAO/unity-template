@@ -1,6 +1,6 @@
-namespace ItsJackAnton.Patterns.Broadcasts
+namespace Boom.Patterns.Broadcasts
 {
-    using ItsJackAnton.Utility;
+    using Boom.Utility;
     using System;
     using System.Collections.Generic;
     using UnityEngine;

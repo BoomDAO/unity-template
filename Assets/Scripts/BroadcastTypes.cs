@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EdjCase.ICP.Agent.Agents;
-using ItsJackAnton.Patterns.Broadcasts;
+using Boom.Patterns.Broadcasts;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -10,7 +10,7 @@ public enum DataState
     None, Loading, Ready
 }
 public interface IDataState { }
-public class DataState<T> : IBroadcastState where T : struct, IDataState
+public class DataState<T> : IBroadcastState where T : IDataState, new()
 {
     public DataState State { get; private set; } = DataState.None;
     public string LoadingMsg { get; private set; } = "";
@@ -31,7 +31,6 @@ public class DataState<T> : IBroadcastState where T : struct, IDataState
     {
         LoadingMsg = "";
         data = new();
-        //SetAsReady();
         State = DataState.None;
     }
     public bool IsLoading()
@@ -40,7 +39,7 @@ public class DataState<T> : IBroadcastState where T : struct, IDataState
     }
     public bool IsReady()
     {
-        return State == DataState.Ready && IsLoading() == false;
+        return State == DataState.Ready;
     }
     public bool IsNull()
     {
@@ -50,20 +49,22 @@ public class DataState<T> : IBroadcastState where T : struct, IDataState
     public void SetAsLoading(string loadingMsg = "Loading...")
     {
         this.LoadingMsg = loadingMsg;
-
         State = DataState.Loading;
     }
-    public void SetAsReady()
+    public void SetAsReady(T data)
     {
         LoadingMsg = "";
-
+        this.data = data;
         State = DataState.Ready;
     }
 }
-public struct Data<T> : IDataState
+public class Data<T> : IDataState
 {
     public Dictionary<string, T> elements;
-
+    public Data()
+    {
+        this.elements = new();
+    }
     public Data(List<T> elements, Func<T, string> getKey)
     {
         elements ??= new();
@@ -79,6 +80,8 @@ public struct Data<T> : IDataState
         tokenData.elements ??= new();
         elements = tokenData.elements;
 
+        if (tokensUpdate == null) return;
+
         foreach (var item in tokensUpdate)
         {
             string key = getKey(item);
@@ -92,13 +95,15 @@ public struct Data<T> : IDataState
     }
 }
 
-public struct DisableButtonInteraction : IBroadcastState
+public struct WaitingForResponse : IBroadcastState
 {
-    public bool disable;
+    public bool value;
+    public string waitingMessage;
 
-    public DisableButtonInteraction(bool disable)
+    public WaitingForResponse(bool disable, string waitingMessage = "")
     {
-        this.disable = disable;
+        this.value = disable;
+        this.waitingMessage = waitingMessage;
     }
 }
 
@@ -139,22 +144,14 @@ public struct FetchDataReq<T> : IBroadcast where T : DataTypes.Base
 #region User
 public struct StartLogin: IBroadcast
 {
-    public string json;
-    public bool useLocalHost;
-
-    public StartLogin(string json, bool useLocalHost)
-    {
-        this.json = json;
-        this.useLocalHost = useLocalHost;
-    }
 }
-public struct SignInData: IDataState
+public struct LoginData: IDataState
 {
     public IAgent agent;
     public string principal;
     public string accountIdentifier;
     public bool asAnon;
-    public SignInData(IAgent agent, string principal, string accountIdentifier, bool asAnon)
+    public LoginData(IAgent agent, string principal, string accountIdentifier, bool asAnon)
     {
         this.agent = agent;
         this.principal = principal;

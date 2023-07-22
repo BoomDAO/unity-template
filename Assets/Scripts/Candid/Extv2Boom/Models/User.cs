@@ -1,26 +1,26 @@
-using TokenIndex = System.UInt32;
+using TokenIndex__1 = System.UInt32;
+using TokenIdentifier__2 = System.String;
 using TokenIdentifier__1 = System.String;
-using TokenIdentifier = System.String;
 using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
 using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
 using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.extv2_boom.Models.MetadataValue>;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
 using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField = System.ValueTuple<System.String, System.String>;
+using HeaderField__1 = System.ValueTuple<System.String, System.String>;
 using Extension = System.String;
 using ChunkId = System.UInt32;
 using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using AssetId = System.UInt32;
-using AssetHandle = System.String;
+using AssetHandle__1 = System.String;
+using AccountIdentifier__2 = System.String;
 using AccountIdentifier__1 = System.String;
-using AccountIdentifier = System.String;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.extv2_boom.Models;
+using Candid.Extv2Boom.Models;
 using EdjCase.ICP.Candid.Models;
 using System;
 
-namespace Candid.extv2_boom.Models
+namespace Candid.Extv2Boom.Models
 {
 	[Variant(typeof(UserTag))]
 	public class User
@@ -41,7 +41,7 @@ namespace Candid.extv2_boom.Models
 		{
 		}
 
-		public static User Address(AccountIdentifier info)
+		public static User Address(AccountIdentifier__1 info)
 		{
 			return new User(UserTag.Address, info);
 		}
@@ -51,10 +51,10 @@ namespace Candid.extv2_boom.Models
 			return new User(UserTag.Principal, info);
 		}
 
-		public AccountIdentifier AsAddress()
+		public AccountIdentifier__1 AsAddress()
 		{
 			this.ValidateTag(UserTag.Address);
-			return (AccountIdentifier)this.Value!;
+			return (AccountIdentifier__1)this.Value!;
 		}
 
 		public Principal AsPrincipal()
@@ -75,7 +75,7 @@ namespace Candid.extv2_boom.Models
 	public enum UserTag
 	{
 		[CandidName("address")]
-		[VariantOptionType(typeof(AccountIdentifier))]
+		[VariantOptionType(typeof(AccountIdentifier__1))]
 		Address,
 		[CandidName("principal")]
 		[VariantOptionType(typeof(Principal))]
