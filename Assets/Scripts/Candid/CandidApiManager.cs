@@ -25,6 +25,7 @@ using Unity.VisualScripting;
 using PeterO.Numbers;
 using Candid.UserNode;
 using System.Security.Principal;
+using EdjCase.ICP.BLS;
 
 namespace Candid
 {
@@ -58,13 +59,18 @@ namespace Candid
                 IAgent randomAgent = null;
 
                 var httpClient = new UnityHttpClient();
+#if UNITY_WEBGL && !UNITY_EDITOR
+                var bls = new WebGlBlsCryptography();
+#else
+                var bls = new WasmBlsCryptography();
+#endif
 
                 try
                 {
                     if (useLocalHost)
-                        randomAgent = new HttpAgent(Ed25519Identity.Generate(), new Uri("http://localhost:4943"));
+                        randomAgent = new HttpAgent(Ed25519Identity.Generate(), new Uri("http://localhost:4943"), bls);
                     else
-                        randomAgent = new HttpAgent(httpClient, Ed25519Identity.Generate());
+                        randomAgent = new HttpAgent(httpClient, Ed25519Identity.Generate(), bls);
                 }
                 catch (Exception e)
                 {
@@ -142,8 +148,13 @@ namespace Candid
 
                 var httpClient = new UnityHttpClient();
 
-                if (useLocalHost) await InitializeCandidApis(new HttpAgent(identity, new Uri("http://localhost:4943")));
-                else await InitializeCandidApis(new HttpAgent(httpClient, identity));
+#if UNITY_WEBGL && !UNITY_EDITOR
+                var bls = new WebGlBlsCryptography();
+#else
+                var bls = new WasmBlsCryptography();
+#endif
+                if (useLocalHost) await InitializeCandidApis(new HttpAgent(identity, new Uri("http://localhost:4943"), bls));
+                else await InitializeCandidApis(new HttpAgent(httpClient, identity, bls));
 
                 Debug.Log("You have logged in");
             }
