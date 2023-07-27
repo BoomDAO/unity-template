@@ -2,6 +2,9 @@
   <a href="logo" target="_blank" rel="noreferrer"><img src="https://github.com/BoomDAO/game-launcher/assets/29381374/875537bb-f9d4-4594-84e0-a7375ce46213" alt="my banner"></a>
 </p>
 
+## TEST IT HERE
+https://prgg7-iaaaa-aaaal-acrfq-cai.raw.icp0.io/
+
 ## UNITY TEMPLATE
 
 A **Unity Template** with all the necessary code for integration with the **World Engine** on the Internet Computer blockchain. Features include on-chain login authentication, payments, staking, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, freeing developers from complexity so they can focus on crafting engaging and enjoyable gameplay. 
