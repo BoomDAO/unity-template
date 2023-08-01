@@ -1,14 +1,14 @@
 using worldId = System.String;
+using userId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
-using TokenIndex = System.UInt32;
+using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
-using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
@@ -49,7 +49,7 @@ namespace Candid.World.Models
 			{
 			}
 
-			public static ActionOutcomeOption.OptionInfo DeleteEntity(ActionOutcomeOption.OptionInfo.DeleteEntityInfo info)
+			public static ActionOutcomeOption.OptionInfo DeleteEntity(DeleteEntity info)
 			{
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.DeleteEntity, info);
 			}
@@ -64,35 +64,35 @@ namespace Candid.World.Models
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.MintToken, info);
 			}
 
-			public static ActionOutcomeOption.OptionInfo ReceiveEntityQuantity(ActionOutcomeOption.OptionInfo.ReceiveEntityQuantityInfo info)
+			public static ActionOutcomeOption.OptionInfo ReceiveEntityQuantity(ReceiveEntityQuantity info)
 			{
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.ReceiveEntityQuantity, info);
 			}
 
-			public static ActionOutcomeOption.OptionInfo ReduceEntityExpiration(ActionOutcomeOption.OptionInfo.ReduceEntityExpirationInfo info)
+			public static ActionOutcomeOption.OptionInfo ReduceEntityExpiration(ReduceEntityExpiration info)
 			{
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.ReduceEntityExpiration, info);
 			}
 
-			public static ActionOutcomeOption.OptionInfo RenewEntityExpiration(ActionOutcomeOption.OptionInfo.RenewEntityExpirationInfo info)
+			public static ActionOutcomeOption.OptionInfo RenewEntityExpiration(RenewEntityExpiration info)
 			{
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.RenewEntityExpiration, info);
 			}
 
-			public static ActionOutcomeOption.OptionInfo SetEntityAttribute(ActionOutcomeOption.OptionInfo.SetEntityAttributeInfo info)
+			public static ActionOutcomeOption.OptionInfo SetEntityAttribute(SetEntityAttribute info)
 			{
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.SetEntityAttribute, info);
 			}
 
-			public static ActionOutcomeOption.OptionInfo SpendEntityQuantity(ActionOutcomeOption.OptionInfo.SpendEntityQuantityInfo info)
+			public static ActionOutcomeOption.OptionInfo SpendEntityQuantity(SpendEntityQuantity info)
 			{
 				return new ActionOutcomeOption.OptionInfo(ActionOutcomeOption.OptionInfoTag.SpendEntityQuantity, info);
 			}
 
-			public ActionOutcomeOption.OptionInfo.DeleteEntityInfo AsDeleteEntity()
+			public DeleteEntity AsDeleteEntity()
 			{
 				this.ValidateTag(ActionOutcomeOption.OptionInfoTag.DeleteEntity);
-				return (ActionOutcomeOption.OptionInfo.DeleteEntityInfo)this.Value!;
+				return (DeleteEntity)this.Value!;
 			}
 
 			public MintNft AsMintNft()
@@ -107,34 +107,34 @@ namespace Candid.World.Models
 				return (MintToken)this.Value!;
 			}
 
-			public ActionOutcomeOption.OptionInfo.ReceiveEntityQuantityInfo AsReceiveEntityQuantity()
+			public ReceiveEntityQuantity AsReceiveEntityQuantity()
 			{
 				this.ValidateTag(ActionOutcomeOption.OptionInfoTag.ReceiveEntityQuantity);
-				return (ActionOutcomeOption.OptionInfo.ReceiveEntityQuantityInfo)this.Value!;
+				return (ReceiveEntityQuantity)this.Value!;
 			}
 
-			public ActionOutcomeOption.OptionInfo.ReduceEntityExpirationInfo AsReduceEntityExpiration()
+			public ReduceEntityExpiration AsReduceEntityExpiration()
 			{
 				this.ValidateTag(ActionOutcomeOption.OptionInfoTag.ReduceEntityExpiration);
-				return (ActionOutcomeOption.OptionInfo.ReduceEntityExpirationInfo)this.Value!;
+				return (ReduceEntityExpiration)this.Value!;
 			}
 
-			public ActionOutcomeOption.OptionInfo.RenewEntityExpirationInfo AsRenewEntityExpiration()
+			public RenewEntityExpiration AsRenewEntityExpiration()
 			{
 				this.ValidateTag(ActionOutcomeOption.OptionInfoTag.RenewEntityExpiration);
-				return (ActionOutcomeOption.OptionInfo.RenewEntityExpirationInfo)this.Value!;
+				return (RenewEntityExpiration)this.Value!;
 			}
 
-			public ActionOutcomeOption.OptionInfo.SetEntityAttributeInfo AsSetEntityAttribute()
+			public SetEntityAttribute AsSetEntityAttribute()
 			{
 				this.ValidateTag(ActionOutcomeOption.OptionInfoTag.SetEntityAttribute);
-				return (ActionOutcomeOption.OptionInfo.SetEntityAttributeInfo)this.Value!;
+				return (SetEntityAttribute)this.Value!;
 			}
 
-			public ActionOutcomeOption.OptionInfo.SpendEntityQuantityInfo AsSpendEntityQuantity()
+			public SpendEntityQuantity AsSpendEntityQuantity()
 			{
 				this.ValidateTag(ActionOutcomeOption.OptionInfoTag.SpendEntityQuantity);
-				return (ActionOutcomeOption.OptionInfo.SpendEntityQuantityInfo)this.Value!;
+				return (SpendEntityQuantity)this.Value!;
 			}
 
 			private void ValidateTag(ActionOutcomeOption.OptionInfoTag tag)
@@ -144,170 +144,12 @@ namespace Candid.World.Models
 					throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
 				}
 			}
-
-			public class DeleteEntityInfo
-			{
-				[CandidTag(0U)]
-				public OptionalValue<worldId> F0 { get; set; }
-
-				[CandidTag(1U)]
-				public groupId F1 { get; set; }
-
-				[CandidTag(2U)]
-				public entityId F2 { get; set; }
-
-				public DeleteEntityInfo(OptionalValue<worldId> f0, groupId f1, entityId f2)
-				{
-					this.F0 = f0;
-					this.F1 = f1;
-					this.F2 = f2;
-				}
-
-				public DeleteEntityInfo()
-				{
-				}
-			}
-
-			public class ReceiveEntityQuantityInfo
-			{
-				[CandidTag(0U)]
-				public OptionalValue<worldId> F0 { get; set; }
-
-				[CandidTag(1U)]
-				public groupId F1 { get; set; }
-
-				[CandidTag(2U)]
-				public entityId F2 { get; set; }
-
-				[CandidTag(3U)]
-				public quantity F3 { get; set; }
-
-				public ReceiveEntityQuantityInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, quantity f3)
-				{
-					this.F0 = f0;
-					this.F1 = f1;
-					this.F2 = f2;
-					this.F3 = f3;
-				}
-
-				public ReceiveEntityQuantityInfo()
-				{
-				}
-			}
-
-			public class ReduceEntityExpirationInfo
-			{
-				[CandidTag(0U)]
-				public OptionalValue<worldId> F0 { get; set; }
-
-				[CandidTag(1U)]
-				public groupId F1 { get; set; }
-
-				[CandidTag(2U)]
-				public entityId F2 { get; set; }
-
-				[CandidTag(3U)]
-				public duration F3 { get; set; }
-
-				public ReduceEntityExpirationInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, duration f3)
-				{
-					this.F0 = f0;
-					this.F1 = f1;
-					this.F2 = f2;
-					this.F3 = f3;
-				}
-
-				public ReduceEntityExpirationInfo()
-				{
-				}
-			}
-
-			public class RenewEntityExpirationInfo
-			{
-				[CandidTag(0U)]
-				public OptionalValue<worldId> F0 { get; set; }
-
-				[CandidTag(1U)]
-				public groupId F1 { get; set; }
-
-				[CandidTag(2U)]
-				public entityId F2 { get; set; }
-
-				[CandidTag(3U)]
-				public duration F3 { get; set; }
-
-				public RenewEntityExpirationInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, duration f3)
-				{
-					this.F0 = f0;
-					this.F1 = f1;
-					this.F2 = f2;
-					this.F3 = f3;
-				}
-
-				public RenewEntityExpirationInfo()
-				{
-				}
-			}
-
-			public class SetEntityAttributeInfo
-			{
-				[CandidTag(0U)]
-				public OptionalValue<worldId> F0 { get; set; }
-
-				[CandidTag(1U)]
-				public groupId F1 { get; set; }
-
-				[CandidTag(2U)]
-				public entityId F2 { get; set; }
-
-				[CandidTag(3U)]
-				public attribute F3 { get; set; }
-
-				public SetEntityAttributeInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, attribute f3)
-				{
-					this.F0 = f0;
-					this.F1 = f1;
-					this.F2 = f2;
-					this.F3 = f3;
-				}
-
-				public SetEntityAttributeInfo()
-				{
-				}
-			}
-
-			public class SpendEntityQuantityInfo
-			{
-				[CandidTag(0U)]
-				public OptionalValue<worldId> F0 { get; set; }
-
-				[CandidTag(1U)]
-				public groupId F1 { get; set; }
-
-				[CandidTag(2U)]
-				public entityId F2 { get; set; }
-
-				[CandidTag(3U)]
-				public quantity F3 { get; set; }
-
-				public SpendEntityQuantityInfo(OptionalValue<worldId> f0, groupId f1, entityId f2, quantity f3)
-				{
-					this.F0 = f0;
-					this.F1 = f1;
-					this.F2 = f2;
-					this.F3 = f3;
-				}
-
-				public SpendEntityQuantityInfo()
-				{
-				}
-			}
 		}
 
 		public enum OptionInfoTag
 		{
 			[CandidName("deleteEntity")]
-			[VariantOptionType(typeof(ActionOutcomeOption.OptionInfo.DeleteEntityInfo))]
+			[VariantOptionType(typeof(DeleteEntity))]
 			DeleteEntity,
 			[CandidName("mintNft")]
 			[VariantOptionType(typeof(MintNft))]
@@ -316,19 +158,19 @@ namespace Candid.World.Models
 			[VariantOptionType(typeof(MintToken))]
 			MintToken,
 			[CandidName("receiveEntityQuantity")]
-			[VariantOptionType(typeof(ActionOutcomeOption.OptionInfo.ReceiveEntityQuantityInfo))]
+			[VariantOptionType(typeof(ReceiveEntityQuantity))]
 			ReceiveEntityQuantity,
 			[CandidName("reduceEntityExpiration")]
-			[VariantOptionType(typeof(ActionOutcomeOption.OptionInfo.ReduceEntityExpirationInfo))]
+			[VariantOptionType(typeof(ReduceEntityExpiration))]
 			ReduceEntityExpiration,
 			[CandidName("renewEntityExpiration")]
-			[VariantOptionType(typeof(ActionOutcomeOption.OptionInfo.RenewEntityExpirationInfo))]
+			[VariantOptionType(typeof(RenewEntityExpiration))]
 			RenewEntityExpiration,
 			[CandidName("setEntityAttribute")]
-			[VariantOptionType(typeof(ActionOutcomeOption.OptionInfo.SetEntityAttributeInfo))]
+			[VariantOptionType(typeof(SetEntityAttribute))]
 			SetEntityAttribute,
 			[CandidName("spendEntityQuantity")]
-			[VariantOptionType(typeof(ActionOutcomeOption.OptionInfo.SpendEntityQuantityInfo))]
+			[VariantOptionType(typeof(SpendEntityQuantity))]
 			SpendEntityQuantity
 		}
 	}

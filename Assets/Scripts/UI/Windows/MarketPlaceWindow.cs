@@ -124,42 +124,42 @@ namespace Boom.UI
 
             foreach (var element in state.data.elements)
             {
-                if (element.Value.Details.Seller.ToText() == loginData.principal)
+                if (element.Value.details.Seller.ToText() == loginData.principal)
                 {
                     WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
-                        id = $"{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.Details.Seller}",
-                        content = $"Nft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nPrice:\n{element.Value.Details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU",
+                        id = $"{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.details.Seller}",
+                        content = $"Nft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nIndex:\n{element.Value.index}\n\nPrice:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU",
                         textButtonContent = "UNLIST",
                         action = (a, b) => UnlistNft(a, b).Forget(),
 
                         customData = (
                             Env.Nfts.BOOM_COLLECTION_CANISTER_ID,
                             element.Value.tokenIdentifier,
-                            $"{element.Value.Details.Seller}",
-                            element.Value.Details.Price),
+                            $"{element.Value.details.Seller}",
+                            element.Value.details.Price),
 
                         imageContentType = new ImageContentType.Url($"https://{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}.raw.icp0.io/?&tokenid={element.Value.tokenIdentifier}&type=thumbnail"),
-                        infoWindowData = new($"Your NFT Listing Info", $"Price:\n{element.Value.Details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU\n\nNft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.AddressToShort()}")
+                        infoWindowData = new($"Your NFT Listing Info", $"Price:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU\n\nNft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.AddressToShort()}")
                     }, listingContent);
                 }
                 else
                 {
                     WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
-                        id = $"{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.Details.Seller}",
-                        content = $"Nft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nSeller:\n{element.Value.Details.Seller.ToText().AddressToShort()}",
-                        textButtonContent = $"BUY {element.Value.Details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
+                        id = $"{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.details.Seller}",
+                        content = $"Nft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nSeller:\n{element.Value.details.Seller.ToText().AddressToShort()}",
+                        textButtonContent = $"BUY {element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
                         action = (a, b) => Buy(a, b).Forget(),
 
                         customData = (
                             Env.Nfts.BOOM_COLLECTION_CANISTER_ID,
                             element.Value.tokenIdentifier,
-                            $"{element.Value.Details.Seller}",
-                            element.Value.Details.Price),
+                            $"{element.Value.details.Seller}",
+                            element.Value.details.Price),
 
                         imageContentType = new ImageContentType.Url($"https://{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}.raw.icp0.io/?&tokenid={element.Value.tokenIdentifier}&type=thumbnail"),
-                        infoWindowData = new($"NFT Listing Info", $"Price:\n{element.Value.Details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: {element.Value.Details.Seller.ToText().AddressToShort()}\n\nNft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.AddressToShort()}")
+                        infoWindowData = new($"NFT Listing Info", $"Price:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: {element.Value.details.Seller.ToText().AddressToShort()}\n\nNft ID:\n{element.Value.tokenIdentifier.AddressToShort()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.AddressToShort()}")
                     }, listingContent);
                 }
             }
@@ -225,7 +225,7 @@ namespace Boom.UI
                         WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                         {
                             id = $"{plethoraCollection.Value.canister}|{token.tokenIdentifier}",
-                            content = $"Nft ID:\n{token.tokenIdentifier.AddressToShort()}\n\nPrice:\n{listing.Details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
+                            content = $"Nft ID:\n{token.tokenIdentifier.AddressToShort()}\n\nPrice:\n{listing.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
                             textButtonContent = "UNLIST",
                             action = (a, b) => UnlistNft(a, b).Forget(),
 
@@ -236,7 +236,7 @@ namespace Boom.UI
                                 "",(ulong)0),
 
                             imageContentType = new ImageContentType.Url(url),
-                            infoWindowData = new($"NFT Listing Info", $"Price:\n{listing.Details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nNft ID:\n{token.tokenIdentifier.AddressToShort()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.AddressToShort()}")
+                            infoWindowData = new($"NFT Listing Info", $"Price:\n{listing.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nNft ID:\n{token.tokenIdentifier.AddressToShort()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.AddressToShort()}")
                         }, nftToListContent);
                     }
                     else
@@ -435,6 +435,7 @@ namespace Boom.UI
             {
                 BroadcastState.Invoke(new WaitingForResponse(false));
                 newListingPanel.SetActive(false);
+                Close();
                 UserUtil.RequestData<DataTypes.Listing>();
 
                 Debug.Log("Listing success");

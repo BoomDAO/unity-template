@@ -12,13 +12,17 @@ namespace Boom.Utility
         {
             return milli / 1_000;
         }
-        public static long NanoToMilliseconds(this long nanoSec)
+        public static long SecondsToMilli(this float seconds)
         {
-            return nanoSec / 1_000_000;
+            return (long)(seconds * 1_000);
         }
         public static long NanoToMilliseconds(this ulong nanoSec)
         {
             return (long)nanoSec / 1_000_000;
+        }
+        public static ulong MilliToNano(this long nanoSec)
+        {
+            return (ulong)nanoSec * 1_000_000;
         }
         public static string AddressToShort(this string value)
         {

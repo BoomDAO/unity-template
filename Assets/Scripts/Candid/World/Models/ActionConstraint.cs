@@ -1,10 +1,11 @@
 using worldId = System.String;
+using userId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
-using TokenIndex = System.UInt32;
+using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System.Collections.Generic;
@@ -51,9 +52,9 @@ namespace Candid.World.Models
 			public OptionalValue<bool> NotExpired { get; set; }
 
 			[CandidName("worldId")]
-			public string WorldId { get; set; }
+			public OptionalValue<string> WorldId { get; set; }
 
-			public EntityConstraintItemItem(string entityId, OptionalValue<string> equalToAttribute, OptionalValue<double> greaterThanOrEqualQuantity, string groupId, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, string worldId)
+			public EntityConstraintItemItem(string entityId, OptionalValue<string> equalToAttribute, OptionalValue<double> greaterThanOrEqualQuantity, string groupId, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, OptionalValue<string> worldId)
 			{
 				this.EntityId = entityId;
 				this.EqualToAttribute = equalToAttribute;

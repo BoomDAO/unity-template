@@ -316,7 +316,13 @@ namespace Candid
 
             if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
             {
-                throw new(userNodeIdResult.AsErr());
+                $"{userNodeIdResult.AsErr()}. Therefore, a new user will be created!".Warning(nameof(CandidApiManager));
+                userNodeIdResult = await WorldHub.CreateNewUser(Principal.FromText(loginData.principal));
+
+                if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
+                {
+                    throw new(userNodeIdResult.AsErr());
+                }
             }
 
             var userNodeId = userNodeIdResult.AsOk();
@@ -327,7 +333,7 @@ namespace Candid
 
             List<UserNode.Models.Entity> userGameEntities = null;
 
-            if (getUserGameDataResult.Tag == UserNode.Models.Result_2Tag.Ok)
+            if (getUserGameDataResult.Tag == UserNode.Models.Result_1Tag.Ok)
             {
                 userGameEntities = getUserGameDataResult.AsOk();
 
@@ -368,7 +374,13 @@ namespace Candid
 
             if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
             {
-                throw new(userNodeIdResult.AsErr());
+                $"{userNodeIdResult.AsErr()}. Therefore, a new user will be created!".Warning(nameof(CandidApiManager));
+                userNodeIdResult = await WorldHub.CreateNewUser(Principal.FromText(loginData.principal));
+
+                if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
+                {
+                    throw new(userNodeIdResult.AsErr());
+                }
             }
 
             var userNodeId = userNodeIdResult.AsOk();
@@ -379,7 +391,7 @@ namespace Candid
 
             List<UserNode.Models.Action> userGameActions = null;
 
-            if (getUserGameDataResult.Tag == UserNode.Models.Result_3Tag.Ok)
+            if (getUserGameDataResult.Tag == UserNode.Models.Result_2Tag.Ok)
             {
                 userGameActions = getUserGameDataResult.AsOk();
 

@@ -1,7 +1,11 @@
+// Ignore Spelling: metadata eid gid wid
+
+using Candid.IcpLedger.Models;
 using Candid.World.Models;
 using EdjCase.ICP.Candid.Models;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine.Scripting;
 
 public class NftCollectionToFetch
@@ -152,17 +156,17 @@ public static class DataTypes
     [Serializable]
     public class Stake : Base
     {
-        public uint Amount { get; set; }
-        public string CanisterId { get; set; }
-        public string? BlockIndex { get; set; }
-        public string TokenType { get; set; }
+        public uint amount;
+        public string canisterId;
+        public string? blockIndex;
+        public string tokenType;
 
         public Stake(uint amount, string canisterId, string? blockIndex, string tokenType)
         {
-            this.Amount = amount;
-            this.CanisterId = canisterId;
-            this.BlockIndex = blockIndex;
-            this.TokenType = tokenType;
+            this.amount = amount;
+            this.canisterId = canisterId;
+            this.blockIndex = blockIndex;
+            this.tokenType = tokenType;
         }
 
         public Stake()
@@ -171,7 +175,7 @@ public static class DataTypes
 
         public override string GetKey()
         {
-            return $"{CanisterId}{BlockIndex}";
+            return $"{canisterId}{blockIndex}";
         }
     }
 
@@ -181,34 +185,40 @@ public static class DataTypes
     {
         public EntityConfig(string wid, Candid.World.Models.EntityConfig arg)
         {
-            Wid = wid;
-            Description = arg.Description;
-            Duration = arg.Duration;
-            Eid = arg.Eid;
-            Gid = arg.Gid;
-            ImageUrl = arg.ImageUrl;
-            Metadata = arg.Metadata;
-            Name = arg.Name;
-            ObjectUrl = arg.ObjectUrl;
-            Rarity = arg.Rarity;
-            Tag = arg.Tag;
+            this.wid = wid;
+            description = arg.Description.HasValue ? arg.Description.ValueOrDefault : null;
+            duration = null;
+            if (arg.Duration.HasValue)
+            {
+                arg.Duration.ValueOrDefault.TryToUInt64(out ulong _duration);
+
+                duration = _duration;
+            }
+            eid = arg.Eid;
+            gid = arg.Gid;
+            imageUrl = arg.ImageUrl.HasValue? arg.ImageUrl.ValueOrDefault : null;
+            metadata = arg.Metadata.HasValue ? arg.Metadata.ValueOrDefault : null;
+            name = arg.Name.HasValue ? arg.Name.ValueOrDefault : null;
+            objectUrl = arg.ObjectUrl.HasValue ? arg.ObjectUrl.ValueOrDefault : null;
+            rarity = arg.Rarity.HasValue ? arg.Rarity.ValueOrDefault : null;
+            tag = arg.Tag.HasValue ? arg.Tag.ValueOrDefault : null;
         }
 
-        public OptionalValue<string> Description { get; set; }
-        public OptionalValue<UnboundedUInt> Duration { get; set; }
-        public string Eid { get; set; }
-        public string Gid { get; set; }
-        public string Wid { get; set; }
-        public OptionalValue<string> ImageUrl { get; set; }
-        public string Metadata { get; set; }
-        public OptionalValue<string> Name { get; set; }
-        public OptionalValue<string> ObjectUrl { get; set; }
-        public OptionalValue<string> Rarity { get; set; }
-        public string Tag { get; set; }
+        public string description;
+        public ulong? duration;
+        public string eid;
+        public string gid;
+        public string wid;
+        public string imageUrl;
+        public string metadata;
+        public string name;
+        public string objectUrl;
+        public string rarity;
+        public string tag;
 
         public override string GetKey()
         {
-            return $"{Wid}{Gid}{Eid}";
+            return $"{wid}{gid}{eid}";
         }
     }
 
@@ -218,28 +228,34 @@ public static class DataTypes
     {
         public ActionConfig(Candid.World.Models.ActionConfig arg)
         {
-            ActionConstraint = arg.ActionConstraint;
-            ActionPlugin = arg.ActionPlugin;
-            ActionResult = arg.ActionResult;
-            Aid = arg.Aid;
-            Description = arg.Description;
-            Name = arg.Name;
-            Tag = arg.Tag;
-            ImageUrl = arg.ImageUrl;
+            if (arg.ActionConstraint.HasValue)
+            {
+                timeConstraint = arg.ActionConstraint.ValueOrDefault.TimeConstraint.ValueOrDefault;
+                entityConstraints = arg.ActionConstraint.ValueOrDefault.EntityConstraint.ValueOrDefault;
+            }
+
+            actionPlugin = arg.ActionPlugin.HasValue ? arg.ActionPlugin.ValueOrDefault : null;
+            actionResult = arg.ActionResult;
+            aid = arg.Aid;
+            description = arg.Description.HasValue ? arg.Description.ValueOrDefault : null;
+            name = arg.Name.HasValue ? arg.Name.ValueOrDefault : null;
+            tag = arg.Tag.HasValue ? arg.Tag.ValueOrDefault : null;
+            imageUrl = arg.ImageUrl.HasValue ? arg.ImageUrl.ValueOrDefault : null;
         }
 
-        public OptionalValue<ActionConstraint> ActionConstraint { get; set; }
-        public OptionalValue<ActionPlugin> ActionPlugin { get; set; }
-        public ActionResult ActionResult { get; set; }
-        public string Aid { get; set; }
-        public OptionalValue<string> Description { get; set; }
-        public OptionalValue<string> Name { get; set; }
-        public OptionalValue<string> Tag { get; set; }
-        public OptionalValue<string> ImageUrl { get; set; }
+        public ActionConstraint.TimeConstraintItem timeConstraint;
+        public List<ActionConstraint.EntityConstraintItemItem> entityConstraints;
+        public ActionPlugin actionPlugin;
+        public ActionResult actionResult;
+        public string aid;
+        public string description;
+        public string name;
+        public string tag;
+        public string imageUrl;
 
         public override string GetKey()
         {
-            return $"{Aid}";
+            return $"{aid}";
         }
     }
 
@@ -250,20 +266,19 @@ public static class DataTypes
         public Listing(string tokenIdentifier, Candid.Extv2Boom.Extv2BoomApiClient.ListingsArg0Item arg)
         {
             this.tokenIdentifier = tokenIdentifier;
-            Index = arg.F0;
-            Details = arg.F1;
-            MetadataLegacy = arg.F2;
+            index = arg.F0;
+            details = arg.F1;
+            metadataLegacy = arg.F2;
         }
 
         public string tokenIdentifier;
-        public uint Index { get; set; }
-        public string TokenIdentifier { get; set; }
-        public Candid.Extv2Boom.Models.Listing Details { get; set; }
-        public Candid.Extv2Boom.Models.MetadataLegacy MetadataLegacy { get; set; }
+        public uint index;
+        public Candid.Extv2Boom.Models.Listing details;
+        public Candid.Extv2Boom.Models.MetadataLegacy metadataLegacy;
 
         public override string GetKey()
         {
-            return $"{Index}";
+            return $"{index}";
         }
     }
 }

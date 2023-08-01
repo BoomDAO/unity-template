@@ -1,4 +1,5 @@
 using Candid;
+using Candid;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Boom.Values;
@@ -12,6 +13,9 @@ using Candid.Extv2Boom;
 using Candid.IcrcLedger;
 using Candid.IcpLedger;
 using WebSocketSharp;
+using EdjCase.ICP.Candid.Mapping;
+using Newtonsoft.Json;
+using UnityEngine.Animations;
 
 //TRANSFER ERROR TYPES
 public static class TransferErrType
@@ -312,93 +316,39 @@ public static class ActionArgValueTypes
     }
 }
 
+//PROCESS ACTION RESULT
+public class ProcessActionResponse
+{
+    public List<MintNft> nfts;
+    public List<MintToken> tokens;
+    public List<DataTypes.Entity> receivedEntities;
+    public List<DataTypes.Entity> spentEntities;
+    public List<DataTypes.Entity> reducedExpiration;
+    public List<DataTypes.Entity> renewedExpiration;
+    public List<DataTypes.Entity> setAttribute;
+    public List<DataTypes.Entity> deletedEntities;
+
+    public ProcessActionResponse(List<MintNft> nfts, List<MintToken> tokens, List<DataTypes.Entity> receivedEntities, List<DataTypes.Entity> spentEntities, List<DataTypes.Entity> reducedExpiration, List<DataTypes.Entity> renewedExpiration, List<DataTypes.Entity> setAttribute, List<DataTypes.Entity> deletedEntities)
+    {
+        this.nfts = nfts;
+        this.tokens = tokens;
+        this.receivedEntities = receivedEntities;
+        this.spentEntities = spentEntities;
+        this.reducedExpiration = reducedExpiration;
+        this.renewedExpiration = renewedExpiration;
+        this.setAttribute = setAttribute;
+        this.deletedEntities = deletedEntities;
+    }
+}
 //UTILS
 public static class ActionUtil
 {
     #region Get Action Details
-    public static string GetDescriptionUnsafe(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.Description.ValueOrDefault;
-    }
-    public static List<ActionConstraint.EntityConstraintItemItem> GetEntityConstrain(this DataTypes.ActionConfig actionConfig)
-    {
-        try
-        {
-            return actionConfig.ActionConstraint.ValueOrDefault.EntityConstraint.ValueOrDefault;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-    public static string GetEntityKey(this ActionConstraint.EntityConstraintItemItem actionConfig)
-    {
-        return $"{actionConfig.WorldId}{actionConfig.GroupId}{actionConfig.EntityId}";
-    }
-
-    public static string GetNameUnsafe(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.Name.ValueOrDefault;
-    }
-    public static ActionPlugin GetPluginUnsafe(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.ActionPlugin.ValueOrDefault;
-    }
-    public static string GetTagUnsafe(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.Tag.ValueOrDefault;
-    }
-    public static ActionConstraint.TimeConstraintItem GetTimeConstrain(this DataTypes.ActionConfig actionConfig)
-    {
-        try
-        {
-            return actionConfig.ActionConstraint.ValueOrDefault.TimeConstraint.ValueOrDefault;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-    public static string GetUrlImageUnsafe(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.ImageUrl.ValueOrDefault;
-    }
-    public static bool HasConstrains(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.ActionConstraint.HasValue;
-    }
-    public static bool HasEntityConstrain(this DataTypes.ActionConfig actionConfig)
-    {
-        try
-        {
-            return actionConfig.ActionConstraint.ValueOrDefault.EntityConstraint.HasValue;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public static bool HasPlugin(this DataTypes.ActionConfig actionConfig)
-    {
-        return actionConfig.ActionPlugin.HasValue;
-    }
     public static bool HasPluginType(this DataTypes.ActionConfig actionConfig, ActionPluginTag type)
     {
-        if (actionConfig.HasPlugin() == false) return false;
+        if (actionConfig.actionPlugin == null) return false;
 
-        return actionConfig.ActionPlugin.ValueOrDefault.Tag == type;
-    }
-    public static bool HasTimeConstrain(this DataTypes.ActionConfig actionConfig)
-    {
-        try
-        {
-            return actionConfig.ActionConstraint.ValueOrDefault.TimeConstraint.HasValue;
-        }
-        catch
-        {
-            return false;
-        }
+        return actionConfig.actionPlugin.Tag == type;
     }
     #endregion
 
@@ -418,76 +368,78 @@ public static class ActionUtil
             return new(new ActionErrType.LogIn("You cannot execute this function as anon"));
         }
 
-        //Check for action timeConstraint
-
-        var isActionsDataValid = UserUtil.IsDataValid<DataTypes.Action>();
-
-        if (!isActionsDataValid) return new(new ActionErrType.Other("Action Data has not been loaded yet"));
-
-        var actionsDataResult = UserUtil.GetElementOfType<DataTypes.Action>(actionId);
-
         //If action exist
-        if (actionsDataResult.IsOk)
+        var intervalStartTs = UserUtil.GetPropertyFromType<DataTypes.Action, ulong>(actionId, e => e.intervalStartTs, 0);
+        var actionCount = UserUtil.GetPropertyFromType<DataTypes.Action, ulong>(actionId, e => e.actionCount, 0);
+
+        ////
+
+        //Check for config
+
+        var isActionConfigsValid = UserUtil.IsDataValid<DataTypes.ActionConfig>();
+
+        if (!isActionConfigsValid) return new(new ActionErrType.Other("Action Config has not been loaded yet"));
+
+        var actionConfigResult = UserUtil.GetElementOfType<DataTypes.ActionConfig>(actionId);
+
+        if (actionConfigResult.IsErr) return new(new ActionErrType.Other(actionConfigResult.AsErr()));
+
+        var actionConfig = actionConfigResult.AsOk();
+
+        if (actionConfig.timeConstraint != null)
         {
-            //Check for config
+            var timeConstrain = actionConfig.timeConstraint;
 
-            var isActionConfigsValid = UserUtil.IsDataValid<DataTypes.ActionConfig>();
+            if (timeConstrain.ActionsPerInterval.TryToUInt64(out var actionsPerIntervalConfig) == false) return new(new ActionErrType.Other("Converting \"timeConstrain.ActionsPerInterval\" to UInt64 failed"));
 
-            if (!isActionConfigsValid) return new(new ActionErrType.Other("Action Config has not been loaded yet"));
+            if (actionsPerIntervalConfig == 0) return new(new ActionErrType.Other("The actionsPerInterval of this action is currently set to 0, which effectively disables it."));
 
-            var actionConfigResult = UserUtil.GetElementOfType<DataTypes.ActionConfig>(actionId);
+            if (timeConstrain.IntervalDuration.TryToUInt64(out var intervalDurationConfig) == false) return new(new ActionErrType.Other("Converting \"timeConstrain.IntervalDuration\" to UInt64 failed"));
 
-            if (actionConfigResult.IsErr) return new(new ActionErrType.Other(actionConfigResult.AsErr()));
-
-            var actionConfig = actionConfigResult.AsOk();
-
-            if (actionConfig.HasTimeConstrain())
+            var timeConstrainToCompareWith = intervalStartTs.NanoToMilliseconds() + intervalDurationConfig.NanoToMilliseconds();
+            if (timeConstrainToCompareWith < MainUtil.Now())
             {
-                var timeConstrain = actionConfig.GetTimeConstrain();
-                var actionData = actionsDataResult.AsOk();
-
-                if (timeConstrain.ActionsPerInterval.TryToUInt64(out var actionsPerInterval) == false) return new(new ActionErrType.Other("Converting \"timeConstrain.ActionsPerInterval\" to UInt64 failed"));
-
-                if (actionsPerInterval == 0) return new(new ActionErrType.Other("The actionsPerInterval of this action is currently set to 0, which effectively disables it."));
-
-                if (timeConstrain.IntervalDuration.TryToUInt64(out var configIntervalDuration) == false) return new(new ActionErrType.Other("Converting \"timeConstrain.IntervalDuration\" to UInt64 failed"));
-
-                var currentIntervalStartTs = actionData.intervalStartTs;
-
-                long millisecondSinceIntervalStart = MainUtil.Now() - currentIntervalStartTs.NanoToMilliseconds();
-                long millisecondsToNextInterval = configIntervalDuration.NanoToMilliseconds();
-
-                // Ensure the current interval start timestamp is not 0, and then check if the current interval is still active
-                if (currentIntervalStartTs != 0 && millisecondSinceIntervalStart < millisecondsToNextInterval)
-                {
-                    // If current interval is still active, then check how many actions have been done in this current interval
-                    var currentActionCount = actionData.actionCount;
-                    if (currentActionCount >= actionsPerInterval) return new(new ActionErrType.ActionsPerInterval($"You have reached the max ({actionsPerInterval}) tries for this time interval. You have tried already {currentActionCount} times"));
-                }
+                actionCount = 1;
+                intervalStartTs = (ulong)(MainUtil.Now() + 5f.SecondsToMilli()).MilliToNano();
+            }
+            else if (actionCount < actionsPerIntervalConfig)
+            {
+                ++actionCount;
+            }
+            else
+            {
+                var secondsLeft = (timeConstrainToCompareWith - MainUtil.Now()).MilliToSeconds();
+                return new(new ActionErrType.ActionsPerInterval($"You have reached the max ({actionsPerIntervalConfig}) tries for this time interval. You have tried already {actionCount} times.\nYou must wait: {(secondsLeft > 0? secondsLeft : 1)} secs"));
             }
 
-            if (actionConfig.HasEntityConstrain())
-            {
-                var entityConstrain = actionConfig.GetEntityConstrain();
+            UserUtil.UpdateData(new DataTypes.Action(
+                actionId,
+                actionCount,
+                intervalStartTs
+            ));
+        }
 
-                var checkForRequiremensResult = EntityUtil.MeetEntityRequirements(entityConstrain.ToArray());
+        if (actionConfig.entityConstraints != null)
+        {
+            var entityConstrain = actionConfig.entityConstraints;
 
-                if (checkForRequiremensResult.IsErr) return new(new ActionErrType.Other(checkForRequiremensResult.AsErr()));
+            var checkForRequiremensResult = EntityUtil.MeetEntityRequirements(entityConstrain.ToArray());
 
-                if (checkForRequiremensResult.AsOk() == false) return new(new ActionErrType.EntityConstrain("You don't meet the entity requirement"));
-            }
+            if (checkForRequiremensResult.IsErr) return new(new ActionErrType.Other(checkForRequiremensResult.AsErr()));
+
+            if (checkForRequiremensResult.AsOk() == false) return new(new ActionErrType.EntityConstrain("You don't meet the entity requirement"));
         }
 
         return new(new Null());//SUCCESS
     }
 
     //MAIN FUNCTION TO PROCESS AN ACTION
-    private async static UniTask<UResult<ActionResponse, string>> ProcessAction<T>(T arg) where T : ActionArgValueTypes.BaseArg
+    private async static UniTask<UResult<ProcessActionResponse, string>> ProcessAction<T>(T arg) where T : ActionArgValueTypes.BaseArg
     {
         $"Try Process Action of type ${typeof(T).Name}, ActionId: {arg.ActionId}".Log(nameof(ActionUtil));
 
         //Execute Action
-        Result_3 verifyTransResponse = null;
+        Result_4 verifyTransResponse = null;
         switch (arg)
         {
             case ActionArgValueTypes.DefaultArg:
@@ -518,27 +470,68 @@ public static class ActionUtil
 
         if (verifyTransResponse == null) return new("verifyTransResponse is null");
 
-        if (verifyTransResponse.Tag == Result_3Tag.Err)
+        if (verifyTransResponse.Tag == Result_4Tag.Err)
         {
             return new(verifyTransResponse.AsErr());
         }
 
         var okVal = verifyTransResponse.AsOk();
 
-        if(okVal.F0 != null)
+        List<MintNft> nfts = new();
+        List<MintToken> tokens = new();
+        List<DataTypes.Entity> receivedEntities = new();
+        List<DataTypes.Entity> spentEntities = new();
+        List<DataTypes.Entity> reducedExpiration = new();
+        List<DataTypes.Entity> renewedExpiration = new();
+        List<DataTypes.Entity> setAttribute = new();
+        List<DataTypes.Entity> deletedEntities = new();
+
+        okVal.Iterate(e =>
         {
-            okVal.F0.ActionCount.TryToUInt64(out var actionCount);
-            okVal.F0.IntervalStartTs.TryToUInt64(out var actionstartTs);
+            switch (e.Option.Tag)
+            {
+                case ActionOutcomeOption.OptionInfoTag.MintToken:
+                    //Debug.Log($"RESULT: MINT TOKENs: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    tokens.Add(e.Option.AsMintToken());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.MintNft:
+                    //Debug.Log($"RESULT: MINT NFTs: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    nfts.Add(e.Option.AsMintNft());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.ReceiveEntityQuantity:
+                    //Debug.Log($"RESULT: ReceiveEntityQuantity: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    receivedEntities.Add(e.ConvertToDataType());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.SpendEntityQuantity:
+                    //Debug.Log($"RESULT: SpendEntityQuantity: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    var asSpendEntityQuantity = e.Option.AsSpendEntityQuantity();
+                    spentEntities.Add(e.ConvertToDataType());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.ReduceEntityExpiration:
+                    //Debug.Log($"RESULT: ReduceEntityExpiration: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    reducedExpiration.Add(e.ConvertToDataType());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.RenewEntityExpiration:
+                    renewedExpiration.Add(e.ConvertToDataType());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.SetEntityAttribute:
+                    //Debug.Log($"RESULT: SetEntityAttribute: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    setAttribute.Add(e.ConvertToDataType());
+                    break;
+                case ActionOutcomeOption.OptionInfoTag.DeleteEntity:
+                    //Debug.Log($"RESULT: DeleteEntity: {JsonConvert.SerializeObject(e.ConvertToDataType())}");
+                    deletedEntities.Add(e.ConvertToDataType());
+                    break;
+            }
+        });
 
-            UserUtil.UpdateData(new DataTypes.Action[1] { new DataTypes.Action(okVal.F0.ActionId, actionCount, actionstartTs) });
-        }
-
-        okVal.F1 ??= new();
-        okVal.F2 ??= new();
-        okVal.F3 ??= new();
+        var processActionResponse = new ProcessActionResponse(nfts, tokens, receivedEntities, spentEntities, reducedExpiration, renewedExpiration, setAttribute, deletedEntities);
 
         $"Action Processed Success, Type: ${typeof(ActionArgValueTypes.BaseArg)}, ActionId: {arg.ActionId}".Log(nameof(ActionUtil));
-        return new(okVal);
+
+        var prevActionCount = UserUtil.GetPropertyFromType<DataTypes.Action, ulong>(arg.ActionId, e => e.actionCount, 0);
+
+        return new(processActionResponse);
     }
 
     public static class Transfer
@@ -585,8 +578,8 @@ public static class ActionUtil
             var arg = new TransferArgs
             {
                 To = addressBytes,
-                Amount = new Tokens(requiredBaseUnitAmount),
-                Fee = new Tokens(configs.fee),
+                Amount = new Candid.IcpLedger.Models.Tokens(requiredBaseUnitAmount),
+                Fee = new Candid.IcpLedger.Models.Tokens(configs.fee),
                 CreatedAtTime = OptionalValue<TimeStamp>.NoValue(),
                 Memo = new ulong(),
                 FromSubaccount = new(),
@@ -597,9 +590,9 @@ public static class ActionUtil
             var result = await tokenInterface.Transfer(arg);
 
             //CHECK SUCCESS
-            if (result.Tag == TransferResultTag.Ok)
+            if (result.Tag == Candid.IcpLedger.Models.TransferResultTag.Ok)
             {
-                if(updateBalance) UserUtil.RequestData<DataTypes.Token>(Env.CanisterIds.ICP_LEDGER);
+                if (updateBalance) TokenUtil.DecrementTokenByBaseUnit(Env.CanisterIds.ICP_LEDGER, requiredBaseUnitAmount + configs.fee); //UserUtil.RequestData<DataTypes.Token>(Env.CanisterIds.ICP_LEDGER);
 
                 var blockIndex = result.AsOk();
                 $"BlockIndex Transfer: {blockIndex}".Log();
@@ -662,7 +655,7 @@ public static class ActionUtil
             //CHECK SUCCESS
             if (result.Tag == Candid.IcrcLedger.Models.TransferResultTag.Ok)
             {
-                if (updateBalance) UserUtil.RequestData<DataTypes.Token>(canisterId);
+                if (updateBalance) TokenUtil.DecrementTokenByBaseUnit(canisterId, requiredBaseUnitAmount + configs.fee);// UserUtil.RequestData<DataTypes.Token>(canisterId);
 
                 var blockIndex = (ulong)result.AsOk();
                 $"BlockIndex Transfer: {blockIndex}".Log(nameof(ActionUtil));
@@ -677,9 +670,10 @@ public static class ActionUtil
         public static async UniTask<UResult<Null, StakeErrType.Base>> StakeToken(double amount, string canisterId = "")
         {
             if (string.IsNullOrEmpty(canisterId)) canisterId = Env.CanisterIds.ICP_LEDGER;
+            Debug.Log($"STAKE {canisterId}");
 
             //IF ICP
-            if(canisterId == Env.CanisterIds.ICP_LEDGER)
+            if (canisterId == Env.CanisterIds.ICP_LEDGER)
             {
                 //TRANSFER TO STAKING HUB
                 var transferResult = await ActionUtil.Transfer.TransferIcp(amount, CandidApiManager.StakingHubIdentifier);
@@ -779,10 +773,10 @@ public static class ActionUtil
 
             var stake = stakes.Locate(e =>
             {
-                return e.CanisterId == canisterId;
+                return e.canisterId == canisterId;
             });
 
-            long stakeBaseUnitBalance = stake == null ? 0 : stake.Amount;
+            long stakeBaseUnitBalance = stake == null ? 0 : stake.amount;
 
             if (stakeBaseUnitBalance == 0)
                 return new(new UnstakeErrType.InsufficientBalance($"You don't have enough staked ICRC from canister: {canisterId}"));
@@ -905,9 +899,9 @@ public static class ActionUtil
 
                 var nextNftStake = stakes.Locate(e =>
                 {
-                    if (e.BlockIndex.TryParseValue(out uint nftIndex) == false) return false;
+                    if (e.blockIndex.TryParseValue(out uint nftIndex) == false) return false;
 
-                    return e.CanisterId == collectionId && nftIndex == index;
+                    return e.canisterId == collectionId && nftIndex == index;
                 });
 
                 if (nextNftStake == null)
@@ -915,12 +909,12 @@ public static class ActionUtil
             }
             else
             {
-                var nextNftStake = stakes.Locate(e => e.CanisterId == collectionId && e.BlockIndex != null);
+                var nextNftStake = stakes.Locate(e => e.canisterId == collectionId && e.blockIndex != null);
 
                 if (nextNftStake == null)
                     return new(new UnstakeErrType.InsufficientBalance($"You have no nft to unstake from collection {collectionId}"));
 
-                if (!nextNftStake.BlockIndex.TryParseValue(out uint nftIndex))
+                if (!nextNftStake.blockIndex.TryParseValue(out uint nftIndex))
                     return new(new UnstakeErrType.Other($"Nft Index of nft collectionId: {collectionId} could not be parsed"));
 
                 index = nftIndex;
@@ -939,7 +933,7 @@ public static class ActionUtil
     public static class Action
     {
         //DEFAULT
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> Default(string actionId)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> Default(string actionId)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -958,7 +952,7 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin())
+            if (actionConfig.actionPlugin != null)
             {
                 return new(new ActionErrType.WrongActionType($"ActionId: {actionId} is not a Default type cuz its ActionPlugin has value"));
             }
@@ -972,11 +966,10 @@ public static class ActionUtil
                 return new(new ActionErrType.ActionExecutionFailure(actionResult.AsErr()));
             }
 
-            Debug.Log("TEST DEFAULT ACTION, RESULT TAG: " + actionResult.Tag);
             return new(actionResult.AsOk());
         }
         //BURN
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> BurnNft(string actionId, string collectionId, uint? index = null)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> BurnNft(string actionId, string collectionId, uint? index = null)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -994,12 +987,12 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin() == false)
+            if (actionConfig.actionPlugin == null)
             {
                 return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.BurnNft}. ActionPlugin is Null"));
             }
 
-            var actionPlugin = actionConfig.GetPluginUnsafe();
+            var actionPlugin = actionConfig.actionPlugin;
 
             if (actionPlugin.Tag != ActionPluginTag.BurnNft)
             {
@@ -1049,7 +1042,7 @@ public static class ActionUtil
         }
 
         //TRANSFER AND VERIFY
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> TransferAndVerifyIcp(string actionId, bool updateBalance = true)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> TransferAndVerifyIcp(string actionId, bool updateBalance = true)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -1067,12 +1060,12 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin() == false)
+            if (actionConfig.actionPlugin == null)
             {
                 return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.VerifyTransferIcp}. ActionPlugin is Null"));
             }
 
-            var actionPlugin = actionConfig.GetPluginUnsafe();
+            var actionPlugin = actionConfig.actionPlugin;
 
             if (actionPlugin.Tag != ActionPluginTag.VerifyTransferIcp)
             {
@@ -1114,7 +1107,7 @@ public static class ActionUtil
 
             return new(actionResult.AsOk());
         }
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> TransferAndVerifyIcrc(string actionId, string canisterId, bool updateBalance = true)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> TransferAndVerifyIcrc(string actionId, string canisterId, bool updateBalance = true)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -1132,12 +1125,12 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin() == false)
+            if (actionConfig.actionPlugin == null)
             {
                 return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.VerifyTransferIcp}. ActionPlugin is Null"));
             }
 
-            var actionPlugin = actionConfig.GetPluginUnsafe();
+            var actionPlugin = actionConfig.actionPlugin;
 
             if (actionPlugin.Tag != ActionPluginTag.VerifyTransferIcrc)
             {
@@ -1182,7 +1175,7 @@ public static class ActionUtil
         }
 
         //CLAIM STAKE REWARD
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> ClaimStakeRewardIcp(string actionId)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> ClaimStakeRewardIcp(string actionId)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -1200,12 +1193,12 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin() == false)
+            if (actionConfig.actionPlugin == null)
             {
                 return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.ClaimStakingRewardIcp}. ActionPlugin is Null"));
             }
 
-            var actionPlugin = actionConfig.GetPluginUnsafe();
+            var actionPlugin = actionConfig.actionPlugin;
 
             if (actionPlugin.Tag != ActionPluginTag.ClaimStakingRewardIcp)
             {
@@ -1238,10 +1231,10 @@ public static class ActionUtil
 
             var stake = stakes.Locate(e =>
             {
-                return e.CanisterId == Env.CanisterIds.ICP_LEDGER;
+                return e.canisterId == Env.CanisterIds.ICP_LEDGER;
             });
 
-            ulong stakeBaseUnitBalance = stake == null ? 0 : stake.Amount;
+            ulong stakeBaseUnitBalance = stake == null ? 0 : stake.amount;
 
             if (stakeBaseUnitBalance < baseUnitRequirement)
             {
@@ -1259,7 +1252,7 @@ public static class ActionUtil
 
             return new(actionResult.AsOk());
         }
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> ClaimStakeRewardIcrc(string actionId)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> ClaimStakeRewardIcrc(string actionId)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -1277,12 +1270,12 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin() == false)
+            if (actionConfig.actionPlugin == null)
             {
                 return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.ClaimStakingRewardIcrc}. ActionPlugin is Null"));
             }
 
-            var actionPlugin = actionConfig.GetPluginUnsafe();
+            var actionPlugin = actionConfig.actionPlugin;
 
             if (actionPlugin.Tag != ActionPluginTag.ClaimStakingRewardIcrc)
             {
@@ -1317,10 +1310,10 @@ public static class ActionUtil
 
             var stake = stakes.Locate(e =>
             {
-                return e.CanisterId == canisterId;
+                return e.canisterId == canisterId;
             });
 
-            ulong stakeBaseUnitBalance = stake == null ? 0 : stake.Amount;
+            ulong stakeBaseUnitBalance = stake == null ? 0 : stake.amount;
 
             if (stakeBaseUnitBalance < baseUnitRequirement)
             {
@@ -1337,7 +1330,7 @@ public static class ActionUtil
 
             return new(actionResult.AsOk());
         }
-        public static async UniTask<UResult<ActionResponse, ActionErrType.Base>> ClaimStakeRewardNft(string actionId)
+        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> ClaimStakeRewardNft(string actionId)
         {
             //CHECK CONSTRAINS
             var canProcessActionResult = ValidateActionConfig(actionId);
@@ -1355,12 +1348,12 @@ public static class ActionUtil
 
             var actionConfig = actionConfigResonse.AsOk();
 
-            if (actionConfig.HasPlugin() == false)
+            if (actionConfig.actionPlugin == null)
             {
                 return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.ClaimStakingRewardNft}. ActionPlugin is Null"));
             }
 
-            var actionPlugin = actionConfig.GetPluginUnsafe();
+            var actionPlugin = actionConfig.actionPlugin;
 
             if (actionPlugin.Tag != ActionPluginTag.ClaimStakingRewardNft)
             {
@@ -1385,7 +1378,7 @@ public static class ActionUtil
 
             ulong nftStakeCount = (ulong)CollectionUtil.Count(stakes, e =>
             {
-                return e.CanisterId.Contains(canisterId);
+                return e.canisterId.Contains(canisterId);
             });
 
             if (nftStakeCount < _requirement)
