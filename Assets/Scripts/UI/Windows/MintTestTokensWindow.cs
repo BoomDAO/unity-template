@@ -112,7 +112,7 @@ public class MintTestTokensWindow : Window
         Debug.Log($"Mint ICRC Success, Wait for approval, reward {resultAsOk.tokens.Count}:\n\n " + resultAsOk.tokens.Reduce(e => $"Token canister: {e.Canister}\nQuantity: {e.Quantity}\n\n"));
     }
 
-    private void DisplayActionResponse(ProcessActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 

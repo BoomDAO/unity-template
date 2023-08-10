@@ -1,5 +1,4 @@
 using worldId = System.String;
-using userId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;

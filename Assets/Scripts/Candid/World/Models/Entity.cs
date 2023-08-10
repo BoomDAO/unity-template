@@ -1,5 +1,4 @@
 using worldId = System.String;
-using userId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -17,21 +16,21 @@ namespace Candid.World.Models
 		public OptionalValue<string> Attribute { get; set; }
 
 		[CandidName("eid")]
-		public string Eid { get; set; }
+		public entityId Eid { get; set; }
 
 		[CandidName("expiration")]
 		public OptionalValue<UnboundedUInt> Expiration { get; set; }
 
 		[CandidName("gid")]
-		public string Gid { get; set; }
+		public groupId Gid { get; set; }
 
 		[CandidName("quantity")]
 		public OptionalValue<double> Quantity { get; set; }
 
 		[CandidName("wid")]
-		public string Wid { get; set; }
+		public worldId Wid { get; set; }
 
-		public Entity(OptionalValue<string> attribute, string eid, OptionalValue<UnboundedUInt> expiration, string gid, OptionalValue<double> quantity, string wid)
+		public Entity(OptionalValue<string> attribute, entityId eid, OptionalValue<UnboundedUInt> expiration, groupId gid, OptionalValue<double> quantity, worldId wid)
 		{
 			this.Attribute = attribute;
 			this.Eid = eid;

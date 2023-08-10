@@ -6,22 +6,20 @@ using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
 using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.World.Models;
-using System.Collections.Generic;
 
 namespace Candid.World.Models
 {
-	public class ActionResult
+	public class GlobalPermission
 	{
-		[CandidName("outcomes")]
-		public List<ActionOutcome> Outcomes { get; set; }
+		[CandidName("wid")]
+		public worldId Wid { get; set; }
 
-		public ActionResult(List<ActionOutcome> outcomes)
+		public GlobalPermission(worldId wid)
 		{
-			this.Outcomes = outcomes;
+			this.Wid = wid;
 		}
 
-		public ActionResult()
+		public GlobalPermission()
 		{
 		}
 	}

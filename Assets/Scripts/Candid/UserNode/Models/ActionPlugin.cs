@@ -37,9 +37,9 @@ namespace Candid.UserNode.Models
 		{
 		}
 
-		public static ActionPlugin BurnNft(ActionPlugin.BurnNftInfo info)
+		public static ActionPlugin VerifyBurnNfts(ActionPlugin.BurnNftInfo info)
 		{
-			return new ActionPlugin(ActionPluginTag.BurnNft, info);
+			return new ActionPlugin(ActionPluginTag.VerifyBurnNfts, info);
 		}
 
 		public static ActionPlugin ClaimStakingRewardIcp(ActionPlugin.ClaimStakingRewardIcpInfo info)
@@ -67,9 +67,9 @@ namespace Candid.UserNode.Models
 			return new ActionPlugin(ActionPluginTag.VerifyTransferIcrc, info);
 		}
 
-		public ActionPlugin.BurnNftInfo AsBurnNft()
+		public ActionPlugin.BurnNftInfo AsVerifyBurnNfts()
 		{
-			this.ValidateTag(ActionPluginTag.BurnNft);
+			this.ValidateTag(ActionPluginTag.VerifyBurnNfts);
 			return (ActionPlugin.BurnNftInfo)this.Value!;
 		}
 
@@ -226,7 +226,7 @@ namespace Candid.UserNode.Models
 	{
 		[CandidName("burnNft")]
 		[VariantOptionType(typeof(ActionPlugin.BurnNftInfo))]
-		BurnNft,
+		VerifyBurnNfts,
 		[CandidName("claimStakingRewardIcp")]
 		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardIcpInfo))]
 		ClaimStakingRewardIcp,

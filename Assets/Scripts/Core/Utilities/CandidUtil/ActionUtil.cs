@@ -1,5 +1,4 @@
 using Candid;
-using Candid;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Boom.Values;
@@ -13,9 +12,7 @@ using Candid.Extv2Boom;
 using Candid.IcrcLedger;
 using Candid.IcpLedger;
 using WebSocketSharp;
-using EdjCase.ICP.Candid.Mapping;
-using Newtonsoft.Json;
-using UnityEngine.Animations;
+using System;
 
 //TRANSFER ERROR TYPES
 public static class TransferErrType
@@ -243,18 +240,18 @@ public static class ActionArgValueTypes
         }
     }
 
-    public class BurnNftArg : BaseArg
+    public class VerifyBurnNftsArg : BaseArg
     {
-        public uint Index { get; set; }
+        public List<uint> Indexes { get; set; }
 
-        public BurnNftArg(string actionId, uint index) : base(actionId)
+        public VerifyBurnNftsArg(string actionId, List<uint> indexes) : base(actionId)
         {
-            this.Index = index;
+            this.Indexes = indexes;
         }
 
         public override System.Object GetGeneratedValue()
         {
-            return new ActionArg.BurnNftInfo(ActionId, Index);
+            return new ActionArg.VerifyBurnNftsInfo(ActionId, Indexes);
         }
     }
 
@@ -317,7 +314,7 @@ public static class ActionArgValueTypes
 }
 
 //PROCESS ACTION RESULT
-public class ProcessActionResponse
+public class ProcessedActionResponse
 {
     public List<MintNft> nfts;
     public List<MintToken> tokens;
@@ -328,7 +325,7 @@ public class ProcessActionResponse
     public List<DataTypes.Entity> setAttribute;
     public List<DataTypes.Entity> deletedEntities;
 
-    public ProcessActionResponse(List<MintNft> nfts, List<MintToken> tokens, List<DataTypes.Entity> receivedEntities, List<DataTypes.Entity> spentEntities, List<DataTypes.Entity> reducedExpiration, List<DataTypes.Entity> renewedExpiration, List<DataTypes.Entity> setAttribute, List<DataTypes.Entity> deletedEntities)
+    public ProcessedActionResponse(List<MintNft> nfts, List<MintToken> tokens, List<DataTypes.Entity> receivedEntities, List<DataTypes.Entity> spentEntities, List<DataTypes.Entity> reducedExpiration, List<DataTypes.Entity> renewedExpiration, List<DataTypes.Entity> setAttribute, List<DataTypes.Entity> deletedEntities)
     {
         this.nfts = nfts;
         this.tokens = tokens;
@@ -353,8 +350,9 @@ public static class ActionUtil
     #endregion
 
     //GENERIC CHECK BEFORE PROCESSING AN ACTION
-    private static UResult<Null, ActionErrType.Base> ValidateActionConfig(string actionId)
+    private static UResult<Null, ActionErrType.Base> ValidateActionConfig(string actionId, out (ulong actionCount, ulong intervalStartTs) newActionData)
     {
+        newActionData = default;
         //Check Login State
         var getLoginTypeResult = UserUtil.GetLogInType();
 
@@ -376,9 +374,9 @@ public static class ActionUtil
 
         //Check for config
 
-        var isActionConfigsValid = UserUtil.IsDataValid<DataTypes.ActionConfig>();
+        var isActionConfigsValid = UserUtil.IsDataValid<DataTypes.ActionConfig>(); //TODO: REMOVE
 
-        if (!isActionConfigsValid) return new(new ActionErrType.Other("Action Config has not been loaded yet"));
+        if (!isActionConfigsValid) return new(new ActionErrType.Other("Action Config has not been loaded yet")); //TODO: REMOVE
 
         var actionConfigResult = UserUtil.GetElementOfType<DataTypes.ActionConfig>(actionId);
 
@@ -409,14 +407,10 @@ public static class ActionUtil
             else
             {
                 var secondsLeft = (timeConstrainToCompareWith - MainUtil.Now()).MilliToSeconds();
-                return new(new ActionErrType.ActionsPerInterval($"You have reached the max ({actionsPerIntervalConfig}) tries for this time interval. You have tried already {actionCount} times.\nYou must wait: {(secondsLeft > 0? secondsLeft : 1)} secs"));
+                return new(new ActionErrType.ActionsPerInterval($"You have reached the max ({actionsPerIntervalConfig}) tries for this time interval. You have tried already {actionCount} times.\nYou must wait: {(secondsLeft > 0 ? secondsLeft : 1)} secs"));
             }
 
-            UserUtil.UpdateData(new DataTypes.Action(
-                actionId,
-                actionCount,
-                intervalStartTs
-            ));
+            newActionData = (actionCount, intervalStartTs);
         }
 
         if (actionConfig.entityConstraints != null)
@@ -433,8 +427,17 @@ public static class ActionUtil
         return new(new Null());//SUCCESS
     }
 
+    private static void UpdateActionData(string actionId, ulong intervalStartTs, ulong actionCount)
+    {
+        UserUtil.UpdateData(new DataTypes.Action(
+            actionId,
+            actionCount,
+            intervalStartTs
+        ));
+    }
+
     //MAIN FUNCTION TO PROCESS AN ACTION
-    private async static UniTask<UResult<ProcessActionResponse, string>> ProcessAction<T>(T arg) where T : ActionArgValueTypes.BaseArg
+    private async static UniTask<UResult<ProcessedActionResponse, string>> ProcessAction<T>(T arg) where T : ActionArgValueTypes.BaseArg
     {
         $"Try Process Action of type ${typeof(T).Name}, ActionId: {arg.ActionId}".Log(nameof(ActionUtil));
 
@@ -445,8 +448,8 @@ public static class ActionUtil
             case ActionArgValueTypes.DefaultArg:
                 verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessAction(new ActionArg(ActionArgTag.Default, arg.GetGeneratedValue()));
                 break;
-            case ActionArgValueTypes.BurnNftArg:
-                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessAction(new ActionArg(ActionArgTag.BurnNft, arg.GetGeneratedValue()));
+            case ActionArgValueTypes.VerifyBurnNftsArg:
+                verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessAction(new ActionArg(ActionArgTag.VerifyBurnNfts, arg.GetGeneratedValue()));
                 break;
             case ActionArgValueTypes.VerifyTransferIcp:
                 verifyTransResponse = await CandidApiManager.Instance.WorldApiClient.ProcessAction(new ActionArg(ActionArgTag.VerifyTransferIcp, arg.GetGeneratedValue()));
@@ -525,11 +528,9 @@ public static class ActionUtil
             }
         });
 
-        var processActionResponse = new ProcessActionResponse(nfts, tokens, receivedEntities, spentEntities, reducedExpiration, renewedExpiration, setAttribute, deletedEntities);
+        var processActionResponse = new ProcessedActionResponse(nfts, tokens, receivedEntities, spentEntities, reducedExpiration, renewedExpiration, setAttribute, deletedEntities);
 
         $"Action Processed Success, Type: ${typeof(ActionArgValueTypes.BaseArg)}, ActionId: {arg.ActionId}".Log(nameof(ActionUtil));
-
-        var prevActionCount = UserUtil.GetPropertyFromType<DataTypes.Action, ulong>(arg.ActionId, e => e.actionCount, 0);
 
         return new(processActionResponse);
     }
@@ -699,7 +700,7 @@ public static class ActionUtil
                 var requiredBaseUnitAmount = amount.ConvertToBaseUnit(tokenConfigResult.AsOk().decimals);
 
                 //UPDATE STAKE
-                var updateStakeResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateIcpStakes(transferResult.AsOk(), Env.CanisterIds.STAKING_HUB, UserUtil.GetPrincipal().AsOk().value, requiredBaseUnitAmount);
+                var updateStakeResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateIcpStakes(transferResult.AsOk(), Env.CanisterIds.STAKING_HUB, UserUtil.GetPrincipal().AsOk().Value, requiredBaseUnitAmount);
 
                 //CHECK FOR STAKE UPDATE ERROR
                 if (updateStakeResult.Tag == Candid.StakingHub.Models.ResponseTag.Err)
@@ -734,7 +735,7 @@ public static class ActionUtil
                 var requiredBaseUnitAmount = amount.ConvertToBaseUnit(tokenConfigResult.AsOk().decimals);
 
                 //UPDATE STAKE
-                var updateStakeResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateIcrcStakes(transferResult.AsOk(), Env.CanisterIds.STAKING_HUB, UserUtil.GetPrincipal().AsOk().value, requiredBaseUnitAmount, canisterId);
+                var updateStakeResult = await CandidApiManager.Instance.StakingHubApiClient.UpdateIcrcStakes(transferResult.AsOk(), Env.CanisterIds.STAKING_HUB, UserUtil.GetPrincipal().AsOk().Value, requiredBaseUnitAmount, canisterId);
 
                 //CHECK FOR STAKE UPDATE ERROR
                 if (updateStakeResult.Tag == Candid.StakingHub.Models.ResponseTag.Err)
@@ -933,10 +934,10 @@ public static class ActionUtil
     public static class Action
     {
         //DEFAULT
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> Default(string actionId)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> Default(string actionId)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -958,6 +959,7 @@ public static class ActionUtil
             }
 
             //PROCESS ACTION
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
             var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.DefaultArg(actionId));
 
             //CHECK FOR SUCCESS
@@ -969,10 +971,10 @@ public static class ActionUtil
             return new(actionResult.AsOk());
         }
         //BURN
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> BurnNft(string actionId, string collectionId, uint? index = null)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> VerifyBurnNfts(string actionId, string collectionId, params uint[] indexes)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -989,48 +991,112 @@ public static class ActionUtil
 
             if (actionConfig.actionPlugin == null)
             {
-                return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.BurnNft}. ActionPlugin is Null"));
+                return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.VerifyBurnNfts}. ActionPlugin is Null"));
             }
 
             var actionPlugin = actionConfig.actionPlugin;
 
-            if (actionPlugin.Tag != ActionPluginTag.BurnNft)
+            if (actionPlugin.Tag != ActionPluginTag.VerifyBurnNfts)
             {
-                return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.BurnNft}. Current type: {actionPlugin.Tag}"));
+                return new(new ActionErrType.WrongActionType($"id {actionId} is not of type {ActionPluginTag.VerifyBurnNfts}. Current type: {actionPlugin.Tag}"));
             }
 
             //CHECK BALANCE
 
-            uint nextIndex = 0;
-            if (index.HasValue)
-            {
-                nextIndex = index.Value;
+            List<uint> nftsToBurn = null;
+            indexes ??= new uint[0];
 
-                if(NftUtil.HasNft(collectionId, nextIndex) == false)
+            var burnNftActionPlugin = actionPlugin.AsVerifyBurnNfts();
+            var optionalRequiredMetadata = burnNftActionPlugin.RequiredNftMetadata;
+
+            var canisterId = burnNftActionPlugin.Canister;
+            var hasRequirements = optionalRequiredMetadata.HasValue && optionalRequiredMetadata.GetValueOrDefault().Count() > 0;
+            var requiredMetadata = hasRequirements ? optionalRequiredMetadata.GetValueOrDefault().ToArray() : null;
+
+            //If has requirements
+            if (hasRequirements)
+            {
+                //If indexes were not specified
+                if (indexes.Length == 0)
                 {
-                    return new(new ActionErrType.InsufficientBalance($"You dont own nft index: {nextIndex}, of collection {collectionId}"));
+          
+                    Func<DataTypes.NftCollection.Nft, string, bool> predicate = (nft, requirement) =>
+                    {
+                        $"Nft metadata Comparison. Nft metadata: {nft.metadata} ==  requirement: {requirement}= {(nft.metadata == requirement)}".Log();
+
+                        return nft.metadata == requirement;
+                    };
+
+                    var nftsToBurnResult = NftUtil.Filter(canisterId, predicate, requiredMetadata);
+
+                    if (nftsToBurnResult.IsErr)
+                        return new(new ActionErrType.InsufficientBalance(nftsToBurnResult.AsErr()));
+
+                    nftsToBurn = nftsToBurnResult.AsOk().Map(e => e.index).ToList();
+                }
+                //If indexes were specified
+                else
+                {
+                    //ENSURE GIVEN IDNEXES CONTAIN THE REQUIRED METADATA
+
+                    nftsToBurn = indexes.ToList();
+                    Func<DataTypes.NftCollection.Nft, uint, bool> predicate = (nft, requiredIndex) => nft.index == requiredIndex;
+
+                    var specifiedNftsResult = NftUtil.Filter(canisterId, predicate, indexes);
+
+                    if(specifiedNftsResult.IsErr)
+                        return new(new ActionErrType.InsufficientBalance(specifiedNftsResult.AsErr()));
+
+                    var specifiedNfts = specifiedNftsResult.AsOk();
+
+                    for (int i = 0; i < requiredMetadata.Length; i++)
+                    {
+                        for (int j = 0; j < specifiedNfts.Count; j++)
+                        {
+                            if (requiredMetadata[i] == specifiedNfts[j].metadata)
+                            {
+                                goto continueWithMainLoop;
+                            }
+                        }
+
+                        return new(new ActionErrType.InsufficientBalance($"You dont have nft with metadata: {requiredMetadata[i]} in the collection: {canisterId}"));
+                        continueWithMainLoop: continue;
+                    }
                 }
             }
             else
             {
-                var getNextIndexResult = NftUtil.TryGetNextNftIndex(collectionId);
-
-                if (getNextIndexResult.Tag == UResultTag.Err)
+                //If indexes were not specified
+                if (indexes.Length == 0)
                 {
-                    return new(new ActionErrType.InsufficientBalance($"Could not find next nft to burn cuz u might not have any from the selected collection {collectionId}"));
+                    var getNextIndexResult = NftUtil.TryGetNextNftIndex(collectionId);
+
+                    if (getNextIndexResult.Tag == UResultTag.Err)
+                    {
+                        return new(new ActionErrType.InsufficientBalance($"Could not find next nft to burn cuz u might not have any from the selected collection {collectionId}"));
+                    }
+
+                    nftsToBurn = new(1) { getNextIndexResult.AsOk() };
+                }
+                //If indexes were specified
+                else
+                {
+                    nftsToBurn = indexes.ToList();
                 }
             }
-            var tryRemoveNftIndexResult = NftUtil.TryRemoveNftByIndex(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, nextIndex);
 
-            if (tryRemoveNftIndexResult.IsErr)
+            foreach (var nftIndex in nftsToBurn)
             {
-                return new(new ActionErrType.Other(tryRemoveNftIndexResult.AsErr()));
+                var tryRemoveNftIndexResult = NftUtil.TryRemoveNftByIndex(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, nftIndex);
+                if (tryRemoveNftIndexResult.IsErr)
+                {
+                    return new(new ActionErrType.Other(tryRemoveNftIndexResult.AsErr()));
+                }
             }
 
-            $"Try Burn Nft of Index: {nextIndex}\n from Collection: {collectionId}".Log(nameof(ActionUtil));
-
             //PROCESS ACTION
-            var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.BurnNftArg(actionId, nextIndex));
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
+            var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.VerifyBurnNftsArg(actionId, nftsToBurn));
 
             //CHECK FOR SUCCESS
             if (actionResult.Tag == UResultTag.Err)
@@ -1042,10 +1108,10 @@ public static class ActionUtil
         }
 
         //TRANSFER AND VERIFY
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> TransferAndVerifyIcp(string actionId, bool updateBalance = true)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> TransferAndVerifyIcp(string actionId, bool updateBalance = true)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -1097,6 +1163,7 @@ public static class ActionUtil
             var blockIndex = transferResult.AsOk();
 
             //PROCESS ACTION
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
             var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.VerifyTransferIcp(actionId, blockIndex));
 
             //CHECK FOR SUCCESS
@@ -1107,10 +1174,10 @@ public static class ActionUtil
 
             return new(actionResult.AsOk());
         }
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> TransferAndVerifyIcrc(string actionId, string canisterId, bool updateBalance = true)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> TransferAndVerifyIcrc(string actionId, string canisterId, bool updateBalance = true)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -1163,6 +1230,7 @@ public static class ActionUtil
 
             $"TEST ActionArgValueTypes.VerifyTransferIcrc:   actionId: {actionId}  blockIndex: {blockIndex}".Log(nameof(ActionUtil));
             //PROCESS ACTION
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
             var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.VerifyTransferIcrc(actionId, blockIndex));
 
             //CHECK FOR SUCCESS
@@ -1175,10 +1243,10 @@ public static class ActionUtil
         }
 
         //CLAIM STAKE REWARD
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> ClaimStakeRewardIcp(string actionId)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> ClaimStakeRewardIcp(string actionId)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -1242,6 +1310,7 @@ public static class ActionUtil
             }
 
             //PROCESS ACTION
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
             var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.ClaimStakingRewardIcp(actionId));
 
             //CHECK FOR SUCCESS
@@ -1252,10 +1321,10 @@ public static class ActionUtil
 
             return new(actionResult.AsOk());
         }
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> ClaimStakeRewardIcrc(string actionId)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> ClaimStakeRewardIcrc(string actionId)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -1321,6 +1390,7 @@ public static class ActionUtil
             }
 
             //PROCESS ACTION
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
             var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.ClaimStakingRewardIcrc(actionId));
 
             if (actionResult.Tag == UResultTag.Err)
@@ -1330,10 +1400,10 @@ public static class ActionUtil
 
             return new(actionResult.AsOk());
         }
-        public static async UniTask<UResult<ProcessActionResponse, ActionErrType.Base>> ClaimStakeRewardNft(string actionId)
+        public static async UniTask<UResult<ProcessedActionResponse, ActionErrType.Base>> ClaimStakeRewardNft(string actionId)
         {
             //CHECK CONSTRAINS
-            var canProcessActionResult = ValidateActionConfig(actionId);
+            var canProcessActionResult = ValidateActionConfig(actionId, out var newActionData);
             if (canProcessActionResult.Tag == UResultTag.Err)
             {
                 return new(canProcessActionResult.AsErr());
@@ -1387,6 +1457,7 @@ public static class ActionUtil
             }
 
             //PROCESS ACTION
+            UpdateActionData(actionId, newActionData.intervalStartTs, newActionData.actionCount);
             var actionResult = await ActionUtil.ProcessAction(new ActionArgValueTypes.ClaimStakingRewardNft(actionId));
 
             //CHECK FOR SUCCESS

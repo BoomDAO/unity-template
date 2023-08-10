@@ -165,7 +165,7 @@
         /// <param name="match"></param>
         public static int Once<T>(this IEnumerable<T> arr, Action<T> action, Predicate<T> match)
         {
-            int index = -1;
+            int index = 0;
 
             foreach (T item in arr)
             {
@@ -174,9 +174,9 @@
                     action(item);
                     return index;
                 }
-                --index;
+                ++index;
             }
-            return index;
+            return -1;
         }
         /// <summary>
         /// Map values

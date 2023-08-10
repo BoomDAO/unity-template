@@ -114,11 +114,12 @@ public class BurnNftWindow : Window
             return;
         }
 
-        var result = await ActionUtil.Action.BurnNft(burnNftActionId, Env.Nfts.BOOM_COLLECTION_CANISTER_ID, nextNftIndexResult.AsOk());
+        var result = await ActionUtil.Action.VerifyBurnNfts(burnNftActionId, Env.Nfts.BOOM_COLLECTION_CANISTER_ID);//, nextNftIndexResult.AsOk());
 
         if (result.Tag == UResultTag.Err)
         {
-            UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
+            //UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
+            Debug.LogError(result.AsErr().content);
 
             switch (result.AsErr())
             {
@@ -126,8 +127,8 @@ public class BurnNftWindow : Window
                     Window infoPopup = null;
                     infoPopup = WindowManager.Instance.OpenWindow<InfoPopupWindow>(
                     new InfoPopupWindow.WindowData(
-                        $"You don't a nft to stake",
-                        $"Requires 1 NFT From Collection:\n {Env.Nfts.BOOM_COLLECTION_CANISTER_ID}",
+                        $"You don't a nft to burn",
+                        $"{content.content}",
                         new(
                             new(
                                 $"Mint a Nft",
@@ -159,7 +160,7 @@ public class BurnNftWindow : Window
         EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
     }
 
-    private void DisplayActionResponse(ProcessActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 

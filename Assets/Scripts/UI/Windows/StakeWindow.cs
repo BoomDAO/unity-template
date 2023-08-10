@@ -436,7 +436,7 @@ public class StakeWindow : Window
         BroadcastState.Invoke(new WaitingForResponse(false));
     }
 
-    private void DisplayActionResponse(ProcessActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 

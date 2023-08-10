@@ -123,30 +123,30 @@ public static class UserUtil
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns>Could be either the user Principal or an error message</returns>
-    public static UResult<Wrapper<string>, string> GetPrincipal()
+    public static UResult<string> GetPrincipal()
     {
         var result = GetLogInData();
         if (result.Tag == UResultTag.Err)
         {
-            return new(result.AsErr());
+            return new(new UResult<string>.ERR<string>(result.AsErr()));
         }
 
-        return new(new Wrapper<string>(result.AsOk().principal));
+        return new(new UResult<string>.OK<string>(result.AsOk().principal));
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this the User/Anon AccountIdentifier
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns>Could be either the user AccountIdentifier or an error message</returns>
-    public static UResult<Wrapper<string>, string> GetAccountIdentifier()
+    public static UResult<string> GetAccountIdentifier()
     {
         var result = GetLogInData();
         if (result.Tag == UResultTag.Err)
         {
-            return new(result.AsErr());
+            return new(new UResult<string>.ERR<string>(result.AsErr()));
         }
 
-        return new(new Wrapper<string>(result.AsOk().accountIdentifier));
+        return new(new UResult<string>.OK<string>(result.AsOk().accountIdentifier));
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this the User/Anon Agent

@@ -9,7 +9,7 @@ internal static class EntityUtil
 {
     public static string GetKey(this ActionConstraint.EntityConstraintItemItem actionConfig)
     {
-        return $"{actionConfig.WorldId}{actionConfig.GroupId}{actionConfig.EntityId}";
+        return $"{actionConfig.Wid}{actionConfig.Gid}{actionConfig.Eid}";
     }
     public static string GetKey(this Entity entity)
     {
@@ -133,7 +133,7 @@ internal static class EntityUtil
             bool doContinue = false;
             foreach (var ownEntity in asOk)
             {
-                if ($"{ownEntity.wid}{ownEntity.gid}{ownEntity.eid}" == $"{constrain.WorldId}{constrain.GroupId}{constrain.EntityId}")
+                if ($"{ownEntity.wid}{ownEntity.gid}{ownEntity.eid}" == $"{constrain.Wid}{constrain.Gid}{constrain.Eid}")
                 {
                     int a = 0, b = 0;
 

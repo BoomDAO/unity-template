@@ -1,5 +1,4 @@
 using worldId = System.String;
-using userId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -112,11 +111,11 @@ namespace Candid.World
 			return reply.ToObjects<List<ValueTuple<string, List<WorldApiClient.GetEntityPermissionsOfWorldArg0ItemItem>>>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<List<userId>> GetGlobalPermissionsOfWorld()
+		public async System.Threading.Tasks.Task<List<worldId>> GetGlobalPermissionsOfWorld()
 		{
 			CandidArg arg = CandidArg.FromCandid();
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "getGlobalPermissionsOfWorld", arg);
-			return reply.ToObjects<List<userId>>(this.Converter);
+			return reply.ToObjects<List<worldId>>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<string> GetOwner()
@@ -127,13 +126,13 @@ namespace Candid.World
 			return reply.ToObjects<string>(this.Converter);
 		}
 
-		public async Task GrantEntityPermission(string arg0, string arg1, string arg2, Models.EntityPermission arg3)
+		public async Task GrantEntityPermission(Models.EntityPermission arg0)
 		{
-			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3));
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "grantEntityPermission", arg);
 		}
 
-		public async Task GrantGlobalPermission(string arg0)
+		public async Task GrantGlobalPermission(Models.GlobalPermission arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "grantGlobalPermission", arg);
@@ -187,13 +186,19 @@ namespace Candid.World
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "removeAdmin", arg);
 		}
 
-		public async Task RemoveEntityPermission(string arg0, string arg1, string arg2)
+		public async Task RemoveAllUserNodeRef()
 		{
-			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
+			CandidArg arg = CandidArg.FromCandid();
+			await this.Agent.CallAndWaitAsync(this.CanisterId, "removeAllUserNodeRef", arg);
+		}
+
+		public async Task RemoveEntityPermission(Models.EntityPermission arg0)
+		{
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "removeEntityPermission", arg);
 		}
 
-		public async Task RemoveGlobalPermission(string arg0)
+		public async Task RemoveGlobalPermission(Models.GlobalPermission arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0));
 			await this.Agent.CallAndWaitAsync(this.CanisterId, "removeGlobalPermission", arg);
@@ -240,9 +245,9 @@ namespace Candid.World
 			public string F0 { get; set; }
 
 			[CandidTag(1U)]
-			public Models.EntityPermission__1 F1 { get; set; }
+			public Models.EntityPermission F1 { get; set; }
 
-			public GetEntityPermissionsOfWorldArg0ItemItem(string f0, Models.EntityPermission__1 f1)
+			public GetEntityPermissionsOfWorldArg0ItemItem(string f0, Models.EntityPermission f1)
 			{
 				this.F0 = f0;
 				this.F1 = f1;

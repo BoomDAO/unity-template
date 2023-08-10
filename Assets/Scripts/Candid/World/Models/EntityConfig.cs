@@ -1,5 +1,4 @@
 using worldId = System.String;
-using userId = System.String;
 using quantity = System.Double;
 using groupId = System.String;
 using entityId = System.String;
@@ -20,10 +19,10 @@ namespace Candid.World.Models
 		public OptionalValue<UnboundedUInt> Duration { get; set; }
 
 		[CandidName("eid")]
-		public string Eid { get; set; }
+		public entityId Eid { get; set; }
 
 		[CandidName("gid")]
-		public string Gid { get; set; }
+		public groupId Gid { get; set; }
 
 		[CandidName("imageUrl")]
 		public OptionalValue<string> ImageUrl { get; set; }
@@ -43,7 +42,7 @@ namespace Candid.World.Models
 		[CandidName("tag")]
 		public OptionalValue<string> Tag { get; set; }
 
-		public EntityConfig(OptionalValue<string> description, OptionalValue<UnboundedUInt> duration, string eid, string gid, OptionalValue<string> imageUrl, OptionalValue<string> metadata, OptionalValue<string> name, OptionalValue<string> objectUrl, OptionalValue<string> rarity, OptionalValue<string> tag)
+		public EntityConfig(OptionalValue<string> description, OptionalValue<UnboundedUInt> duration, entityId eid, groupId gid, OptionalValue<string> imageUrl, OptionalValue<string> metadata, OptionalValue<string> name, OptionalValue<string> objectUrl, OptionalValue<string> rarity, OptionalValue<string> tag)
 		{
 			this.Description = description;
 			this.Duration = duration;

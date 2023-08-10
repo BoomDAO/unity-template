@@ -39,7 +39,7 @@ namespace Candid.UserNode.Models
 		public class EntityConstraintItemItem
 		{
 			[CandidName("entityId")]
-			public string EntityId { get; set; }
+			public string Eid { get; set; }
 
 			[CandidName("equalToAttribute")]
 			public OptionalValue<string> EqualToAttribute { get; set; }
@@ -48,7 +48,7 @@ namespace Candid.UserNode.Models
 			public OptionalValue<double> GreaterThanOrEqualQuantity { get; set; }
 
 			[CandidName("groupId")]
-			public string GroupId { get; set; }
+			public string Gid { get; set; }
 
 			[CandidName("lessThanQuantity")]
 			public OptionalValue<double> LessThanQuantity { get; set; }
@@ -57,17 +57,17 @@ namespace Candid.UserNode.Models
 			public OptionalValue<bool> NotExpired { get; set; }
 
 			[CandidName("worldId")]
-			public string WorldId { get; set; }
+			public string Wid { get; set; }
 
 			public EntityConstraintItemItem(string entityId, OptionalValue<string> equalToAttribute, OptionalValue<double> greaterThanOrEqualQuantity, string groupId, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, string worldId)
 			{
-				this.EntityId = entityId;
+				this.Eid = entityId;
 				this.EqualToAttribute = equalToAttribute;
 				this.GreaterThanOrEqualQuantity = greaterThanOrEqualQuantity;
-				this.GroupId = groupId;
+				this.Gid = groupId;
 				this.LessThanQuantity = lessThanQuantity;
 				this.NotExpired = notExpired;
-				this.WorldId = worldId;
+				this.Wid = worldId;
 			}
 
 			public EntityConstraintItemItem()

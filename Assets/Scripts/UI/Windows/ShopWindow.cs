@@ -323,7 +323,7 @@ public class ShopWindow : Window
     }
 
 
-    private void DisplayActionResponse(ProcessActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 
