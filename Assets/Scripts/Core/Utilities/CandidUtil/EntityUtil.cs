@@ -1,22 +1,26 @@
 ﻿
 using Boom.Values;
 using Candid.World.Models;
+using System.Collections.Generic;
 using UnityEngine;
-using static Candid.World.Models.ActionOutcomeOption.OptionInfo;
 // Ignore Spelling: Util
 
 internal static class EntityUtil
 {
+    public static string GetKey(this ActionConstraint.EntityConstraintItemItem actionConfig)
+    {
+        return $"{actionConfig.Wid}{actionConfig.Gid}{actionConfig.Eid}";
+    }
     public static string GetKey(this Entity entity)
     {
         return $"{entity.Wid}{entity.Gid}{entity.Eid}";
     }
-    public static string GetKey(this ReceiveEntityQuantityInfo entity)
+    public static string GetKey(this ReceiveEntityQuantity entity)
     {
-        var wid = entity.F0.GetValueOrDefault();
-
+        var wid = entity.Wid.GetValueOrDefault();
         if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD;
-        return $"{wid}{entity.F1}{entity.F2}";
+
+        return $"{wid}{entity.Gid}{entity.Eid}";
     }
     //HAS CONFIG
     public static bool HasConfig(string entityId, out DataTypes.EntityConfig config)
@@ -28,75 +32,71 @@ internal static class EntityUtil
     }
 
     // GET NAME
-    public static string GetName(string entityId, string defaultValue = "None")
+    public static string GetName(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if (config.Name.HasValue) return config.Name.ValueOrDefault;
+            if (string.IsNullOrEmpty(config.name) == false) return config.name;
         }
         return defaultValue;
     }
 
     // GET DESCRIPTION
-    public static string GetDescription(string entityId, string defaultValue = "None")
+    public static string GetDescription(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if (config.Description.HasValue) return config.Description.ValueOrDefault;
+            if (string.IsNullOrEmpty(config.description) == false) return config.description;
         }
         return defaultValue;
     }
 
     // GET IMAGE URL
-    public static string GetImageUrl(string entityId, string defaultValue = "None")
+    public static string GetImageUrl(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if (config.ImageUrl.HasValue) return config.ImageUrl.ValueOrDefault;
+            if (string.IsNullOrEmpty(config.imageUrl) == false) return config.imageUrl;
         }
         return defaultValue;
     }
 
     // GET OBJECT URL
-    public static string GetObjetUrl(string entityId, string defaultValue = "None")
+    public static string GetObjetUrl(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if (config.ObjectUrl.HasValue) return config.ObjectUrl.ValueOrDefault;
+            if (string.IsNullOrEmpty(config.objectUrl) == false) return config.objectUrl;
         }
         return defaultValue;
     }
 
     // GET RARITY
-    public static string GetRarity(string entityId, string defaultValue = "None")
+    public static string GetRarity(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if (config.Rarity.HasValue) return config.Rarity.ValueOrDefault;
+            if (string.IsNullOrEmpty(config.rarity) == false) return config.rarity;
         }
         return defaultValue;
     }
 
     // GET TAG
-    public static string GetTag(string entityId, string defaultValue = "None")
+    public static string GetTag(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if(string.IsNullOrEmpty(config.Tag)) return defaultValue;
-
-            return config.Tag;
+            if (string.IsNullOrEmpty(config.tag) == false) return config.tag;
         }
         return defaultValue;
     }
 
     // GET MERADATA
-    public static string GetMetadata(string entityId, string defaultValue = "None")
+    public static string GetMetadata(string key, string defaultValue = "None")
     {
-        if (HasConfig(entityId, out var config))
+        if (HasConfig(key, out var config))
         {
-            if (string.IsNullOrEmpty(config.Metadata)) return defaultValue;
-
-            return config.Metadata;
+            if (string.IsNullOrEmpty(config.metadata) == false) return config.metadata;
         }
         return defaultValue;
     }
@@ -133,7 +133,7 @@ internal static class EntityUtil
             bool doContinue = false;
             foreach (var ownEntity in asOk)
             {
-                if ($"{ownEntity.wid}{ownEntity.gid}{ownEntity.eid}" == $"{constrain.WorldId}{constrain.GroupId}{constrain.EntityId}")
+                if ($"{ownEntity.wid}{ownEntity.gid}{ownEntity.eid}" == $"{constrain.Wid}{constrain.Gid}{constrain.Eid}")
                 {
                     int a = 0, b = 0;
 
@@ -184,5 +184,54 @@ internal static class EntityUtil
         }
 
         return new(true);
+    }
+
+    public static double IncrementCurrentQuantity(params DataTypes.Entity[] valuesToIncrementBy)
+    {
+        List<DataTypes.Entity> newValues = new();
+        double currentQuantity = 0;
+
+        for (int i = 0; i < valuesToIncrementBy.Length; i++)
+        {
+            var element = valuesToIncrementBy[i];
+            currentQuantity = UserUtil.GetPropertyFromType<DataTypes.Entity, double>(element.GetKey(), e => e.quantity.GetValueOrDefault(), 0);
+
+            if(element.quantity != null)
+            {
+                element.quantity += currentQuantity;
+                newValues.Add(element);
+            }
+        }
+
+        UserUtil.UpdateData<DataTypes.Entity>(newValues.ToArray());
+
+        return currentQuantity;
+    }
+    public static double DecrementCurrentQuantity(params DataTypes.Entity[] valuesToIncrementBy)
+    {
+        List<DataTypes.Entity> newValues = new();
+        double currentQuantity = 0;
+
+        for (int i = 0; i < valuesToIncrementBy.Length; i++)
+        {
+            var element = valuesToIncrementBy[i];
+            currentQuantity = UserUtil.GetPropertyFromType<DataTypes.Entity, double>(element.GetKey(), e => e.quantity.GetValueOrDefault(), 0);
+
+            if(currentQuantity > 0)
+            {
+                if (element.quantity != null)
+                {
+                    element.quantity = currentQuantity - element.quantity;
+
+                    if (element.quantity < 0) element.quantity = 0;
+
+                    newValues.Add(element);
+                }
+            }
+        }
+
+        UserUtil.UpdateData<DataTypes.Entity>(newValues.ToArray());
+
+        return currentQuantity;
     }
 }

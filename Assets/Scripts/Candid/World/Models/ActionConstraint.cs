@@ -4,7 +4,7 @@ using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
-using TokenIndex = System.UInt32;
+using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System.Collections.Generic;
@@ -32,17 +32,17 @@ namespace Candid.World.Models
 
 		public class EntityConstraintItemItem
 		{
-			[CandidName("entityId")]
-			public string EntityId { get; set; }
+			[CandidName("eid")]
+			public entityId Eid { get; set; }
 
 			[CandidName("equalToAttribute")]
 			public OptionalValue<string> EqualToAttribute { get; set; }
 
+			[CandidName("gid")]
+			public groupId Gid { get; set; }
+
 			[CandidName("greaterThanOrEqualQuantity")]
 			public OptionalValue<double> GreaterThanOrEqualQuantity { get; set; }
-
-			[CandidName("groupId")]
-			public string GroupId { get; set; }
 
 			[CandidName("lessThanQuantity")]
 			public OptionalValue<double> LessThanQuantity { get; set; }
@@ -50,18 +50,18 @@ namespace Candid.World.Models
 			[CandidName("notExpired")]
 			public OptionalValue<bool> NotExpired { get; set; }
 
-			[CandidName("worldId")]
-			public string WorldId { get; set; }
+			[CandidName("wid")]
+			public OptionalValue<worldId> Wid { get; set; }
 
-			public EntityConstraintItemItem(string entityId, OptionalValue<string> equalToAttribute, OptionalValue<double> greaterThanOrEqualQuantity, string groupId, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, string worldId)
+			public EntityConstraintItemItem(entityId eid, OptionalValue<string> equalToAttribute, groupId gid, OptionalValue<double> greaterThanOrEqualQuantity, OptionalValue<double> lessThanQuantity, OptionalValue<bool> notExpired, OptionalValue<worldId> wid)
 			{
-				this.EntityId = entityId;
+				this.Eid = eid;
 				this.EqualToAttribute = equalToAttribute;
+				this.Gid = gid;
 				this.GreaterThanOrEqualQuantity = greaterThanOrEqualQuantity;
-				this.GroupId = groupId;
 				this.LessThanQuantity = lessThanQuantity;
 				this.NotExpired = notExpired;
-				this.WorldId = worldId;
+				this.Wid = wid;
 			}
 
 			public EntityConstraintItemItem()

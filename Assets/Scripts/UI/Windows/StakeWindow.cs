@@ -78,7 +78,27 @@ public class StakeWindow : Window
         if (obj.IsReady())
         {
             if(obj.data.elements.Count == 0) stakeText.text = "You don't have Stakes...";
-            else stakeText.text = obj.data.elements.Reduce(e => $"Type: {e.Value.TokenType} | Id: {e.Value.CanisterId} | Amt :{e.Value.Amount} | Index?: {e.Value.BlockIndex}", ",\n");
+            else
+            {
+                stakeText.text = obj.data.elements.Reduce(e =>
+                {
+                    if(e.Value.blockIndex == null)
+                    {
+                        var tokenConfigResult = UserUtil.GetElementOfType<DataTypes.TokenConfig>(e.Value.canisterId);
+
+                        if (tokenConfigResult.IsOk)
+                        {
+                            return $"Type: {e.Value.tokenType} | Id: {e.Value.canisterId} | Amt :{CandidUtil.ConvertToDecimal(e.Value.amount, tokenConfigResult.AsOk().decimals)}";
+                        }
+
+                        return $"Type: {e.Value.tokenType} | Id: {e.Value.canisterId} | Amt :{e.Value.amount}";
+                    }
+                    else
+                    {
+                        return $"Type: {e.Value.tokenType} | Id: {e.Value.canisterId} | Index: {e.Value.blockIndex}";
+                    }
+                }, ",\n");
+            }
         }
         else
         {
@@ -209,9 +229,8 @@ public class StakeWindow : Window
         }
 
         var resultAsOk = result.AsOk();
-        DisplayActionResponse(result.AsOk());
-        UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        DisplayActionResponse(resultAsOk);
+        EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
         BroadcastState.Invoke(new WaitingForResponse(false));
     }
     //
@@ -314,9 +333,8 @@ public class StakeWindow : Window
         }
 
         var resultAsOk = result.AsOk();
-        DisplayActionResponse(result.AsOk());
-        UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        DisplayActionResponse(resultAsOk);
+        EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
         BroadcastState.Invoke(new WaitingForResponse(false));
     }
     //
@@ -413,42 +431,18 @@ public class StakeWindow : Window
         }
 
         var resultAsOk = result.AsOk();
-        DisplayActionResponse(result.AsOk());
-        UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        DisplayActionResponse(resultAsOk);
+        EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
         BroadcastState.Invoke(new WaitingForResponse(false));
     }
 
-    private void DisplayActionResponse(ActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 
-        var processedItems = resonse.F1.Filter(
-                e => {
-                    var localValue = UserUtil.GetElementOfType<DataTypes.Entity>($"{e.Gid}{e.Eid}");
-
-                    //if player doesn't yet have any of this entity we return true
-                    if (localValue.IsErr) return true;
-
-                    var localValueAsOk = localValue.AsOk();
-
-                    bool differentQuantities = localValueAsOk.quantity != e.Quantity.ValueOrDefault;
-
-                    //we don't want to display entities whose quantity value has not changed
-                    if (differentQuantities == false) return false;
-
-                    bool willLocalIncreaseValue = localValueAsOk.quantity < e.Quantity.ValueOrDefault;
-
-                    //we don't want to display entities whose quantity value has reduced
-                    if (willLocalIncreaseValue == false) return false;
-
-                    return true;
-                });
-
-        processedItems.Iterate(e =>
+        resonse.receivedEntities.Iterate(e =>
         {
-            var localQuantity = EntityUtil.GetCurrentQuantity(e.GetKey());
-            inventoryElements.Add($"{EntityUtil.GetName(e.GetKey(), $"Gid: {(string.IsNullOrEmpty(e.Gid) ? "CurrentWorld" : e.Gid)}: Eid: {e.Eid}")} x {e.GetQuantity() - localQuantity}");
+            inventoryElements.Add($"{EntityUtil.GetName(e.GetKey(), $"Key: {e.GetKey()}: ")} x {e.quantity}");
         });
 
         WindowManager.Instance.OpenWindow<InventoryPopupWindow>(new InventoryPopupWindow.WindowData("Earned Items", inventoryElements), 3);

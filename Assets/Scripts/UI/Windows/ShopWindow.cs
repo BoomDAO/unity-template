@@ -83,13 +83,12 @@ public class ShopWindow : Window
             var key = actionOfferKeyValue.key;
             var actionOffer = actionOfferKeyValue.value;
 
-            if (!actionOffer.HasPlugin())
+            if (actionOffer.actionPlugin == null)
             {
-
-                var constrain = actionOffer.GetEntityConstrain().Reduce(e =>
+                var constrain = actionOffer.entityConstraints?.Reduce(e =>
                 {
                     double amount = e.GreaterThanOrEqualQuantity.HasValue ? e.GreaterThanOrEqualQuantity.ValueOrDefault : 0;
-                    string name = EntityUtil.GetName(e.GetEntityKey(), e.GetEntityKey());
+                    string name = EntityUtil.GetName(e.GetKey(), e.GetKey());
                     return $"{name} x {amount}\n\n";
                 },"\n");
 
@@ -97,15 +96,15 @@ public class ShopWindow : Window
                 {
                     id = key,
                     textButtonContent = $"Trade",
-                    content = $"{actionOffer.GetNameUnsafe()}\n\n{constrain} -> ItemC x 1",
+                    content = $"{actionOffer.name}\n\n{constrain} -> ItemC x 1",
                     action = (actionId, customData) => { Trade(actionId, constrain).Forget(); },
-                    imageContentType = new ImageContentType.Url(actionOffer.GetUrlImageUnsafe()),
-                    infoWindowData = new InfoPopupWindow.WindowData(actionOffer.GetNameUnsafe(), actionOffer.GetDescriptionUnsafe())
+                    imageContentType = new ImageContentType.Url(actionOffer.imageUrl),
+                    infoWindowData = new InfoPopupWindow.WindowData(actionOffer.name, actionOffer.description)
                 }, content);
             }
             else
             {
-                var actionPlugin = actionOffer.GetPluginUnsafe();
+                var actionPlugin = actionOffer.actionPlugin;
 
                 if (actionOffer.HasPluginType(ActionPluginTag.VerifyTransferIcp))
                 {
@@ -114,11 +113,11 @@ public class ShopWindow : Window
                     ActionWidget aw = WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
                         id = key,
-                        textButtonContent = $"{(actionOffer.GetTagUnsafe() == "Mint" ? "Mint" : "Buy")}",
-                        content = $"{actionOffer.GetNameUnsafe()}\n\nprice: {config.Amt.NotScientificNotation()} ICP",
+                        textButtonContent = $"{(actionOffer.tag == "Mint" ? "Mint" : "Buy")}",
+                        content = $"{actionOffer.name}\n\nprice: {config.Amt.NotScientificNotation()} ICP",
                         action = (actionId, customData) => { BuyWithIcp(actionId, config, actionOffer).Forget(); },
-                        imageContentType = new ImageContentType.Url(actionOffer.GetUrlImageUnsafe()),
-                        infoWindowData = new InfoPopupWindow.WindowData(actionOffer.GetNameUnsafe(), actionOffer.GetDescriptionUnsafe())
+                        imageContentType = new ImageContentType.Url(actionOffer.imageUrl),
+                        infoWindowData = new InfoPopupWindow.WindowData(actionOffer.name, actionOffer.description)
                     }, content);
                 }
                 else if (actionOffer.HasPluginType(ActionPluginTag.VerifyTransferIcrc))
@@ -131,12 +130,12 @@ public class ShopWindow : Window
                     ActionWidget aw = WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
                         id = key,
-                        textButtonContent = $"{(actionOffer.GetTagUnsafe() == "Mint" ? "Mint" : "Buy")}",
-                        content = $"{actionOffer.GetNameUnsafe()}\n\nprice: {config.Amt.ToString("0." + new string('#', 339))} {tokenName}",
+                        textButtonContent = $"{(actionOffer.tag == "Mint" ? "Mint" : "Buy")}",
+                        content = $"{actionOffer.name}\n\nprice: {config.Amt.ToString("0." + new string('#', 339))} {tokenName}",
                         action = (actionId, customData) => { BuyWithIcrc(actionId, config, actionOffer).Forget(); }
                         ,
-                        imageContentType = new ImageContentType.Url(actionOffer.GetUrlImageUnsafe()),
-                        infoWindowData = new InfoPopupWindow.WindowData(actionOffer.GetNameUnsafe(), actionOffer.GetDescriptionUnsafe())
+                        imageContentType = new ImageContentType.Url(actionOffer.imageUrl),
+                        infoWindowData = new InfoPopupWindow.WindowData(actionOffer.name, actionOffer.description)
                     }, content);
                 }
                 else Debug.Log($"Trying to call wrong action type of id: {actionPlugin.Tag} -" + key);
@@ -145,8 +144,6 @@ public class ShopWindow : Window
     }
     private async UniTaskVoid Trade(string actionId, string constrain)
     {
-        //await UniTask.SwitchToMainThread();
-
         BroadcastState.Invoke(new WaitingForResponse(true));
 
         var actionResult = await ActionUtil.Action.Default(actionId);
@@ -177,14 +174,12 @@ public class ShopWindow : Window
         DisplayActionResponse(resultAsOk);
 
         BroadcastState.Invoke(new WaitingForResponse(false));
-        //UserUtil.RequestData<DataTypes.Entity>();
-        UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
+        EntityUtil.DecrementCurrentQuantity(resultAsOk.spentEntities.ToArray());
+
     }
     private async UniTaskVoid BuyWithIcp(string actionId, ActionPlugin.VerifyTransferIcpInfo config, DataTypes.ActionConfig actionOffer)
     {
-        //await UniTask.SwitchToMainThread();
-
         BroadcastState.Invoke(new WaitingForResponse(true));
 
         var actionResult = await ActionUtil.Action.TransferAndVerifyIcp(actionId);
@@ -216,22 +211,17 @@ public class ShopWindow : Window
         DisplayActionResponse(resultAsOk);
 
         BroadcastState.Invoke(new WaitingForResponse(false));
-        if (actionOffer.Tag.ValueOrDefault.Contains("Mint"))
+        if (actionOffer.tag.Contains("Mint"))
         {
-            //UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
-            NftUtil.TryAddMintedNft(resultAsOk.F2.ToArray());
+            NftUtil.TryAddMintedNft(resultAsOk.nfts.ToArray());
         }
         else
         {
-            //UserUtil.RequestData<DataTypes.Entity>();
-            UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-            UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+            EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
         }
     }
     private async UniTaskVoid BuyWithIcrc(string actionId, ActionPlugin.VerifyTransferIcrcInfo config, DataTypes.ActionConfig actionOffer)
     {
-        //await UniTask.SwitchToMainThread();
-
         BroadcastState.Invoke(new WaitingForResponse(true));
 
         var tokenSymbol = "ICRC";
@@ -290,16 +280,13 @@ public class ShopWindow : Window
         DisplayActionResponse(resultAsOk);
 
         BroadcastState.Invoke(new WaitingForResponse(false));
-        if (actionOffer.Tag.ValueOrDefault.Contains("Mint"))
+        if (actionOffer.tag.Contains("Mint"))
         {
-            //UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
-            NftUtil.TryAddMintedNft(resultAsOk.F2.ToArray());
+            NftUtil.TryAddMintedNft(resultAsOk.nfts.ToArray());
         }
         else
         {
-            //UserUtil.RequestData<DataTypes.Entity>();
-            UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-            UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+            EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
         }
     }
     private List<KeyValue<string, DataTypes.ActionConfig>> GetValidOffers(List<string> actionOfferIds)
@@ -322,7 +309,7 @@ public class ShopWindow : Window
 
             var config = getDataResult.AsOk();
 
-            var actionPlugin = config.ActionPlugin.ValueOrDefault;
+            var actionPlugin = config.actionPlugin;
 
             if (actionPlugin != null)
             {
@@ -336,13 +323,13 @@ public class ShopWindow : Window
     }
 
 
-    private void DisplayActionResponse(ActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 
         //NFTs
         Dictionary<string, int> collectionsToDisplay = new();
-        resonse.F2.Iterate(e =>
+        resonse.nfts.Iterate(e =>
         {
 
             if (collectionsToDisplay.TryAdd(e.Canister, 1) == false) collectionsToDisplay[e.Canister] += 1;
@@ -368,32 +355,9 @@ public class ShopWindow : Window
 
 
         //ENTITIES
-        var processedItems = resonse.F1.Filter(
-                e => {
-                    var localValue = UserUtil.GetElementOfType<DataTypes.Entity>($"{e.GetKey()}");
-
-                    //if player doesn't yet have any of this entity we return true
-                    if (localValue.IsErr) return true;
-
-                    var localValueAsOk = localValue.AsOk();
-
-                    bool differentQuantities = localValueAsOk.quantity != e.Quantity.ValueOrDefault;
-
-                    //we don't want to display entities whose quantity value has not changed
-                    if(differentQuantities == false) return false;
-
-                    bool willLocalIncreaseValue = localValueAsOk.quantity < e.Quantity.ValueOrDefault;
-
-                    //we don't want to display entities whose quantity value has reduced
-                    if (willLocalIncreaseValue == false) return false;
-
-                    return true;
-                });
-
-        processedItems.Iterate(e =>
+        resonse.receivedEntities.Iterate(e =>
         {
-            var localQuantity = EntityUtil.GetCurrentQuantity(e.GetKey());
-            inventoryElements.Add($"{EntityUtil.GetName(e.GetKey(), $"Gid: {(string.IsNullOrEmpty(e.Gid) ? "CurrentWorld" : e.Gid)}: Eid: {e.Eid}")} x {e.GetQuantity() - localQuantity}");
+            inventoryElements.Add($"{EntityUtil.GetName(e.GetKey(), $"Key: {e.GetKey()}: ")} x {e.quantity}");
         });
 
         WindowManager.Instance.OpenWindow<InventoryPopupWindow>(new InventoryPopupWindow.WindowData("Earned Items", inventoryElements), 3);

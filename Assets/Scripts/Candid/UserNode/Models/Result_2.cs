@@ -42,7 +42,7 @@ namespace Candid.UserNode.Models
 			return new Result_2(Result_2Tag.Err, info);
 		}
 
-		public static Result_2 Ok(List<Entity> info)
+		public static Result_2 Ok(List<Action> info)
 		{
 			return new Result_2(Result_2Tag.Ok, info);
 		}
@@ -53,10 +53,10 @@ namespace Candid.UserNode.Models
 			return (string)this.Value!;
 		}
 
-		public List<Entity> AsOk()
+		public List<Action> AsOk()
 		{
 			this.ValidateTag(Result_2Tag.Ok);
-			return (List<Entity>)this.Value!;
+			return (List<Action>)this.Value!;
 		}
 
 		private void ValidateTag(Result_2Tag tag)
@@ -74,7 +74,7 @@ namespace Candid.UserNode.Models
 		[VariantOptionType(typeof(string))]
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(List<Entity>))]
+		[VariantOptionType(typeof(List<Action>))]
 		Ok
 	}
 }

@@ -48,6 +48,7 @@ public class MintTestTokensWindow : Window
         if (actionResult.Tag == UResultTag.Err)
         {
             Debug.LogError(actionResult.AsErr().Content);
+            WindowManager.Instance.OpenWindow<InfoPopupWindow>(new InfoPopupWindow.WindowData("Upss!", actionResult.AsErr().content), 3);
             BroadcastState.Invoke(new WaitingForResponse(false));
             return;
         }
@@ -56,8 +57,7 @@ public class MintTestTokensWindow : Window
         DisplayActionResponse(resultAsOk);
 
         //UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
-        NftUtil.TryAddMintedNft(resultAsOk.F2.ToArray());
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        NftUtil.TryAddMintedNft(resultAsOk.nfts.ToArray());
 
         BroadcastState.Invoke(new WaitingForResponse(false));
 
@@ -96,30 +96,29 @@ public class MintTestTokensWindow : Window
 
         var actionConfig = actionConfigResult.AsOk();
 
-        string canisterId = "";
-        actionConfig.ActionResult.Outcomes.Once(e => e.PossibleOutcomes.Once(k =>
+        actionConfig.actionResult.Outcomes.Once(e => e.PossibleOutcomes.Once(k =>
         {
             if (k.Option.Tag == ActionOutcomeOption.OptionInfoTag.MintToken)
             {
-                canisterId = k.Option.AsMintToken().Canister;
+                TokenUtil.IncrementTokenByDecimal(k.Option.AsMintToken().Canister, k.Option.AsMintToken().Quantity);
             }
         }));
 
-        UserUtil.RequestData<DataTypes.Token>(canisterId);
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        //UserUtil.RequestData<DataTypes.Token>(canisterId);
+
 
         BroadcastState.Invoke(new WaitingForResponse(false));
 
-        Debug.Log($"Mint ICRC Success, Wait for approval, reward {resultAsOk.F3.Count}:\n\n " + resultAsOk.F3.Reduce(e => $"Token canister: {e.Canister}\nQuantity: {e.Quantity}\n\n"));
+        Debug.Log($"Mint ICRC Success, Wait for approval, reward {resultAsOk.tokens.Count}:\n\n " + resultAsOk.tokens.Reduce(e => $"Token canister: {e.Canister}\nQuantity: {e.Quantity}\n\n"));
     }
 
-    private void DisplayActionResponse(ActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 
         //NFTs
         Dictionary<string, int> collectionsToDisplay = new();
-        resonse.F2.Iterate(e =>
+        resonse.nfts.Iterate(e =>
         {
 
             if (collectionsToDisplay.TryAdd(e.Canister, 1) == false) collectionsToDisplay[e.Canister] += 1;
@@ -144,7 +143,7 @@ public class MintTestTokensWindow : Window
         });
 
         //Tokens
-        resonse.F3.Iterate(e =>
+        resonse.tokens.Iterate(e =>
         {
             string tokenName = "Some Name";
             var fetchOwnTokenDataResult = UserUtil.GetElementOfType<DataTypes.TokenConfig>(e.Canister);

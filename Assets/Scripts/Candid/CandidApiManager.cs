@@ -327,7 +327,13 @@ namespace Candid
 
             if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
             {
-                throw new(userNodeIdResult.AsErr());
+                $"{userNodeIdResult.AsErr()}. Therefore, a new user will be created!".Warning(nameof(CandidApiManager));
+                userNodeIdResult = await WorldHub.CreateNewUser(Principal.FromText(loginData.principal));
+
+                if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
+                {
+                    throw new(userNodeIdResult.AsErr());
+                }
             }
 
             var userNodeId = userNodeIdResult.AsOk();
@@ -338,7 +344,7 @@ namespace Candid
 
             List<UserNode.Models.Entity> userGameEntities = null;
 
-            if (getUserGameDataResult.Tag == UserNode.Models.Result_2Tag.Ok)
+            if (getUserGameDataResult.Tag == UserNode.Models.Result_1Tag.Ok)
             {
                 userGameEntities = getUserGameDataResult.AsOk();
 
@@ -379,7 +385,13 @@ namespace Candid
 
             if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
             {
-                throw new(userNodeIdResult.AsErr());
+                $"{userNodeIdResult.AsErr()}. Therefore, a new user will be created!".Warning(nameof(CandidApiManager));
+                userNodeIdResult = await WorldHub.CreateNewUser(Principal.FromText(loginData.principal));
+
+                if (userNodeIdResult.Tag == Candid.WorldHub.Models.ResultTag.Err)
+                {
+                    throw new(userNodeIdResult.AsErr());
+                }
             }
 
             var userNodeId = userNodeIdResult.AsOk();
@@ -390,7 +402,7 @@ namespace Candid
 
             List<UserNode.Models.Action> userGameActions = null;
 
-            if (getUserGameDataResult.Tag == UserNode.Models.Result_3Tag.Ok)
+            if (getUserGameDataResult.Tag == UserNode.Models.Result_2Tag.Ok)
             {
                 userGameActions = getUserGameDataResult.AsOk();
 
@@ -599,16 +611,16 @@ namespace Candid
 
             try
             {
-                Debug.Log("-- Try Fetch NFTs from collection of id: " + collection.canister);
+                //Debug.Log("-- Try Fetch NFTs from collection of id: " + collection.canister);
                 var getAccountIdentifierResult = UserUtil.GetAccountIdentifier();
 
-                if (getAccountIdentifierResult.Tag == UResultTag.Err)
+                if (getAccountIdentifierResult.IsErr)
                 {
-                    Debug.LogError(getAccountIdentifierResult.AsErr());
+                    Debug.LogError(getAccountIdentifierResult.AsErr().Value);
                     return;
                 }
 
-                var accountIdentifier = getAccountIdentifierResult.AsOk();
+                var accountIdentifier = getAccountIdentifierResult.AsOk().Value;
 
                 var pagedRegistry = await api.GetPagedRegistry(index); // We used paged registries for Boom NFTs
                 List<uint> indexes = new();
@@ -617,9 +629,9 @@ namespace Candid
                 foreach (var value in pagedRegistry)
                 {
                     if (string.Equals(value.F1,
-                        accountIdentifier.value)) // Checks that the address that owns the NFT is same as your address
+                        accountIdentifier)) // Checks that the address that owns the NFT is same as your address
                     {
-                        Debug.Log($"-- Try fetch Token Metadata of index: {value.F0}");
+                        //Debug.Log($"-- Try fetch Token Metadata of index: {value.F0}");
 
                         indexes.Add(value.F0);
                         asyncMetadataFunctions.Add(GetNftMetadata(api, value.F0));
@@ -646,7 +658,7 @@ namespace Candid
                 {
                     string metadata = metadataResults[i].ValueOrDefault.AsNonfungible().Metadata.ValueOrDefault
                         .AsJson();
-                    Debug.Log($"-- Nft metadata fetched of index: {indexes[i]}");
+                    //Debug.Log($"-- Nft metadata fetched of index: {indexes[i]}");
 
 
                     collection.tokens.Add(

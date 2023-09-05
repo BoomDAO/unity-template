@@ -35,18 +35,7 @@ public class BalanceWindow : Window
     }
     private void UpdateWindow(DataState<Data<DataTypes.NftCollection>> obj)
     {
-        var result = UserUtil.IsAnonLoggedIn();
-
-        if (result.IsOk)
-        {
-            if (result.AsOk())
-            {
-                nftCountTxt.text = $"NFT Count: 0";
-
-                return;
-            }
-        }
-        else
+        if (!UserUtil.IsUserLoggedIn())
         {
             nftCountTxt.text = $"NFT Count: 0";
             return;
@@ -69,22 +58,18 @@ public class BalanceWindow : Window
 
     private void UpdateWindow(DataState<Data<DataTypes.Token>> obj)
     {
-        var result = UserUtil.IsAnonLoggedIn();
-
-        if (result.IsOk)
+        if (!UserUtil.IsUserLoggedIn())
         {
-            if (result.AsOk())
-            {
-                icpBalanceText.text = $"ICP: {0}";
-                icrcBalances.text = $"ICRC: {0}";
-                return;
-            }
+            icpBalanceText.text = $"ICP: {0}";
+            icrcBalances.text = $"ICRC: {0}";
+
+            return;
         }
-        else
+
+        if (obj.IsLoading())
         {
             icpBalanceText.text = $"ICP: Loading...";
             icrcBalances.text = $"ICRC: Loading...";
-
             return;
         }
 

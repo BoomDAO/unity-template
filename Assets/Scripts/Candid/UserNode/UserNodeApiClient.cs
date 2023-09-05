@@ -59,20 +59,20 @@ namespace Candid.UserNode
 			return reply.ToObjects<List<userId>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_3> GetAllUserWorldActions(userId arg0, worldId arg1)
+		public async System.Threading.Tasks.Task<Models.Result_2> GetAllUserWorldActions(userId arg0, worldId arg1)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "getAllUserWorldActions", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_3>(this.Converter);
+			return reply.ToObjects<Models.Result_2>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_2> GetAllUserWorldEntities(userId arg0, worldId arg1)
+		public async System.Threading.Tasks.Task<Models.Result_1> GetAllUserWorldEntities(userId arg0, worldId arg1)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "getAllUserWorldEntities", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_2>(this.Converter);
+			return reply.ToObjects<Models.Result_1>(this.Converter);
 		}
 
 		public async System.Threading.Tasks.Task<List<userId>> GetAllWorldUserIds(worldId arg0)
@@ -83,12 +83,12 @@ namespace Candid.UserNode
 			return reply.ToObjects<List<userId>>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_2> GetSpecificUserWorldEntities(userId arg0, worldId arg1, List<UserNodeApiClient.GetSpecificUserWorldEntitiesArg2Item> arg2)
+		public async System.Threading.Tasks.Task<Models.Result_1> GetSpecificUserWorldEntities(userId arg0, worldId arg1, List<UserNodeApiClient.GetSpecificUserWorldEntitiesArg2Item> arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			QueryResponse response = await this.Agent.QueryAsync(this.CanisterId, "getSpecificUserWorldEntities", arg);
 			CandidArg reply = response.ThrowOrGetReply();
-			return reply.ToObjects<Models.Result_2>(this.Converter);
+			return reply.ToObjects<Models.Result_1>(this.Converter);
 		}
 
 		public async Task GrantEntityPermission(string arg0, string arg1, string arg2, string arg3, Models.EntityPermission arg4)
@@ -117,16 +117,16 @@ namespace Candid.UserNode
 			return reply.ToObjects<Models.Result>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_2> ManuallyOverwriteEntities(userId arg0, groupId arg1, List<Models.Entity> arg2)
+		public async System.Threading.Tasks.Task<Models.Result_1> ManuallyOverwriteEntities(userId arg0, groupId arg1, List<Models.Entity> arg2)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "manuallyOverwriteEntities", arg);
-			return reply.ToObjects<Models.Result_2>(this.Converter);
+			return reply.ToObjects<Models.Result_1>(this.Converter);
 		}
 
-		public async System.Threading.Tasks.Task<Models.Result_1> ProcessAction(userId arg0, actionId arg1, Models.ActionConfig arg2)
+		public async System.Threading.Tasks.Task<Models.Result_1> ProcessAction(userId arg0, actionId arg1, OptionalValue<Models.ActionConstraint> arg2, List<Models.ActionOutcomeOption> arg3)
 		{
-			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2));
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0), CandidTypedValue.FromObject(arg1), CandidTypedValue.FromObject(arg2), CandidTypedValue.FromObject(arg3));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "processAction", arg);
 			return reply.ToObjects<Models.Result_1>(this.Converter);
 		}

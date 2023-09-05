@@ -123,30 +123,30 @@ public static class UserUtil
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns>Could be either the user Principal or an error message</returns>
-    public static UResult<Wrapper<string>, string> GetPrincipal()
+    public static UResult<string> GetPrincipal()
     {
         var result = GetLogInData();
         if (result.Tag == UResultTag.Err)
         {
-            return new(result.AsErr());
+            return new(new UResult<string>.ERR<string>(result.AsErr()));
         }
 
-        return new(new Wrapper<string>(result.AsOk().principal));
+        return new(new UResult<string>.OK<string>(result.AsOk().principal));
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this the User/Anon AccountIdentifier
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns>Could be either the user AccountIdentifier or an error message</returns>
-    public static UResult<Wrapper<string>, string> GetAccountIdentifier()
+    public static UResult<string> GetAccountIdentifier()
     {
         var result = GetLogInData();
         if (result.Tag == UResultTag.Err)
         {
-            return new(result.AsErr());
+            return new(new UResult<string>.ERR<string>(result.AsErr()));
         }
 
-        return new(new Wrapper<string>(result.AsOk().accountIdentifier));
+        return new(new UResult<string>.OK<string>(result.AsOk().accountIdentifier));
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this the User/Anon Agent
@@ -171,46 +171,72 @@ public static class UserUtil
     /// <returns></returns>
     public static UResult<LoginType, string> GetLogInType()
     {
-        var getSignInDataResult = UserUtil.GetLogInData();
+        var getLogInDataResult = UserUtil.GetLogInData();
 
-        if (getSignInDataResult.Tag == UResultTag.Err)
+        if (getLogInDataResult.Tag == UResultTag.Err)
         {
-            return new(getSignInDataResult.AsErr());
+            return new(getLogInDataResult.AsErr());
         }
 
-        return getSignInDataResult.AsOk().asAnon ? new(LoginType.Anon) : new(LoginType.User);
+        return getLogInDataResult.AsOk().asAnon ? new(LoginType.Anon) : new(LoginType.User);
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this true if Login Data is from an User
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns></returns>
-    public static UResult<bool, string> IsUserLoggedIn()
+    public static bool IsUserLoggedIn()
     {
-        var getSignInDataResult = UserUtil.GetLogInData();
+        var getLogInDataResult = UserUtil.GetLogInData();
 
-        if (getSignInDataResult.Tag == UResultTag.Err)
+        if (getLogInDataResult.Tag == UResultTag.Err)
         {
-            return new(getSignInDataResult.AsErr());
+            return false;
         }
 
-        return new(getSignInDataResult.AsOk().asAnon == false) ;
+        return !getLogInDataResult.AsOk().asAnon;
+    }
+    public static bool IsUserLoggedIn(out LoginData loginData)
+    {
+        loginData = default;
+
+        var getLogInDataResult = UserUtil.GetLogInData();
+
+        if (getLogInDataResult.Tag == UResultTag.Err)
+        {
+            return false;
+        }
+        loginData = getLogInDataResult.AsOk();
+        return !loginData.asAnon;
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this true if Login Data is from Anon
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns></returns>
-    public static UResult<bool, string> IsAnonLoggedIn()
+    public static bool IsAnonLoggedIn()
     {
-        var getSignInDataResult = UserUtil.GetLogInData();
+        var getLogInDataResult = UserUtil.GetLogInData();
 
-        if (getSignInDataResult.Tag == UResultTag.Err)
+        if (getLogInDataResult.Tag == UResultTag.Err)
         {
-            return new(getSignInDataResult.AsErr());
+            return false;
         }
 
-        return new(getSignInDataResult.AsOk().asAnon);
+        return getLogInDataResult.AsOk().asAnon;
+    }
+    public static bool IsAnonLoggedIn(out LoginData loginData)
+    {
+        loginData = default;
+
+        var getLogInDataResult = UserUtil.GetLogInData();
+
+        if (getLogInDataResult.Tag == UResultTag.Err)
+        {
+            return false;
+        }
+        loginData = getLogInDataResult.AsOk();
+        return loginData.asAnon;
     }
     #endregion
 
@@ -340,6 +366,19 @@ public static class UserUtil
         {
             return new(e.Message);
         }
+    }
+    public static PropertyType GetPropertyFromType<T, PropertyType>(string id, Func<T, PropertyType> getter, PropertyType defaultVal = default) where T : DataTypes.Base
+    {
+        var restult = GetElementOfType<T>(id);
+
+        if (restult.Tag == UResultTag.Err)
+        {
+            return defaultVal;
+        }
+
+        PropertyType propertyType = getter(restult.AsOk());
+
+        return propertyType;
     }
 
     /// <summary>

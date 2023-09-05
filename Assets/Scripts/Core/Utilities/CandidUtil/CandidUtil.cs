@@ -18,14 +18,14 @@ public static class CandidUtil
         return bytes;
     }
 
-    public static ulong ConvertToBaseUnit(this double value, ulong decimals)//Zero
+    public static ulong ConvertToBaseUnit(this double value, byte decimals)//Zero
     {
         var baseUnitCount = decimals == 0 ? 0 : (ulong)Mathf.Pow(10, decimals);
 
 
         return (ulong)(baseUnitCount * value);
     }
-    public static double ConvertToDecimal(this ulong value, ulong decimals)//Zero
+    public static double ConvertToDecimal(this ulong value, byte decimals)//Zero
     {
         var baseUnitCount = decimals == 0 ? 0 : (ulong)Mathf.Pow(10, decimals);
 
@@ -65,6 +65,56 @@ public static class CandidUtil
         return entities.Map(e => e.ConvertToDataType()).ToArray();
     }
 
+    public static DataTypes.Entity ConvertToDataType(this ActionOutcomeOption actionOutcomeOption)
+    {
+        if(actionOutcomeOption.Option.Tag == ActionOutcomeOption.OptionInfoTag.ReceiveEntityQuantity)
+        {
+            var val = actionOutcomeOption.Option.AsReceiveEntityQuantity();
+            var wid = val.Wid.GetValueOrDefault();
+            if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD;
+
+            return new DataTypes.Entity(string.IsNullOrEmpty(wid)? Env.CanisterIds.WORLD : wid, val.Gid, val.Eid, val.Quantity, null, null);
+        }
+        else if (actionOutcomeOption.Option.Tag == ActionOutcomeOption.OptionInfoTag.SpendEntityQuantity)
+        {
+            var val = actionOutcomeOption.Option.AsSpendEntityQuantity();
+            var wid = val.Wid.GetValueOrDefault();
+            if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD;
+            return new DataTypes.Entity(string.IsNullOrEmpty(wid) ? Env.CanisterIds.WORLD : wid, val.Gid, val.Eid, val.Quantity, null, null);
+        }
+        else if (actionOutcomeOption.Option.Tag == ActionOutcomeOption.OptionInfoTag.ReduceEntityExpiration)
+        {
+            var val = actionOutcomeOption.Option.AsReduceEntityExpiration();
+            var wid = val.Wid.GetValueOrDefault();
+            if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD;
+            return new DataTypes.Entity(string.IsNullOrEmpty(wid) ? Env.CanisterIds.WORLD : wid, val.Gid, val.Eid, null, null, (ulong)val.Duration);
+
+        }
+        else if (actionOutcomeOption.Option.Tag == ActionOutcomeOption.OptionInfoTag.RenewEntityExpiration)
+        {
+            var val = actionOutcomeOption.Option.AsRenewEntityExpiration();
+            var wid = val.Wid.GetValueOrDefault();
+            if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD; ;
+            return new DataTypes.Entity(string.IsNullOrEmpty(wid) ? Env.CanisterIds.WORLD : wid, val.Gid, val.Eid, null, null, (ulong)val.Duration);
+
+        }
+        else if (actionOutcomeOption.Option.Tag == ActionOutcomeOption.OptionInfoTag.SetEntityAttribute)
+        {
+            var val = actionOutcomeOption.Option.AsSetEntityAttribute();
+            var wid = val.Wid.GetValueOrDefault();
+            if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD;
+            return new DataTypes.Entity(string.IsNullOrEmpty(wid) ? Env.CanisterIds.WORLD : wid, val.Gid, val.Eid, null, val.Attribute, null);
+
+        }
+        else if (actionOutcomeOption.Option.Tag == ActionOutcomeOption.OptionInfoTag.DeleteEntity)
+        {
+            var val = actionOutcomeOption.Option.AsDeleteEntity();
+            var wid = val.Wid.GetValueOrDefault();
+            if (string.IsNullOrEmpty(wid)) wid = Env.CanisterIds.WORLD;
+            return new DataTypes.Entity(string.IsNullOrEmpty(wid) ? Env.CanisterIds.WORLD : wid, val.Gid, val.Eid, null, null, null);
+        }
+        return null;
+    }
     public static DataTypes.Entity ConvertToDataType(this Candid.UserNode.Models.Entity entity)
     {
         double? quantity = null;

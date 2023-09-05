@@ -46,7 +46,7 @@ public class BurnNftWindow : Window
             {
                 var actionConfig = keyValActionConfig.Value;
 
-                actionConfig.ActionResult.Outcomes.Once(k =>
+                actionConfig.actionResult.Outcomes.Once(k =>
                 {
                     possibleOutcoemsContentText.text = k.PossibleOutcomes.Reduce(s =>
                     {
@@ -54,7 +54,7 @@ public class BurnNftWindow : Window
                         {
                             case ActionOutcomeOption.OptionInfoTag.ReceiveEntityQuantity:
                                 var option = s.Option.AsReceiveEntityQuantity();
-                                var quantity = option.F3;
+                                var quantity = option.Quantity;
                                 return $"{EntityUtil.GetName(option.GetKey())} x {quantity}";
 
                             default:
@@ -114,11 +114,12 @@ public class BurnNftWindow : Window
             return;
         }
 
-        var result = await ActionUtil.Action.BurnNft(burnNftActionId, Env.Nfts.BOOM_COLLECTION_CANISTER_ID, nextNftIndexResult.AsOk());
+        var result = await ActionUtil.Action.VerifyBurnNfts(burnNftActionId, Env.Nfts.BOOM_COLLECTION_CANISTER_ID);//, nextNftIndexResult.AsOk());
 
         if (result.Tag == UResultTag.Err)
         {
-            UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
+            //UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(Env.Nfts.BOOM_COLLECTION_CANISTER_ID, "Test Nft Collection", false));
+            Debug.LogError(result.AsErr().content);
 
             switch (result.AsErr())
             {
@@ -126,8 +127,8 @@ public class BurnNftWindow : Window
                     Window infoPopup = null;
                     infoPopup = WindowManager.Instance.OpenWindow<InfoPopupWindow>(
                     new InfoPopupWindow.WindowData(
-                        $"You don't a nft to stake",
-                        $"Requires 1 NFT From Collection:\n {Env.Nfts.BOOM_COLLECTION_CANISTER_ID}",
+                        $"You don't a nft to burn",
+                        $"{content.content}",
                         new(
                             new(
                                 $"Mint a Nft",
@@ -156,40 +157,16 @@ public class BurnNftWindow : Window
 
         BroadcastState.Invoke(new WaitingForResponse(false));
 
-        UserUtil.UpdateData<DataTypes.Entity>(resultAsOk.F1.ConvertToDataType());
-        UserUtil.UpdateData<DataTypes.Action>(resultAsOk.F0.ConvertToDataType());
+        EntityUtil.IncrementCurrentQuantity(resultAsOk.receivedEntities.ToArray());
     }
 
-    private void DisplayActionResponse(ActionResponse resonse)
+    private void DisplayActionResponse(ProcessedActionResponse resonse)
     {
         List<string> inventoryElements = new();
 
-        var processedItems = resonse.F1.Filter(
-                e => {
-                    var localValue = UserUtil.GetElementOfType<DataTypes.Entity>($"{e.Gid}{e.Eid}");
-
-                    //if player doesn't yet have any of this entity we return true
-                    if (localValue.IsErr) return true;
-
-                    var localValueAsOk = localValue.AsOk();
-
-                    bool differentQuantities = localValueAsOk.quantity != e.Quantity.ValueOrDefault;
-
-                    //we don't want to display entities whose quantity value has not changed
-                    if (differentQuantities == false) return false;
-
-                    bool willLocalIncreaseValue = localValueAsOk.quantity < e.Quantity.ValueOrDefault;
-
-                    //we don't want to display entities whose quantity value has reduced
-                    if (willLocalIncreaseValue == false) return false;
-
-                    return true;
-                });
-
-        processedItems.Iterate(e =>
+        resonse.receivedEntities.Iterate(e =>
         {
-            var localQuantity = EntityUtil.GetCurrentQuantity(e.GetKey());
-            inventoryElements.Add($"{EntityUtil.GetName(e.GetKey(), $"Gid: {(string.IsNullOrEmpty(e.Gid) ? "CurrentWorld" : e.Gid)}: Eid: {e.Eid}")} x {e.GetQuantity() - localQuantity}");
+            inventoryElements.Add($"{EntityUtil.GetName(e.GetKey(), $"Key: {e.GetKey()}: ")} x {e.quantity}");
         });
 
         WindowManager.Instance.OpenWindow<InventoryPopupWindow>(new InventoryPopupWindow.WindowData("Earned Items", inventoryElements), 3);

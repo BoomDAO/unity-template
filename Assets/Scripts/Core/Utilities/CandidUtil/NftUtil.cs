@@ -4,6 +4,7 @@ using Candid;
 using Candid.World.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 public static class NftUtil
@@ -131,6 +132,53 @@ public static class NftUtil
         {
             return e.index == index;
         });
+    }
+    public static bool HasNft<T>(string collectionId, Func<DataTypes.NftCollection.Nft, T, bool>  predicate, params T[] requirements)
+    {
+        var result = TryGetCollection(collectionId);
+        if (result.Tag == UResultTag.Err) return false;
+
+        var tokens = result.AsOk().tokens;
+        tokens ??= new();
+
+        var tokensCopy = tokens.CreateDeepCopy();
+
+        if (tokensCopy.Count == 0) return false;
+
+        foreach ( var requirement in requirements) 
+        {
+            var matchingNftIndex = tokensCopy.Once(e => tokensCopy.Remove(e), e => predicate(e, requirement));
+
+            if (matchingNftIndex == -1) return false;
+        }
+
+        return true;
+    }
+    public static UResult<List<DataTypes.NftCollection.Nft>, string> Filter<T>(string collectionId, Func<DataTypes.NftCollection.Nft, T, bool> predicate, params T[] requirements)
+    {
+        var result = TryGetCollection(collectionId);
+        if (result.Tag == UResultTag.Err) return new($"You were not able to find any local data on collection of id: {collectionId}");
+
+        var tokens = result.AsOk().tokens;
+        tokens ??= new();
+
+        var tokensCopy = tokens.CreateDeepCopy();
+
+        if (tokensCopy.Count == 0) return new($"You have no nft on collection of id: {collectionId}");
+
+        List<DataTypes.NftCollection.Nft> nftsToReturn = new();
+        foreach (var requirement in requirements)
+        {
+            var matchingNftIndex = tokensCopy.Once(e =>
+            {
+                nftsToReturn.Add(e);
+                tokensCopy.Remove(e);
+            }, e => predicate(e, requirement));
+
+            if (matchingNftIndex == -1) return new($"You are missing an nft of requirement: {requirement}");
+        }
+
+        return new(nftsToReturn);
     }
 
     /// <summary>

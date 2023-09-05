@@ -4,11 +4,12 @@ using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
-using TokenIndex = System.UInt32;
+using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
 using EdjCase.ICP.Candid.Models;
+using System.Collections.Generic;
 
 namespace Candid.World.Models
 {
@@ -31,11 +32,6 @@ namespace Candid.World.Models
 		{
 		}
 
-		public static ActionPlugin BurnNft(ActionPlugin.BurnNftInfo info)
-		{
-			return new ActionPlugin(ActionPluginTag.BurnNft, info);
-		}
-
 		public static ActionPlugin ClaimStakingRewardIcp(ActionPlugin.ClaimStakingRewardIcpInfo info)
 		{
 			return new ActionPlugin(ActionPluginTag.ClaimStakingRewardIcp, info);
@@ -51,6 +47,11 @@ namespace Candid.World.Models
 			return new ActionPlugin(ActionPluginTag.ClaimStakingRewardNft, info);
 		}
 
+		public static ActionPlugin VerifyBurnNfts(ActionPlugin.VerifyBurnNftsInfo info)
+		{
+			return new ActionPlugin(ActionPluginTag.VerifyBurnNfts, info);
+		}
+
 		public static ActionPlugin VerifyTransferIcp(ActionPlugin.VerifyTransferIcpInfo info)
 		{
 			return new ActionPlugin(ActionPluginTag.VerifyTransferIcp, info);
@@ -59,12 +60,6 @@ namespace Candid.World.Models
 		public static ActionPlugin VerifyTransferIcrc(ActionPlugin.VerifyTransferIcrcInfo info)
 		{
 			return new ActionPlugin(ActionPluginTag.VerifyTransferIcrc, info);
-		}
-
-		public ActionPlugin.BurnNftInfo AsBurnNft()
-		{
-			this.ValidateTag(ActionPluginTag.BurnNft);
-			return (ActionPlugin.BurnNftInfo)this.Value!;
 		}
 
 		public ActionPlugin.ClaimStakingRewardIcpInfo AsClaimStakingRewardIcp()
@@ -85,6 +80,12 @@ namespace Candid.World.Models
 			return (ActionPlugin.ClaimStakingRewardNftInfo)this.Value!;
 		}
 
+		public ActionPlugin.VerifyBurnNftsInfo AsVerifyBurnNfts()
+		{
+			this.ValidateTag(ActionPluginTag.VerifyBurnNfts);
+			return (ActionPlugin.VerifyBurnNftsInfo)this.Value!;
+		}
+
 		public ActionPlugin.VerifyTransferIcpInfo AsVerifyTransferIcp()
 		{
 			this.ValidateTag(ActionPluginTag.VerifyTransferIcp);
@@ -102,21 +103,6 @@ namespace Candid.World.Models
 			if (!this.Tag.Equals(tag))
 			{
 				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
-			}
-		}
-
-		public class BurnNftInfo
-		{
-			[CandidName("canister")]
-			public string Canister { get; set; }
-
-			public BurnNftInfo(string canister)
-			{
-				this.Canister = canister;
-			}
-
-			public BurnNftInfo()
-			{
 			}
 		}
 
@@ -173,6 +159,25 @@ namespace Candid.World.Models
 			}
 		}
 
+		public class VerifyBurnNftsInfo
+		{
+			[CandidName("canister")]
+			public string Canister { get; set; }
+
+			[CandidName("requiredNftMetadata")]
+			public OptionalValue<List<string>> RequiredNftMetadata { get; set; }
+
+			public VerifyBurnNftsInfo(string canister, OptionalValue<List<string>> requiredNftMetadata)
+			{
+				this.Canister = canister;
+				this.RequiredNftMetadata = requiredNftMetadata;
+			}
+
+			public VerifyBurnNftsInfo()
+			{
+			}
+		}
+
 		public class VerifyTransferIcpInfo
 		{
 			[CandidName("amt")]
@@ -218,9 +223,6 @@ namespace Candid.World.Models
 
 	public enum ActionPluginTag
 	{
-		[CandidName("burnNft")]
-		[VariantOptionType(typeof(ActionPlugin.BurnNftInfo))]
-		BurnNft,
 		[CandidName("claimStakingRewardIcp")]
 		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardIcpInfo))]
 		ClaimStakingRewardIcp,
@@ -230,6 +232,9 @@ namespace Candid.World.Models
 		[CandidName("claimStakingRewardNft")]
 		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardNftInfo))]
 		ClaimStakingRewardNft,
+		[CandidName("verifyBurnNfts")]
+		[VariantOptionType(typeof(ActionPlugin.VerifyBurnNftsInfo))]
+		VerifyBurnNfts,
 		[CandidName("verifyTransferIcp")]
 		[VariantOptionType(typeof(ActionPlugin.VerifyTransferIcpInfo))]
 		VerifyTransferIcp,

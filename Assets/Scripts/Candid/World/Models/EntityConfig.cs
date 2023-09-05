@@ -4,7 +4,7 @@ using groupId = System.String;
 using entityId = System.String;
 using duration = EdjCase.ICP.Candid.Models.UnboundedUInt;
 using attribute = System.String;
-using TokenIndex = System.UInt32;
+using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using EdjCase.ICP.Candid.Models;
 
@@ -19,16 +19,16 @@ namespace Candid.World.Models
 		public OptionalValue<UnboundedUInt> Duration { get; set; }
 
 		[CandidName("eid")]
-		public string Eid { get; set; }
+		public entityId Eid { get; set; }
 
 		[CandidName("gid")]
-		public string Gid { get; set; }
+		public groupId Gid { get; set; }
 
 		[CandidName("imageUrl")]
 		public OptionalValue<string> ImageUrl { get; set; }
 
 		[CandidName("metadata")]
-		public string Metadata { get; set; }
+		public OptionalValue<string> Metadata { get; set; }
 
 		[CandidName("name")]
 		public OptionalValue<string> Name { get; set; }
@@ -40,9 +40,9 @@ namespace Candid.World.Models
 		public OptionalValue<string> Rarity { get; set; }
 
 		[CandidName("tag")]
-		public string Tag { get; set; }
+		public OptionalValue<string> Tag { get; set; }
 
-		public EntityConfig(OptionalValue<string> description, OptionalValue<UnboundedUInt> duration, string eid, string gid, OptionalValue<string> imageUrl, string metadata, OptionalValue<string> name, OptionalValue<string> objectUrl, OptionalValue<string> rarity, string tag)
+		public EntityConfig(OptionalValue<string> description, OptionalValue<UnboundedUInt> duration, entityId eid, groupId gid, OptionalValue<string> imageUrl, OptionalValue<string> metadata, OptionalValue<string> name, OptionalValue<string> objectUrl, OptionalValue<string> rarity, OptionalValue<string> tag)
 		{
 			this.Description = description;
 			this.Duration = duration;

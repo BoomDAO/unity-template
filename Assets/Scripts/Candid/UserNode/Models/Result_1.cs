@@ -13,6 +13,7 @@ using AssocList_1 = EdjCase.ICP.Candid.Models.OptionalValue<Candid.UserNode.Mode
 using AssocList = EdjCase.ICP.Candid.Models.OptionalValue<Candid.UserNode.Models.AssocListItem>;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.UserNode.Models;
+using System.Collections.Generic;
 using System;
 
 namespace Candid.UserNode.Models
@@ -41,7 +42,7 @@ namespace Candid.UserNode.Models
 			return new Result_1(Result_1Tag.Err, info);
 		}
 
-		public static Result_1 Ok(ActionResponse info)
+		public static Result_1 Ok(List<Entity> info)
 		{
 			return new Result_1(Result_1Tag.Ok, info);
 		}
@@ -52,10 +53,10 @@ namespace Candid.UserNode.Models
 			return (string)this.Value!;
 		}
 
-		public ActionResponse AsOk()
+		public List<Entity> AsOk()
 		{
 			this.ValidateTag(Result_1Tag.Ok);
-			return (ActionResponse)this.Value!;
+			return (List<Entity>)this.Value!;
 		}
 
 		private void ValidateTag(Result_1Tag tag)
@@ -73,7 +74,7 @@ namespace Candid.UserNode.Models
 		[VariantOptionType(typeof(string))]
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(ActionResponse))]
+		[VariantOptionType(typeof(List<Entity>))]
 		Ok
 	}
 }

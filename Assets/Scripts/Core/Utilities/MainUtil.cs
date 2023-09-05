@@ -1,5 +1,8 @@
 namespace Boom.Utility
 {
+    using System.IO;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Runtime.Serialization;
     using UnityEngine;
 
     public static class MainUtil
@@ -8,19 +11,23 @@ namespace Boom.Utility
         {
             return System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
-        public static long MilliToSeconds(this long milli)
+        public static float MilliToSeconds(this long milli)
         {
-            return milli / 1_000;
+            return milli / (float)1_000;
         }
-        public static long NanoToMilliseconds(this long nanoSec)
+        public static long SecondsToMilli(this float seconds)
         {
-            return nanoSec / 1_000_000;
+            return (long)(seconds * 1_000);
         }
         public static long NanoToMilliseconds(this ulong nanoSec)
         {
             return (long)nanoSec / 1_000_000;
         }
-        public static string AddressToShort(this string value)
+        public static ulong MilliToNano(this long nanoSec)
+        {
+            return (ulong)nanoSec * 1_000_000;
+        }
+        public static string SimplifyAddress(this string value)
         {
             string newString = "";
 
@@ -100,5 +107,14 @@ namespace Boom.Utility
             return Cursor.visible;
         }
         #endregion
+
+        public static T CreateDeepCopy<T>(this T obj)
+        {
+            using var ms = new MemoryStream();
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(ms, obj);
+            ms.Seek(0, SeekOrigin.Begin);
+            return (T)formatter.Deserialize(ms);
+        }
     }
 }
