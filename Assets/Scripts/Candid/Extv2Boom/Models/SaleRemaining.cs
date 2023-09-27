@@ -21,7 +21,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(SaleRemainingTag))]
+	[Variant]
 	public class SaleRemaining
 	{
 		[VariantTagProperty()]
@@ -77,7 +77,7 @@ namespace Candid.Extv2Boom.Models
 		[CandidName("retain")]
 		Retain,
 		[CandidName("send")]
-		[VariantOptionType(typeof(AccountIdentifier__2))]
+		
 		Send
 	}
 }

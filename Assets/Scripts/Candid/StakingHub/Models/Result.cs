@@ -4,7 +4,7 @@ using System;
 
 namespace Candid.StakingHub.Models
 {
-	[Variant(typeof(ResultTag))]
+	[Variant]
 	public class Result
 	{
 		[VariantTagProperty()]
@@ -57,10 +57,10 @@ namespace Candid.StakingHub.Models
 	public enum ResultTag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(string))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(string))]
+		
 		Ok
 	}
 }

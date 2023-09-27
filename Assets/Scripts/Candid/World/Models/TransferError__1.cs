@@ -11,7 +11,7 @@ using System;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(TransferError__1Tag))]
+	[Variant]
 	public class TransferError__1
 	{
 		[VariantTagProperty()]
@@ -150,14 +150,14 @@ namespace Candid.World.Models
 
 	public enum TransferError__1Tag
 	{
-		[VariantOptionType(typeof(TransferError__1.BadFeeInfo))]
+		
 		BadFee,
-		[VariantOptionType(typeof(TransferError__1.InsufficientFundsInfo))]
+		
 		InsufficientFunds,
 		TxCreatedInFuture,
-		[VariantOptionType(typeof(TransferError__1.TxDuplicateInfo))]
+		
 		TxDuplicate,
-		[VariantOptionType(typeof(TransferError__1.TxTooOldInfo))]
+		
 		TxTooOld
 	}
 }

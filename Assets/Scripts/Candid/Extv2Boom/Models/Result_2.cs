@@ -23,7 +23,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(Result_2Tag))]
+	[Variant]
 	public class Result_2
 	{
 		[VariantTagProperty()]
@@ -99,10 +99,10 @@ namespace Candid.Extv2Boom.Models
 	public enum Result_2Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(CommonError__1))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(List<Result_2.OkItem>))]
+		
 		Ok
 	}
 }

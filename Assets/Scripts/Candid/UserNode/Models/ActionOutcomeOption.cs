@@ -35,7 +35,7 @@ namespace Candid.UserNode.Models
 		{
 		}
 
-		[Variant(typeof(ActionOutcomeOption.OptionInfoTag))]
+		[Variant]
 		public class OptionInfo
 		{
 			[VariantTagProperty()]
@@ -154,28 +154,28 @@ namespace Candid.UserNode.Models
 		public enum OptionInfoTag
 		{
 			[CandidName("deleteEntity")]
-			[VariantOptionType(typeof(DeleteEntity))]
+			
 			DeleteEntity,
 			[CandidName("mintNft")]
-			[VariantOptionType(typeof(MintNft))]
+			
 			MintNft,
 			[CandidName("mintToken")]
-			[VariantOptionType(typeof(MintToken))]
+			
 			MintToken,
 			[CandidName("receiveEntityQuantity")]
-			[VariantOptionType(typeof(ReceiveEntityQuantity))]
+			
 			ReceiveEntityQuantity,
 			[CandidName("reduceEntityExpiration")]
-			[VariantOptionType(typeof(ReduceEntityExpiration))]
+			
 			ReduceEntityExpiration,
 			[CandidName("renewEntityExpiration")]
-			[VariantOptionType(typeof(RenewEntityExpiration))]
+			
 			RenewEntityExpiration,
 			[CandidName("setEntityAttribute")]
-			[VariantOptionType(typeof(SetEntityAttribute))]
+			
 			SetEntityAttribute,
 			[CandidName("spendEntityQuantity")]
-			[VariantOptionType(typeof(SpendEntityQuantity))]
+			
 			SpendEntityQuantity
 		}
 	}

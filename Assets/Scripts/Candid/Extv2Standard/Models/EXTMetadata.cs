@@ -20,7 +20,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(EXTMetadataTag))]
+	[Variant]
 	public class EXTMetadata
 	{
 		[VariantTagProperty()]
@@ -127,10 +127,10 @@ namespace Candid.Extv2Standard.Models
 	public enum EXTMetadataTag
 	{
 		[CandidName("fungible")]
-		[VariantOptionType(typeof(EXTMetadata.FungibleInfo))]
+		
 		Fungible,
 		[CandidName("nonfungible")]
-		[VariantOptionType(typeof(EXTMetadata.NonfungibleInfo))]
+		
 		Nonfungible
 	}
 }

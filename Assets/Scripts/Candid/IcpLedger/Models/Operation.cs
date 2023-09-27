@@ -14,7 +14,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.IcpLedger.Models
 {
-	[Variant(typeof(OperationTag))]
+	[Variant]
 	public class Operation
 	{
 		[VariantTagProperty()]
@@ -226,15 +226,15 @@ namespace Candid.IcpLedger.Models
 
 	public enum OperationTag
 	{
-		[VariantOptionType(typeof(Operation.MintInfo))]
+		
 		Mint,
-		[VariantOptionType(typeof(Operation.BurnInfo))]
+		
 		Burn,
-		[VariantOptionType(typeof(Operation.TransferInfo))]
+		
 		Transfer,
-		[VariantOptionType(typeof(Operation.ApproveInfo))]
+		
 		Approve,
-		[VariantOptionType(typeof(Operation.TransferFromInfo))]
+		
 		TransferFrom
 	}
 }

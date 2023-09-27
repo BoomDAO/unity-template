@@ -20,7 +20,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(Result_9Tag))]
+	[Variant]
 	public class Result_9
 	{
 		[VariantTagProperty()]
@@ -92,10 +92,10 @@ namespace Candid.Extv2Standard.Models
 	public enum Result_9Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(CommonError))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(Result_9.OkInfo))]
+		
 		Ok
 	}
 }

@@ -22,7 +22,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(MetadataContainerTag))]
+	[Variant]
 	public class MetadataContainer
 	{
 		[VariantTagProperty()]
@@ -86,13 +86,13 @@ namespace Candid.Extv2Boom.Models
 	public enum MetadataContainerTag
 	{
 		[CandidName("blob")]
-		[VariantOptionType(typeof(List<byte>))]
+		
 		Blob,
 		[CandidName("data")]
-		[VariantOptionType(typeof(List<MetadataValue>))]
+		
 		Data,
 		[CandidName("json")]
-		[VariantOptionType(typeof(string))]
+		
 		Json
 	}
 }

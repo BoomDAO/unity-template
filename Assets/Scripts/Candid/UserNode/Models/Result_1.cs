@@ -18,7 +18,7 @@ using System;
 
 namespace Candid.UserNode.Models
 {
-	[Variant(typeof(Result_1Tag))]
+	[Variant]
 	public class Result_1
 	{
 		[VariantTagProperty()]
@@ -71,10 +71,10 @@ namespace Candid.UserNode.Models
 	public enum Result_1Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(string))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(List<Entity>))]
+		
 		Ok
 	}
 }

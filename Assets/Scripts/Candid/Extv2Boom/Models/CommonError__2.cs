@@ -21,7 +21,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(CommonError__2Tag))]
+	[Variant]
 	public class CommonError__2
 	{
 		[VariantTagProperty()]
@@ -73,9 +73,9 @@ namespace Candid.Extv2Boom.Models
 
 	public enum CommonError__2Tag
 	{
-		[VariantOptionType(typeof(TokenIdentifier__1))]
+		
 		InvalidToken,
-		[VariantOptionType(typeof(string))]
+		
 		Other
 	}
 }

@@ -18,7 +18,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.UserNode.Models
 {
-	[Variant(typeof(ActionPluginTag))]
+	[Variant]
 	public class ActionPlugin
 	{
 		[VariantTagProperty()]
@@ -225,22 +225,22 @@ namespace Candid.UserNode.Models
 	public enum ActionPluginTag
 	{
 		[CandidName("burnNft")]
-		[VariantOptionType(typeof(ActionPlugin.BurnNftInfo))]
+		
 		VerifyBurnNfts,
 		[CandidName("claimStakingRewardIcp")]
-		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardIcpInfo))]
+		
 		ClaimStakingRewardIcp,
 		[CandidName("claimStakingRewardIcrc")]
-		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardIcrcInfo))]
+		
 		ClaimStakingRewardIcrc,
 		[CandidName("claimStakingRewardNft")]
-		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardNftInfo))]
+		
 		ClaimStakingRewardNft,
 		[CandidName("verifyTransferIcp")]
-		[VariantOptionType(typeof(ActionPlugin.VerifyTransferIcpInfo))]
+		
 		VerifyTransferIcp,
 		[CandidName("verifyTransferIcrc")]
-		[VariantOptionType(typeof(ActionPlugin.VerifyTransferIcrcInfo))]
+		
 		VerifyTransferIcrc
 	}
 }

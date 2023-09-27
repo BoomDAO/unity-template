@@ -19,7 +19,7 @@ using System;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(Result_6Tag))]
+	[Variant]
 	public class Result_6
 	{
 		[VariantTagProperty()]
@@ -72,10 +72,10 @@ namespace Candid.Extv2Standard.Models
 	public enum Result_6Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(CommonError))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(Metadata))]
+		
 		Ok
 	}
 }

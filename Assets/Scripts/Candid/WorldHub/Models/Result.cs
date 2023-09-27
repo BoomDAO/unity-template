@@ -7,7 +7,7 @@ using System;
 
 namespace Candid.WorldHub.Models
 {
-	[Variant(typeof(ResultTag))]
+	[Variant]
 	public class Result
 	{
 		[VariantTagProperty()]
@@ -60,10 +60,10 @@ namespace Candid.WorldHub.Models
 	public enum ResultTag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(string))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(string))]
+		
 		Ok
 	}
 }

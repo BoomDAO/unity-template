@@ -12,7 +12,7 @@ using System;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(Result__1Tag))]
+	[Variant]
 	public class Result__1
 	{
 		[VariantTagProperty()]
@@ -64,9 +64,9 @@ namespace Candid.World.Models
 
 	public enum Result__1Tag
 	{
-		[VariantOptionType(typeof(TransferError))]
+		
 		Err,
-		[VariantOptionType(typeof(UnboundedUInt))]
+		
 		Ok
 	}
 }

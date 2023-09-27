@@ -21,7 +21,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(BalanceResponseTag))]
+	[Variant]
 	public class BalanceResponse
 	{
 		[VariantTagProperty()]
@@ -74,10 +74,10 @@ namespace Candid.Extv2Boom.Models
 	public enum BalanceResponseTag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(CommonError__2))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(Balance))]
+		
 		Ok
 	}
 }

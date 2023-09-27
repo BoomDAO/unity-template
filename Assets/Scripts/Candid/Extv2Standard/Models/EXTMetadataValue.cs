@@ -21,7 +21,7 @@ using System;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(EXTMetadataValueTag))]
+	[Variant]
 	public class EXTMetadataValue
 	{
 		[VariantTagProperty()]
@@ -96,16 +96,16 @@ namespace Candid.Extv2Standard.Models
 	public enum EXTMetadataValueTag
 	{
 		[CandidName("blob")]
-		[VariantOptionType(typeof(List<byte>))]
+		
 		Blob,
 		[CandidName("nat")]
-		[VariantOptionType(typeof(UnboundedUInt))]
+		
 		Nat,
 		[CandidName("nat8")]
-		[VariantOptionType(typeof(byte))]
+		
 		Nat8,
 		[CandidName("text")]
-		[VariantOptionType(typeof(string))]
+		
 		Text
 	}
 }

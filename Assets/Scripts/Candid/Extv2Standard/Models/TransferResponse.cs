@@ -19,7 +19,7 @@ using System;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(TransferResponseTag))]
+	[Variant]
 	public class TransferResponse
 	{
 		[VariantTagProperty()]
@@ -68,7 +68,7 @@ namespace Candid.Extv2Standard.Models
 			}
 		}
 
-		[Variant(typeof(TransferResponse.ErrInfoTag))]
+		[Variant]
 		public class ErrInfo
 		{
 			[VariantTagProperty()]
@@ -152,15 +152,15 @@ namespace Candid.Extv2Standard.Models
 
 		public enum ErrInfoTag
 		{
-			[VariantOptionType(typeof(AccountIdentifier))]
+			
 			CannotNotify,
 			InsufficientBalance,
-			[VariantOptionType(typeof(TokenIdentifier))]
+			
 			InvalidToken,
-			[VariantOptionType(typeof(string))]
+			
 			Other,
 			Rejected,
-			[VariantOptionType(typeof(AccountIdentifier))]
+			
 			Unauthorized
 		}
 	}
@@ -168,10 +168,10 @@ namespace Candid.Extv2Standard.Models
 	public enum TransferResponseTag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(TransferResponse.ErrInfo))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(Balance))]
+		
 		Ok
 	}
 }

@@ -4,7 +4,7 @@ using System;
 
 namespace Candid.StakingHub.Models
 {
-	[Variant(typeof(ResponseTag))]
+	[Variant]
 	public class Response
 	{
 		[VariantTagProperty()]
@@ -56,9 +56,9 @@ namespace Candid.StakingHub.Models
 
 	public enum ResponseTag
 	{
-		[VariantOptionType(typeof(string))]
+		
 		Err,
-		[VariantOptionType(typeof(string))]
+		
 		Success
 	}
 }

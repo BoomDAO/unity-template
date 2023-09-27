@@ -13,7 +13,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(ActionArgTag))]
+	[Variant]
 	public class ActionArg
 	{
 		[VariantTagProperty()]
@@ -238,25 +238,18 @@ namespace Candid.World.Models
 	public enum ActionArgTag
 	{
 		[CandidName("claimStakingRewardIcp")]
-		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardIcpInfo))]
 		ClaimStakingRewardIcp,
 		[CandidName("claimStakingRewardIcrc")]
-		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardIcrcInfo))]
 		ClaimStakingRewardIcrc,
 		[CandidName("claimStakingRewardNft")]
-		[VariantOptionType(typeof(ActionArg.ClaimStakingRewardNftInfo))]
 		ClaimStakingRewardNft,
 		[CandidName("default")]
-		[VariantOptionType(typeof(ActionArg.DefaultInfo))]
 		Default,
 		[CandidName("verifyBurnNfts")]
-		[VariantOptionType(typeof(ActionArg.VerifyBurnNftsInfo))]
 		VerifyBurnNfts,
 		[CandidName("verifyTransferIcp")]
-		[VariantOptionType(typeof(ActionArg.VerifyTransferIcpInfo))]
 		VerifyTransferIcp,
 		[CandidName("verifyTransferIcrc")]
-		[VariantOptionType(typeof(ActionArg.VerifyTransferIcrcInfo))]
 		VerifyTransferIcrc
 	}
 }

@@ -20,7 +20,7 @@ using EdjCase.ICP.Candid.Models.Values;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(HttpStreamingStrategyTag))]
+	[Variant]
 	public class HttpStreamingStrategy
 	{
 		[VariantTagProperty()]
@@ -80,7 +80,7 @@ namespace Candid.Extv2Standard.Models
 
 	public enum HttpStreamingStrategyTag
 	{
-		[VariantOptionType(typeof(HttpStreamingStrategy.CallbackInfo))]
+		
 		Callback
 	}
 }

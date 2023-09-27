@@ -20,7 +20,7 @@ using System;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(UserTag))]
+	[Variant]
 	public class User
 	{
 		[VariantTagProperty()]
@@ -73,10 +73,10 @@ namespace Candid.Extv2Standard.Models
 	public enum UserTag
 	{
 		[CandidName("address")]
-		[VariantOptionType(typeof(AccountIdentifier))]
+		
 		Address,
 		[CandidName("principal")]
-		[VariantOptionType(typeof(Principal))]
+		
 		Principal
 	}
 }

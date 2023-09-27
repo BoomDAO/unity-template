@@ -11,7 +11,7 @@ using System;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(Result_1Tag))]
+	[Variant]
 	public class Result_1
 	{
 		[VariantTagProperty()]
@@ -60,7 +60,7 @@ namespace Candid.World.Models
 			}
 		}
 
-		[Variant(typeof(Result_1.ErrInfoTag))]
+		[Variant]
 		public class ErrInfo
 		{
 			[VariantTagProperty()]
@@ -112,9 +112,9 @@ namespace Candid.World.Models
 
 		public enum ErrInfoTag
 		{
-			[VariantOptionType(typeof(string))]
+			
 			Err,
-			[VariantOptionType(typeof(TransferError__1))]
+			
 			TxErr
 		}
 	}
@@ -122,10 +122,10 @@ namespace Candid.World.Models
 	public enum Result_1Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(Result_1.ErrInfo))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(TransferResult))]
+		
 		Ok
 	}
 }

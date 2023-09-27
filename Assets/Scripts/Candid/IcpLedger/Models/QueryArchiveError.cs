@@ -13,7 +13,7 @@ using System;
 
 namespace Candid.IcpLedger.Models
 {
-	[Variant(typeof(QueryArchiveErrorTag))]
+	[Variant]
 	public class QueryArchiveError
 	{
 		[VariantTagProperty()]
@@ -103,9 +103,9 @@ namespace Candid.IcpLedger.Models
 
 	public enum QueryArchiveErrorTag
 	{
-		[VariantOptionType(typeof(QueryArchiveError.BadFirstBlockIndexInfo))]
+		
 		BadFirstBlockIndex,
-		[VariantOptionType(typeof(QueryArchiveError.OtherInfo))]
+		
 		Other
 	}
 }

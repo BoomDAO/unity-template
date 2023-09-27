@@ -22,7 +22,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(MetadataTag))]
+	[Variant]
 	public class Metadata
 	{
 		[VariantTagProperty()]
@@ -129,10 +129,10 @@ namespace Candid.Extv2Boom.Models
 	public enum MetadataTag
 	{
 		[CandidName("fungible")]
-		[VariantOptionType(typeof(Metadata.FungibleInfo))]
+		
 		Fungible,
 		[CandidName("nonfungible")]
-		[VariantOptionType(typeof(Metadata.NonfungibleInfo))]
+		
 		Nonfungible
 	}
 }
