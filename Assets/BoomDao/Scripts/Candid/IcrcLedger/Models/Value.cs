@@ -17,7 +17,7 @@ using System;
 
 namespace Candid.IcrcLedger.Models
 {
-	[Variant(typeof(ValueTag))]
+	[Variant]
 	public class Value
 	{
 		[VariantTagProperty()]
@@ -91,13 +91,13 @@ namespace Candid.IcrcLedger.Models
 
 	public enum ValueTag
 	{
-		[VariantOptionType(typeof(List<byte>))]
+		
 		Blob,
-		[VariantOptionType(typeof(UnboundedInt))]
+		
 		Int,
-		[VariantOptionType(typeof(UnboundedUInt))]
+		
 		Nat,
-		[VariantOptionType(typeof(string))]
+		
 		Text
 	}
 }

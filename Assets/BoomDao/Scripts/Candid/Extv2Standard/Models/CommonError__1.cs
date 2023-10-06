@@ -19,7 +19,7 @@ using System;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(CommonError__1Tag))]
+	[Variant]
 	public class CommonError__1
 	{
 		[VariantTagProperty()]
@@ -71,9 +71,9 @@ namespace Candid.Extv2Standard.Models
 
 	public enum CommonError__1Tag
 	{
-		[VariantOptionType(typeof(TokenIdentifier))]
+		
 		InvalidToken,
-		[VariantOptionType(typeof(string))]
+		
 		Other
 	}
 }

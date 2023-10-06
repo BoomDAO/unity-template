@@ -10,6 +10,7 @@
       "EdjCase.ICP.Agent/1.0.0": {
         "dependencies": {
           "BouncyCastle.Cryptography": "2.1.1",
+          "EdjCase.ICP.BLS": "1.0.0",
           "EdjCase.ICP.Candid": "1.0.0",
           "System.Formats.Cbor": "7.0.0",
           "Vsxmd": "1.4.4"
@@ -98,6 +99,22 @@
         }
       },
       "Vsxmd/1.4.4": {},
+      "Wasmtime/8.0.1": {
+        "runtime": {
+          "lib/netstandard2.1/Wasmtime.Dotnet.dll": {
+            "assemblyVersion": "8.0.1.0",
+            "fileVersion": "8.0.1.0"
+          }
+        }
+      },
+      "EdjCase.ICP.BLS/1.0.0": {
+        "dependencies": {
+          "Wasmtime": "8.0.1"
+        },
+        "runtime": {
+          "EdjCase.ICP.BLS.dll": {}
+        }
+      },
       "EdjCase.ICP.Candid/1.0.0": {
         "dependencies": {
           "Microsoft.Bcl.HashCode": "1.1.1",
@@ -178,6 +195,18 @@
       "sha512": "sha512-dhE1koy33KVwpKuz803/7GpYm4Q2emwiln2beHpLJb4PHAbJUFFQ+BUGWUe/iEVSeYptODX7x2fvpYlBvSConQ==",
       "path": "vsxmd/1.4.4",
       "hashPath": "vsxmd.1.4.4.nupkg.sha512"
+    },
+    "Wasmtime/8.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-erxCx7kWqnVstw8KBvGnrIEXJSDW4CKKED5mNhJAL9dw3xK8bMbUdamfOchsNEweWwuuyHwjS2KSr1SQ+HNEpg==",
+      "path": "wasmtime/8.0.1",
+      "hashPath": "wasmtime.8.0.1.nupkg.sha512"
+    },
+    "EdjCase.ICP.BLS/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "EdjCase.ICP.Candid/1.0.0": {
       "type": "project",

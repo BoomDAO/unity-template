@@ -10,7 +10,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(TransferErrorTag))]
+	[Variant]
 	public class TransferError
 	{
 		[VariantTagProperty()]
@@ -210,17 +210,17 @@ namespace Candid.World.Models
 
 	public enum TransferErrorTag
 	{
-		[VariantOptionType(typeof(TransferError.BadBurnInfo))]
+		
 		BadBurn,
-		[VariantOptionType(typeof(TransferError.BadFeeInfo))]
+		
 		BadFee,
-		[VariantOptionType(typeof(TransferError.CreatedInFutureInfo))]
+		
 		CreatedInFuture,
-		[VariantOptionType(typeof(TransferError.DuplicateInfo))]
+		
 		Duplicate,
-		[VariantOptionType(typeof(TransferError.GenericErrorInfo))]
+		
 		GenericError,
-		[VariantOptionType(typeof(TransferError.InsufficientFundsInfo))]
+		
 		InsufficientFunds,
 		TemporarilyUnavailable,
 		TooOld

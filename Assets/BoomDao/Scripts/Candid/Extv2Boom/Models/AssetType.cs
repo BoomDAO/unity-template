@@ -22,7 +22,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(AssetTypeTag))]
+	[Variant]
 	public class AssetType
 	{
 		[VariantTagProperty()]
@@ -105,13 +105,11 @@ namespace Candid.Extv2Boom.Models
 	public enum AssetTypeTag
 	{
 		[CandidName("canister")]
-		[VariantOptionType(typeof(AssetType.CanisterInfo))]
 		Canister,
 		[CandidName("direct")]
-		[VariantOptionType(typeof(List<ChunkId>))]
 		Direct,
 		[CandidName("other")]
-		[VariantOptionType(typeof(string))]
+		
 		Other
 	}
 }

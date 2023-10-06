@@ -23,7 +23,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(MetadataValueTag))]
+	[Variant]
 	public class MetadataValue
 	{
 		[VariantTagProperty()]
@@ -98,16 +98,16 @@ namespace Candid.Extv2Boom.Models
 	public enum MetadataValueTag
 	{
 		[CandidName("blob")]
-		[VariantOptionType(typeof(List<byte>))]
+		
 		Blob,
 		[CandidName("nat")]
-		[VariantOptionType(typeof(UnboundedUInt))]
+		
 		Nat,
 		[CandidName("nat8")]
-		[VariantOptionType(typeof(byte))]
+		
 		Nat8,
 		[CandidName("text")]
-		[VariantOptionType(typeof(string))]
+		
 		Text
 	}
 }

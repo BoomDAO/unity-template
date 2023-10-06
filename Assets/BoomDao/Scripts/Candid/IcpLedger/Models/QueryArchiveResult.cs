@@ -13,7 +13,7 @@ using System;
 
 namespace Candid.IcpLedger.Models
 {
-	[Variant(typeof(QueryArchiveResultTag))]
+	[Variant]
 	public class QueryArchiveResult
 	{
 		[VariantTagProperty()]
@@ -65,9 +65,9 @@ namespace Candid.IcpLedger.Models
 
 	public enum QueryArchiveResultTag
 	{
-		[VariantOptionType(typeof(BlockRange))]
+		
 		Ok,
-		[VariantOptionType(typeof(QueryArchiveError))]
+		
 		Err
 	}
 }

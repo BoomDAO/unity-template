@@ -14,7 +14,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.IcpLedger.Models
 {
-	[Variant(typeof(Icrc1TransferErrorTag))]
+	[Variant]
 	public class Icrc1TransferError
 	{
 		[VariantTagProperty()]
@@ -214,19 +214,19 @@ namespace Candid.IcpLedger.Models
 
 	public enum Icrc1TransferErrorTag
 	{
-		[VariantOptionType(typeof(Icrc1TransferError.BadFeeInfo))]
+		
 		BadFee,
-		[VariantOptionType(typeof(Icrc1TransferError.BadBurnInfo))]
+		
 		BadBurn,
-		[VariantOptionType(typeof(Icrc1TransferError.InsufficientFundsInfo))]
+		
 		InsufficientFunds,
 		TooOld,
-		[VariantOptionType(typeof(Icrc1TransferError.CreatedInFutureInfo))]
+		
 		CreatedInFuture,
 		TemporarilyUnavailable,
-		[VariantOptionType(typeof(Icrc1TransferError.DuplicateInfo))]
+		
 		Duplicate,
-		[VariantOptionType(typeof(Icrc1TransferError.GenericErrorInfo))]
+		
 		GenericError
 	}
 }

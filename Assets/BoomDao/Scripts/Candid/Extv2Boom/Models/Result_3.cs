@@ -22,7 +22,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(Result_3Tag))]
+	[Variant]
 	public class Result_3
 	{
 		[VariantTagProperty()]
@@ -75,10 +75,10 @@ namespace Candid.Extv2Boom.Models
 	public enum Result_3Tag
 	{
 		[CandidName("err")]
-		[VariantOptionType(typeof(CommonError__1))]
+		
 		Err,
 		[CandidName("ok")]
-		[VariantOptionType(typeof(List<TokenIndex__1>))]
+		
 		Ok
 	}
 }

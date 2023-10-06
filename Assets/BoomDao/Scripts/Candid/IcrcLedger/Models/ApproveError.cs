@@ -16,7 +16,7 @@ using EdjCase.ICP.Candid.Models;
 
 namespace Candid.IcrcLedger.Models
 {
-	[Variant(typeof(ApproveErrorTag))]
+	[Variant]
 	public class ApproveError
 	{
 		[VariantTagProperty()]
@@ -242,19 +242,19 @@ namespace Candid.IcrcLedger.Models
 
 	public enum ApproveErrorTag
 	{
-		[VariantOptionType(typeof(ApproveError.AllowanceChangedInfo))]
+		
 		AllowanceChanged,
-		[VariantOptionType(typeof(ApproveError.BadFeeInfo))]
+		
 		BadFee,
-		[VariantOptionType(typeof(ApproveError.CreatedInFutureInfo))]
+		
 		CreatedInFuture,
-		[VariantOptionType(typeof(ApproveError.DuplicateInfo))]
+		
 		Duplicate,
-		[VariantOptionType(typeof(ApproveError.ExpiredInfo))]
+		
 		Expired,
-		[VariantOptionType(typeof(ApproveError.GenericErrorInfo))]
+		
 		GenericError,
-		[VariantOptionType(typeof(ApproveError.InsufficientFundsInfo))]
+		
 		InsufficientFunds,
 		TemporarilyUnavailable,
 		TooOld

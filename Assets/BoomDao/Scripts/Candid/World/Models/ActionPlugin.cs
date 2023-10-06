@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(ActionPluginTag))]
+	[Variant]
 	public class ActionPlugin
 	{
 		[VariantTagProperty()]
@@ -222,22 +222,22 @@ namespace Candid.World.Models
 	public enum ActionPluginTag
 	{
 		[CandidName("claimStakingRewardIcp")]
-		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardIcpInfo))]
+		
 		ClaimStakingRewardIcp,
 		[CandidName("claimStakingRewardIcrc")]
-		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardIcrcInfo))]
+		
 		ClaimStakingRewardIcrc,
 		[CandidName("claimStakingRewardNft")]
-		[VariantOptionType(typeof(ActionPlugin.ClaimStakingRewardNftInfo))]
+		
 		ClaimStakingRewardNft,
 		[CandidName("verifyBurnNfts")]
-		[VariantOptionType(typeof(ActionPlugin.VerifyBurnNftsInfo))]
+		
 		VerifyBurnNfts,
 		[CandidName("verifyTransferIcp")]
-		[VariantOptionType(typeof(ActionPlugin.VerifyTransferIcpInfo))]
+		
 		VerifyTransferIcp,
 		[CandidName("verifyTransferIcrc")]
-		[VariantOptionType(typeof(ActionPlugin.VerifyTransferIcrcInfo))]
+		
 		VerifyTransferIcrc
 	}
 }

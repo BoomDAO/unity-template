@@ -14,7 +14,7 @@ using System;
 
 namespace Candid.UserNode.Models
 {
-	[Variant(typeof(Trie_1Tag))]
+	[Variant]
 	public class Trie_1
 	{
 		[VariantTagProperty()]
@@ -72,12 +72,12 @@ namespace Candid.UserNode.Models
 	public enum Trie_1Tag
 	{
 		[CandidName("branch")]
-		[VariantOptionType(typeof(Branch_1))]
+		
 		Branch,
 		[CandidName("empty")]
 		Empty,
 		[CandidName("leaf")]
-		[VariantOptionType(typeof(Leaf_1))]
+		
 		Leaf
 	}
 }

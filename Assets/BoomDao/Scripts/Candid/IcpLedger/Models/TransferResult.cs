@@ -13,7 +13,7 @@ using System;
 
 namespace Candid.IcpLedger.Models
 {
-	[Variant(typeof(TransferResultTag))]
+	[Variant]
 	public class TransferResult
 	{
 		[VariantTagProperty()]
@@ -65,9 +65,9 @@ namespace Candid.IcpLedger.Models
 
 	public enum TransferResultTag
 	{
-		[VariantOptionType(typeof(BlockIndex))]
+		
 		Ok,
-		[VariantOptionType(typeof(TransferError))]
+		
 		Err
 	}
 }

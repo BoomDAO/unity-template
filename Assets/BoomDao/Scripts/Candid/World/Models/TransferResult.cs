@@ -9,7 +9,7 @@ using System;
 
 namespace Candid.World.Models
 {
-	[Variant(typeof(TransferResultTag))]
+	[Variant]
 	public class TransferResult
 	{
 		[VariantTagProperty()]
@@ -61,9 +61,9 @@ namespace Candid.World.Models
 
 	public enum TransferResultTag
 	{
-		[VariantOptionType(typeof(TransferError__1))]
+		
 		Err,
-		[VariantOptionType(typeof(BlockIndex))]
+		
 		Ok
 	}
 }

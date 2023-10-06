@@ -13,7 +13,7 @@ using System;
 
 namespace Candid.IcpLedger.Models
 {
-	[Variant(typeof(TransferErrorTag))]
+	[Variant]
 	public class TransferError
 	{
 		[VariantTagProperty()]
@@ -152,14 +152,14 @@ namespace Candid.IcpLedger.Models
 
 	public enum TransferErrorTag
 	{
-		[VariantOptionType(typeof(TransferError.BadFeeInfo))]
+		
 		BadFee,
-		[VariantOptionType(typeof(TransferError.InsufficientFundsInfo))]
+		
 		InsufficientFunds,
-		[VariantOptionType(typeof(TransferError.TxTooOldInfo))]
+		
 		TxTooOld,
 		TxCreatedInFuture,
-		[VariantOptionType(typeof(TransferError.TxDuplicateInfo))]
+		
 		TxDuplicate
 	}
 }

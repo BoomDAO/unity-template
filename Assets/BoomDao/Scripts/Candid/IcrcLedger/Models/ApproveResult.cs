@@ -16,7 +16,7 @@ using System;
 
 namespace Candid.IcrcLedger.Models
 {
-	[Variant(typeof(ApproveResultTag))]
+	[Variant]
 	public class ApproveResult
 	{
 		[VariantTagProperty()]
@@ -68,9 +68,9 @@ namespace Candid.IcrcLedger.Models
 
 	public enum ApproveResultTag
 	{
-		[VariantOptionType(typeof(ApproveError))]
+		
 		Err,
-		[VariantOptionType(typeof(UnboundedUInt))]
+		
 		Ok
 	}
 }

@@ -22,7 +22,7 @@ using System;
 
 namespace Candid.Extv2Boom.Models
 {
-	[Variant(typeof(PaymentTypeTag))]
+	[Variant]
 	public class PaymentType
 	{
 		[VariantTagProperty()]
@@ -86,13 +86,13 @@ namespace Candid.Extv2Boom.Models
 	public enum PaymentTypeTag
 	{
 		[CandidName("nft")]
-		[VariantOptionType(typeof(TokenIndex__1))]
+		
 		Nft,
 		[CandidName("nfts")]
-		[VariantOptionType(typeof(List<TokenIndex__1>))]
+		
 		Nfts,
 		[CandidName("sale")]
-		[VariantOptionType(typeof(ulong))]
+		
 		Sale
 	}
 }

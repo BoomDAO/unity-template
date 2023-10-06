@@ -20,7 +20,7 @@ using System;
 
 namespace Candid.Extv2Standard.Models
 {
-	[Variant(typeof(EXTMetadataContainerTag))]
+	[Variant]
 	public class EXTMetadataContainer
 	{
 		[VariantTagProperty()]
@@ -84,13 +84,13 @@ namespace Candid.Extv2Standard.Models
 	public enum EXTMetadataContainerTag
 	{
 		[CandidName("blob")]
-		[VariantOptionType(typeof(List<byte>))]
+		
 		Blob,
 		[CandidName("data")]
-		[VariantOptionType(typeof(List<EXTMetadataValue>))]
+		
 		Data,
 		[CandidName("json")]
-		[VariantOptionType(typeof(string))]
+		
 		Json
 	}
 }
