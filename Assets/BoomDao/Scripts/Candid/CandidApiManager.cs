@@ -48,7 +48,7 @@ namespace Candid
                 bool isLoadingDataValid = UserUtil.IsLoginDataValid();
                 bool isAnonLoggedIn = UserUtil.IsAnonLoggedIn();
                 bool isConfigReady = UserUtil.IsDataValid<DataTypes.Config>();
-                bool areActionsReady = UserUtil.IsDataValid<DataTypes.Config>();
+                bool areActionsReady = UserUtil.IsDataValid<DataTypes.Action>();
 
                 return isConfigReady && areActionsReady && isLoadingDataValid && isAnonLoggedIn;
             } 

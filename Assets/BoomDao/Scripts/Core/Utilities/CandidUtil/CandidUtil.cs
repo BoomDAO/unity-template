@@ -3,6 +3,7 @@ using Candid.World.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -77,5 +78,20 @@ public static class CandidUtil
         returnVal = _a + b;
 
         return true;
+    }
+
+    public static bool IsValidDfinityAddress(this string address)
+    {
+        string pattern = @"^[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{3}$";
+        Regex regex = new Regex(pattern);
+
+        return regex.IsMatch(address);
+    }
+    public static bool IsValidDfinityPrincipal(this string address)
+    {
+        string pattern = @"^[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{3}$";
+        Regex regex = new Regex(pattern);
+
+        return regex.IsMatch(address);
     }
 }

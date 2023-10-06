@@ -130,7 +130,7 @@ internal static class EntityUtil
         {
             if (!e.fields.TryGetValue("tag", out var value)) return false;
 
-            return value.ToString() == tag;
+            return value.Contains(tag);
         }, out returnValue);
     }
 
