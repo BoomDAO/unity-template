@@ -2,7 +2,13 @@
   <a href="logo" target="_blank" rel="noreferrer"><img src="https://github.com/BoomDAO/game-launcher/assets/29381374/875537bb-f9d4-4594-84e0-a7375ce46213" alt="my banner"></a>
 </p>
 
-## TEST IT HERE
+## HOW TO USE
+Go to the Releases section in this repo to the right --->
+Download the latest release of the Unity Package.
+Drag-and-drop the Unity Package into your Unity Project.
+Start building!
+
+## TEST IT BEFORE DOWNLOADING HERE
 https://prgg7-iaaaa-aaaal-acrfq-cai.raw.icp0.io/
 
 ## UNITY TEMPLATE
