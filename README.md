@@ -13,9 +13,9 @@ https://prgg7-iaaaa-aaaal-acrfq-cai.raw.icp0.io/
 
 ## UNITY TEMPLATE
 
-A **Unity Template** with all the necessary code for integration with the **World Protocol** on the Internet Computer blockchain. Features include on-chain login authentication, payments, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, so that game developers can focus on crafting fun and enjoyable gameplay. 
+This **Unity Template** has all the necessary code for integration with the **World Protocol** on the Internet Computer blockchain. Features include on-chain login authentication, payments, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, so that game developers can focus on crafting fun and enjoyable gameplay. 
 
-Deploy a game **World** canister using our [Game Launcher](launcher.boomdao.xyz) website, configure your World's rules directly from the website, download the Unity Template and edit it to call your World canister. Boom. You now have a fully on-chain game.
+Deploy a game **World** canister using our [Game Launcher](launcher.boomdao.xyz) website, configure your World's rules directly from the website, download this Unity Template and edit it to call your World canister. Boom. You now have a fully on-chain game.
 
 ## TECH DOCUMENTATION
 
