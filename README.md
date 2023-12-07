@@ -3,19 +3,19 @@
 </p>
 
 ## HOW TO USE
-Go to the Releases section in this repo to the right --->
-Download the latest release of the Unity Package.
-Drag-and-drop the Unity Package into your Unity Project.
-Start building!
+1. Go to the Releases section in this repo to the right --->
+2. Download the latest release of the Unity Package.
+3. Drag-and-drop the Unity Package into your Unity Project.
+4. Start building!
 
 ## TEST IT BEFORE DOWNLOADING HERE
 https://prgg7-iaaaa-aaaal-acrfq-cai.raw.icp0.io/
 
 ## UNITY TEMPLATE
 
-A **Unity Template** with all the necessary code for integration with the **World Engine** on the Internet Computer blockchain. Features include on-chain login authentication, payments, staking, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, freeing developers from complexity so they can focus on crafting engaging and enjoyable gameplay. 
+A **Unity Template** with all the necessary code for integration with the **World Protocol** on the Internet Computer blockchain. Features include on-chain login authentication, payments, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, so that game developers can focus on crafting fun and enjoyable gameplay. 
 
-Simply deploy a game **World** canister using our [Game Launcher](launcher.boomdao.xyz) website, configure your World's rules directly from the website, download the Unity Template and edit it to call your World canister, and upload your Unity game client build to the website. Boom. You now have a fully on-chain game.
+Deploy a game **World** canister using our [Game Launcher](launcher.boomdao.xyz) website, configure your World's rules directly from the website, download the Unity Template and edit it to call your World canister. Boom. You now have a fully on-chain game.
 
 ## TECH DOCUMENTATION
 
