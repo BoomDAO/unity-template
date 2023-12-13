@@ -1112,6 +1112,7 @@ MonoBehaviour:
   - buyItemC_ItemB
   - spend_icp_to_mint_test_nft
   - burn_nft_tiket
+  - nft_holding_verification
   content: {fileID: 6631525212458899429}
   closeButton: {fileID: 299223244791056358}
   buying: 0

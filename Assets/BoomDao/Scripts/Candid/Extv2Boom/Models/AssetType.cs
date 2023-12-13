@@ -1,35 +1,20 @@
-using TokenIndex__1 = System.UInt32;
-using TokenIdentifier__2 = System.String;
-using TokenIdentifier__1 = System.String;
-using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
-using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
-using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
-using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField__1 = System.ValueTuple<System.String, System.String>;
-using Extension = System.String;
-using ChunkId = System.UInt32;
-using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
-using AssetHandle__1 = System.String;
-using AccountIdentifier__2 = System.String;
-using AccountIdentifier__1 = System.String;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.Extv2Boom.Models;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using ChunkId = System.UInt32;
+using AssetId = System.UInt32;
 
 namespace Candid.Extv2Boom.Models
 {
 	[Variant]
 	public class AssetType
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public AssetTypeTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public AssetType(AssetTypeTag tag, object? value)
 		{
@@ -46,7 +31,7 @@ namespace Candid.Extv2Boom.Models
 			return new AssetType(AssetTypeTag.Canister, info);
 		}
 
-		public static AssetType Direct(List<ChunkId> info)
+		public static AssetType Direct(AssetType.DirectInfo info)
 		{
 			return new AssetType(AssetTypeTag.Direct, info);
 		}
@@ -62,10 +47,10 @@ namespace Candid.Extv2Boom.Models
 			return (AssetType.CanisterInfo)this.Value!;
 		}
 
-		public List<ChunkId> AsDirect()
+		public AssetType.DirectInfo AsDirect()
 		{
 			this.ValidateTag(AssetTypeTag.Direct);
-			return (List<ChunkId>)this.Value!;
+			return (AssetType.DirectInfo)this.Value!;
 		}
 
 		public string AsOther()
@@ -100,6 +85,13 @@ namespace Candid.Extv2Boom.Models
 			{
 			}
 		}
+
+		public class DirectInfo : List<ChunkId>
+		{
+			public DirectInfo()
+			{
+			}
+		}
 	}
 
 	public enum AssetTypeTag
@@ -109,7 +101,6 @@ namespace Candid.Extv2Boom.Models
 		[CandidName("direct")]
 		Direct,
 		[CandidName("other")]
-		
 		Other
 	}
 }

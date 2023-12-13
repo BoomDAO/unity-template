@@ -1,11 +1,6 @@
-using worldId = System.String;
-using groupId = System.String;
-using entityId = System.String;
-using configId = System.String;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.World.Models;
 using System.Collections.Generic;
+using Candid.World.Models;
 
 namespace Candid.World.Models
 {

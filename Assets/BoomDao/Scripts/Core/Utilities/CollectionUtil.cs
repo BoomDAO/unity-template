@@ -141,6 +141,15 @@
         {
             foreach (T item in arr) action(item);
         }
+        public static void Iterate<T>(this IEnumerable<T> arr, Action<T, int> action)
+        {
+            int index = 0;
+            foreach (T item in arr)
+            {
+                action(item, index);
+                ++index;
+            }
+        }
 
         /// <summary>
         /// Executes a function the first element it finds and returns the index for such element

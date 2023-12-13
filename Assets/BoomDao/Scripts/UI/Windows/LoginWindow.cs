@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using Boom.Utility;
 using Boom;
+using System.Linq;
 
 public class LoginWindow : Window
 {
@@ -22,6 +23,9 @@ public class LoginWindow : Window
     public TextMeshProUGUI loadingTxt;
     public TextMeshProUGUI principalTxt;
     public GameObject pageControl;
+    public GameObject roomsButton;
+
+    Window balanceWindow;
 
     readonly List<Type> typesToLoad = new();
 
@@ -33,21 +37,24 @@ public class LoginWindow : Window
     }
     public override void Setup(object data)
     {
-        UserUtil.RegisterToLoginDataChange(UpdateWindow, true);
+        UserUtil.AddListenerMainDataChange<MainDataTypes.LoginData>(UpdateWindow, true);
         BroadcastState.Register<CanLogin>(UpdateWindow, true);
-        UserUtil.RegisterToDataChange<DataTypes.Entity>(UpdateWindow);
-        UserUtil.RegisterToDataChange<DataTypes.ActionState>(UpdateWindow);
-        UserUtil.RegisterToDataChange<DataTypes.NftCollection>(UpdateWindow);
+        UserUtil.AddListenerDataChangeSelf<DataTypes.Entity>(UpdateWindow);
+        UserUtil.AddListenerDataChangeSelf<DataTypes.ActionState>(UpdateWindow);
+        UserUtil.AddListenerDataChangeSelf<DataTypes.NftCollection>(UpdateWindow);
 
         logInBtn.onClick.AddListener(LogIn);
         logOutBtn.onClick.AddListener(LogoutUser);
 
         loadingTxt.text = "Loading...";
         principalTxt.text = "";
+        pageControl.SetActive(false);
 
         typesToLoad.Add(typeof(DataTypes.Entity));
         typesToLoad.Add(typeof(DataTypes.ActionState));
         typesToLoad.Add(typeof(DataTypes.NftCollection));
+
+        if (CandidApiManager.Instance.BoomDaoGameType == CandidApiManager.GameType.SinglePlayer) roomsButton.SetActive(false);
     }
 
 
@@ -58,11 +65,11 @@ public class LoginWindow : Window
         logInBtn.onClick.RemoveListener(LogIn);
         logOutBtn.onClick.RemoveListener(LogoutUser);
 
-        UserUtil.UnregisterToLoginDataChange(UpdateWindow);
+        UserUtil.RemoveListenerMainDataChange<MainDataTypes.LoginData>(UpdateWindow);
         BroadcastState.Unregister<CanLogin>(UpdateWindow);
-        UserUtil.UnregisterToDataChange<DataTypes.Entity>(UpdateWindow);
-        UserUtil.UnregisterToDataChange<DataTypes.ActionState>(UpdateWindow);
-        UserUtil.UnregisterToDataChange<DataTypes.NftCollection>(UpdateWindow);
+        UserUtil.RemoveListenerDataChangeSelf<DataTypes.Entity>(UpdateWindow);
+        UserUtil.RemoveListenerDataChangeSelf<DataTypes.ActionState>(UpdateWindow);
+        UserUtil.RemoveListenerDataChangeSelf<DataTypes.NftCollection>(UpdateWindow);
     }
 
     private void UpdateWindow(CanLogin state)
@@ -70,9 +77,9 @@ public class LoginWindow : Window
         logInBtn.interactable = state.value;
     }
 
-    private void UpdateWindow(DataState<Data<DataTypes.Entity>> state)
+    private void UpdateWindow(Data<DataTypes.Entity> state)
     {
-        if (state.IsReady() && typesToLoad.Count > 0)
+        if (!UserUtil.IsFetchingData<DataTypes.Entity>() && typesToLoad.Count > 0)
         {
             if (typesToLoad.Contains(typeof(DataTypes.Entity)))
             {
@@ -80,12 +87,12 @@ public class LoginWindow : Window
             }
         }
 
-        var loginDataStateResult = UserUtil.GetLogInDataState();
+        var loginDataStateResult = UserUtil.GetLogInData();
         if (loginDataStateResult.IsOk) UpdateWindow(loginDataStateResult.AsOk());
     }
-    private void UpdateWindow(DataState<Data<DataTypes.ActionState>> state)
+    private void UpdateWindow(Data<DataTypes.ActionState> state)
     {
-        if (state.IsReady() && typesToLoad.Count > 0)
+        if (!UserUtil.IsFetchingData<DataTypes.ActionState>() && typesToLoad.Count > 0)
         {
             if (typesToLoad.Contains(typeof(DataTypes.ActionState)))
             {
@@ -93,12 +100,12 @@ public class LoginWindow : Window
             }
         }
 
-        var loginDataStateResult = UserUtil.GetLogInDataState();
+        var loginDataStateResult = UserUtil.GetLogInData();
         if (loginDataStateResult.IsOk) UpdateWindow(loginDataStateResult.AsOk());
     }
-    private void UpdateWindow(DataState<Data<DataTypes.NftCollection>> state)
+    private void UpdateWindow(Data<DataTypes.NftCollection> state)
     {
-        if (UserUtil.IsDataValid<DataTypes.NftCollection>(Env.Nfts.BOOM_COLLECTION_CANISTER_ID) && typesToLoad.Count > 0)
+        if (UserUtil.IsDataValidSelf<DataTypes.NftCollection>() && typesToLoad.Count > 0)
         {
             if (typesToLoad.Contains(typeof(DataTypes.NftCollection)))
             {
@@ -106,23 +113,30 @@ public class LoginWindow : Window
             }
         }
 
-        var loginDataStateResult = UserUtil.GetLogInDataState();
+        var loginDataStateResult = UserUtil.GetLogInData();
         if (loginDataStateResult.IsOk) UpdateWindow(loginDataStateResult.AsOk());
     }
 
-    private void UpdateWindow(DataState<LoginData> state)
+    private void UpdateWindow(MainDataTypes.LoginData state)
     {
-        bool isLoading = state.IsLoading();
-        var getIsLoginResult = UserUtil.GetLogInType();
+        var loginDataResult = UserUtil.GetLogInData();
 
-        if (getIsLoginResult.Tag == UResultTag.Ok)
+        //bool isValid = UserUtil.IsDataValid<DataTypes.LoginData>();
+        //if (!isValid) return;
+
+        bool isLoading = UserUtil.IsLoginIn();
+
+        if (loginDataResult.IsOk && !isLoading)
         {
+            var loginData = loginDataResult.AsOk();
+            var getIsLoginResult = UserUtil.GetLoginType();
+
             if(getIsLoginResult.AsOk() == UserUtil.LoginType.User)
             {
                 var isUserDataLoaded =
-                    UserUtil.IsDataValid<DataTypes.Entity>() &&
-                    UserUtil.IsDataValid<DataTypes.ActionState>() &&
-                    UserUtil.IsDataValid<DataTypes.NftCollection>(Env.Nfts.BOOM_COLLECTION_CANISTER_ID);
+                    UserUtil.IsDataValidSelf<DataTypes.Entity>() &&
+                    UserUtil.IsDataValidSelf<DataTypes.ActionState>() &&
+                    UserUtil.IsDataValidSelf<DataTypes.NftCollection>();
 
                 logInBtn.gameObject.SetActive(false);
 
@@ -131,10 +145,13 @@ public class LoginWindow : Window
                     initialized = true;
 
                     logInStateTxt.text = "Logged In";
-                    principalTxt.text = $"Principal: <b>\"{state.data.principal}\"</b>\nAccountId: <b>\"{state.data.accountIdentifier}\"</b>";
+                    principalTxt.text = $"Principal: <b>\"{loginData.principal}\"</b>\nAccountId: <b>\"{loginData.accountIdentifier}\"</b>";
                     pageControl.SetActive(true);
                     logOutBtn.gameObject.SetActive(true);
                     loadingTxt.text = "";
+
+                    if(balanceWindow == null) balanceWindow = WindowManager.Instance.OpenWindow<BalanceWindow>(null, 1000);
+
                 }
                 else
                 {
@@ -158,12 +175,15 @@ public class LoginWindow : Window
                 logInBtn.gameObject.SetActive(true);
                 logOutBtn.gameObject.SetActive(false);
                 loadingTxt.text = "Please login";
+
+                if (balanceWindow) balanceWindow.Close();
+
             }
         }
         else
         {
-            if (isLoading) loadingTxt.text = state.LoadingMsg;
-            else loadingTxt.text = "Loading...";
+            if (isLoading) loadingTxt.text = "Loading...";
+            else loadingTxt.text = "";
             logInStateTxt.text = "";
             principalTxt.text = $"";
             pageControl.SetActive(false);
@@ -182,6 +202,6 @@ public class LoginWindow : Window
     //Login
     public void LogIn()
     {
-        UserUtil.StartLogin("Logging In...");
+        Broadcast.Invoke<UserLoginRequest>();
     }
 }

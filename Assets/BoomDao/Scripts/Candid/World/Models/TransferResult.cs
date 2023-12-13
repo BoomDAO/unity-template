@@ -1,22 +1,18 @@
-using worldId = System.String;
-using groupId = System.String;
-using entityId = System.String;
-using configId = System.String;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
+using BlockIndex = System.UInt64;
 
 namespace Candid.World.Models
 {
 	[Variant]
 	public class TransferResult
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public TransferResultTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public TransferResult(TransferResultTag tag, object? value)
 		{
@@ -28,7 +24,7 @@ namespace Candid.World.Models
 		{
 		}
 
-		public static TransferResult Err(TransferError__1 info)
+		public static TransferResult Err(Transfererror1 info)
 		{
 			return new TransferResult(TransferResultTag.Err, info);
 		}
@@ -38,10 +34,10 @@ namespace Candid.World.Models
 			return new TransferResult(TransferResultTag.Ok, info);
 		}
 
-		public TransferError__1 AsErr()
+		public Transfererror1 AsErr()
 		{
 			this.ValidateTag(TransferResultTag.Err);
-			return (TransferError__1)this.Value!;
+			return (Transfererror1)this.Value!;
 		}
 
 		public BlockIndex AsOk()
@@ -61,9 +57,7 @@ namespace Candid.World.Models
 
 	public enum TransferResultTag
 	{
-		
 		Err,
-		
 		Ok
 	}
 }

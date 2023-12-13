@@ -93,7 +93,10 @@ namespace Boom.UI
             openedWindows.TryGetValue(typeName, out Window baseWindow);
             return baseWindow != null;
         }
-
+        public T OpenWindow<T>(int? orderLayer = null) where T : Window
+        {
+            return (T)OpenWindow(typeof(T).Name, null, orderLayer);
+        }
         public T OpenWindow<T>(object data, int? orderLayer = null) where T : Window
         {
             return (T) OpenWindow(typeof(T).Name, data, orderLayer);
@@ -125,7 +128,7 @@ namespace Boom.UI
             }
 
             string typeName = WindowName;
-            Debug.Log($"Try Open Window of Type: {typeName}");
+            //Debug.Log($"Try Open Window of Type: {typeName}");
 
             if (openedWindows.TryGetValue(typeName, out Window baseWindow) == false)
             {

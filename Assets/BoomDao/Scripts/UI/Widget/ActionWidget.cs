@@ -103,14 +103,14 @@ public class ActionWidget : Window
         {
             case ImageContentType.Url imageContentType:
 
-                Debug.Log("Load Image Url: " + imageContentType.content);
+                //Debug.Log("Load Image Url: " + imageContentType.content);
                 CoroutineManager.Instance.DownloadImage(image, imageContentType.content);
 
                 break;
             case ImageContentType.Base64Encoding imageContentType:
 
                 string encoding = imageContentType.content.Split(',')[1];
-                Debug.Log("Load Base64 Encoded Image: " + encoding);
+                //Debug.Log("Load Base64 Encoded Image: " + encoding);
 
                 byte[] imageBytes = Convert.FromBase64String(encoding);
                 Texture2D tex = new(2, 2);

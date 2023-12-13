@@ -9,114 +9,60 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using System.Linq;
+using static Env;
 
 public static class UserUtil
 {
     #region Login
     public enum LoginType { User, Anon }
-    public static void RegisterToLoginDataChange(this Action<DataState<LoginData>> action, bool invokeOnRegistration = false)
-    {
-        BroadcastState.Register<DataState<LoginData>>(action, invokeOnRegistration);
-    }
-    public static void UnregisterToLoginDataChange(this Action<DataState<LoginData>> action)
-    {
-        BroadcastState.Unregister<DataState<LoginData>>(action);
-    }
 
-    public static void StartLogin(string loadingMessage = "Loading...")
+    public static void SetAsLoginIn()
     {
-        Broadcast.Invoke<StartLogin>();
+        var result = GetLogInData();
 
-        BroadcastState.ForceInvoke<DataState<LoginData>>(e =>
+        if (result.IsErr)
         {
-            e.SetAsLoading(loadingMessage);
+            Debug.LogError(result.AsErr());
 
-            return e;
-        });
-    }
-    public static void UpdateLoginData(IAgent agent, string principal, string accountIdentifier, bool asAnon)
-    {
-        BroadcastState.ForceInvoke<DataState<LoginData>>(e =>
-        {
-            Debug.Log($"Principal: {principal}");
-            Debug.Log($"Address: {accountIdentifier}");
-            e.SetAsReady(new LoginData(agent, principal, accountIdentifier, asAnon));
-            return e;
-        });
+            return;
+        }
+        var a = new MainDataTypes.LoginData(true, result.AsOk());
+        UserUtil.UpdateMainData(new MainDataTypes.LoginData(true, result.AsOk()));
     }
 
-    /// <summary>
-    /// If LoginData is ever initialized this function will return a result as an Ok, being this the DataState Object of the User/Anon LoginData
-    /// Otherwise it will return a result as an Err, being this an error message
-    /// </summary>
-    /// <returns>Could be either the Data State Object of LoginData or an error message</returns>
-    public static UResult<DataState<LoginData>, string> GetLogInDataState()
+    public static bool IsLoginIn() 
     {
-        if (BroadcastState.TryRead<DataState<LoginData>>(out var state) == false)
+        var loginDataResult = GetMainData<MainDataTypes.LoginData>();
+
+        if(loginDataResult.IsErr)
         {
-            return new("Data could not be found");
+            Debug.LogError(loginDataResult.AsErr());
+
+            return false;
         }
 
-        if (!state.IsReady())
-        {
-            if (state.IsLoading())
-            {
-                return new(state.LoadingMsg);
-            }
-            else
-            {
-                return new("StartLogin process has not started");
-            }
-        }
 
-        return new(state);
+        return loginDataResult.AsOk().isLoginIn;
     }
+
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this the User/Anon LoginData
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns>Could be either the Data State Object of LoginData or an error message</returns>
-    public static UResult<LoginData, string> GetLogInData()
+    public static UResult<MainDataTypes.LoginData, string> GetLogInData()
     {
-        if (BroadcastState.TryRead<DataState<LoginData>>(out var state) == false)
+        var loginDataResult = GetMainData<MainDataTypes.LoginData>();
+
+
+        if (loginDataResult.IsErr)
         {
-            return new("Data could not be found");
+            return new(loginDataResult.AsErr());
         }
 
-        if (!state.IsReady())
-        {
-            if (state.IsLoading())
-            {
-                return new(state.LoadingMsg);
-            }
-            else
-            {
-                return new("StartLogin process has not started");
-            }
-        }
 
-        return new(state.data);
-    }
-    public static bool IsLoginDataValid()
-    {
-        if (BroadcastState.TryRead<DataState<LoginData>>(out var state) == false)
-        {
-            return false;
-        }
-
-        if (!state.IsReady())
-        {
-            if (state.IsLoading())
-            {
-                return false;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return new(loginDataResult.AsOk());
     }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this the User/Anon Principal
@@ -169,7 +115,7 @@ public static class UserUtil
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns></returns>
-    public static UResult<LoginType, string> GetLogInType()
+    public static UResult<LoginType, string> GetLoginType()
     {
         var getLogInDataResult = UserUtil.GetLogInData();
 
@@ -196,7 +142,7 @@ public static class UserUtil
 
         return !getLogInDataResult.AsOk().asAnon;
     }
-    public static bool IsUserLoggedIn(out LoginData loginData)
+    public static bool IsUserLoggedIn(out MainDataTypes.LoginData loginData)
     {
         loginData = default;
 
@@ -225,7 +171,7 @@ public static class UserUtil
 
         return getLogInDataResult.AsOk().asAnon;
     }
-    public static bool IsAnonLoggedIn(out LoginData loginData)
+    public static bool IsAnonLoggedIn(out MainDataTypes.LoginData loginData)
     {
         loginData = default;
 
@@ -240,25 +186,119 @@ public static class UserUtil
     }
     #endregion
 
-    #region User Data Management
-    public static void RegisterToRequestData<T>(this System.Action<FetchDataReq<T>> action) where T : DataTypes.Base
+    #region DataTypes
+
+    static readonly Dictionary<string, HashSet<string>> loadingData = new();// worldId/userId -> loading data type
+
+    //SUBSCRIPTIONS
+    public static void AddListenerRequestData<T>(this System.Action<FetchDataReq<T>> action) where T : DataTypeRequestArgs.Base
     {
         Broadcast.Register<FetchDataReq<T>>(action);
     }
-    public static void UnregisterToRequestData<T>(this System.Action<FetchDataReq<T>> action) where T : DataTypes.Base
+    public static void RemoveListenerRequestData<T>(this System.Action<FetchDataReq<T>> action) where T : DataTypeRequestArgs.Base
     {
         Broadcast.Unregister<FetchDataReq<T>>(action);
     }
 
-    public static void RegisterToDataChange<T>(this System.Action<DataState<Data<T>>> action, bool invokeOnRegistration = false) where T : DataTypes.Base
+    public static void AddListenerDataChange<T>(this System.Action<Data<T>> action, bool invokeOnRegistration = false, params string[] uids) where T : DataTypes.Base
     {
-        BroadcastState.Register<DataState<Data<T>>>(action, invokeOnRegistration);
+        if (IsUserLoggedIn(out var loginData) == false || loginData.asAnon)
+        {
+            foreach (var uid in uids)
+            {
+                string _uid = uid == loginData.principal ? "self" : uid;
+
+                BroadcastState.Register<Data<T>>(action, invokeOnRegistration, _uid);
+            }
+
+            return;
+        }
+
+        foreach (var uid in uids) 
+            BroadcastState.Register<Data<T>>(action, invokeOnRegistration, uid);
     }
-    public static void UnregisterToDataChange<T>(this System.Action<DataState<Data<T>>> action) where T : DataTypes.Base
+    public static void RemoveListenerDataChange<T>(this System.Action<Data<T>> action, params string[] uids) where T : DataTypes.Base
     {
-        BroadcastState.Unregister<DataState<Data<T>>>(action);
+        if (IsUserLoggedIn(out var loginData) == false || loginData.asAnon)
+        {
+            foreach (var uid in uids)
+            {
+                string _uid = uid == loginData.principal ? "self" : uid;
+
+                BroadcastState.Unregister<Data<T>>(action, _uid);
+            }
+
+            return;
+        }
+
+        foreach (var uid in uids)
+            BroadcastState.Unregister<Data<T>>(action, uid);
     }
 
+    public static void AddListenerDataChangeSelf<T>(this System.Action<Data<T>> action, bool invokeOnRegistration = false) where T : DataTypes.Base
+    {
+        AddListenerDataChange<T>(action, invokeOnRegistration, "self");
+    }
+    public static void RemoveListenerDataChangeSelf<T>(this System.Action<Data<T>> action) where T : DataTypes.Base
+    {
+        RemoveListenerDataChange<T>(action, "self");
+    }
+
+    //CLEAR
+
+    public abstract class ClearMode
+    {
+        public abstract class Base { };
+        public class All : Base { }
+        public class AllBut : Base
+        {
+            public string[] blacklistIds;
+
+            public AllBut(params string[] blacklistIds)
+            {
+                this.blacklistIds = blacklistIds;
+            }
+        }
+        public class Targets : Base
+        {
+            public string[] targetIds;
+
+            public Targets(params string[] targetIds)
+            {
+                this.targetIds = targetIds;
+            }
+        }
+    }
+    /// <summary>
+    /// Clean up user data handled by type
+    /// </summary>
+    //
+    public static void ClearData<T>(ClearMode.Base cleanUpType = default) where T : DataTypes.Base
+    {
+        switch (cleanUpType)
+        {
+            case ClearMode.AllBut e:
+                BroadcastState.TryDisposeAll<Data<T>>(e.blacklistIds);
+                break;
+            case ClearMode.Targets e:
+
+                e.targetIds.Iterate(k =>
+                {
+                    BroadcastState.ForceInvoke<Data<T>>(j =>
+                    {
+                        j.Clear();
+                        return j;
+                    }, k);
+                });
+                break;
+            default:
+                BroadcastState.TryDisposeAll<Data<T>>();
+                break;
+
+        }
+    }
+
+    // REQUEST
     /// <summary>
     /// Request Data from Canisters,
     /// This will trigger listeners from "CandidApiManager" which handle fetching the data
@@ -267,89 +307,351 @@ public static class UserUtil
     /// <typeparam name="T"></typeparam>
     /// <param name="optional">you can set it to any argument as required, for example DataTypes.Token requires an canisterId as argument so that it knows what token canister to fetch data from</param>
     /// <param name="loadingMessage">This is the message you want to display when waiting for the data to be fetched</param>
-    public static void RequestData<T>(object optional = null, string loadingMessage = "Loading...") where T : DataTypes.Base
+    public static void RequestData(DataTypeRequestArgs.Base arg)
     {
-        BroadcastState.ForceInvoke<DataState<Data<T>>>(e =>
+        if (IsUserLoggedIn(out var loginData) == false)
         {
-            e.SetAsLoading(loadingMessage);
-            return e;
-        });
+            Debug.LogError("Issue getting loginData!");
 
-        Broadcast.Invoke<FetchDataReq<T>>(new FetchDataReq<T>(optional));
+            return;
+        }
+
+        if (loginData.asAnon)
+        {
+            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+
+            return;
+        }
+
+        var loadingDataType = "";
+        if (arg.uids.Length == 0)
+        {
+            arg.uids = new string[1] { loginData.principal };
+        }
+
+        switch (arg)
+        {
+            case DataTypeRequestArgs.Entity e:
+
+                loadingDataType = nameof(DataTypes.Entity);
+
+                QueueLoadingType(loginData.principal, loadingDataType, arg.uids);
+
+                Broadcast.Invoke<FetchDataReq<DataTypeRequestArgs.Entity>>(new FetchDataReq<DataTypeRequestArgs.Entity>(e));
+                break;
+
+            case DataTypeRequestArgs.ActionState e:
+
+                loadingDataType = nameof(DataTypes.ActionState);
+
+                QueueLoadingType(loginData.principal, loadingDataType, arg.uids);
+
+                Broadcast.Invoke<FetchDataReq<DataTypeRequestArgs.ActionState>>(new FetchDataReq<DataTypeRequestArgs.ActionState>(e));
+                break;
+
+            case DataTypeRequestArgs.Token e:
+
+                loadingDataType = nameof(DataTypes.Token);
+
+                QueueLoadingType(loginData.principal, loadingDataType, arg.uids);
+
+                Broadcast.Invoke<FetchDataReq<DataTypeRequestArgs.Token>>(new FetchDataReq<DataTypeRequestArgs.Token>(e));
+                break;
+
+            case DataTypeRequestArgs.NftCollection e:
+
+                loadingDataType = nameof(DataTypes.NftCollection);
+
+                QueueLoadingType(loginData.principal, loadingDataType, arg.uids);
+
+                Broadcast.Invoke<FetchDataReq<DataTypeRequestArgs.NftCollection>>(new FetchDataReq<DataTypeRequestArgs.NftCollection>(e));
+                break;
+        }
+
+        static void QueueLoadingType(string selfPrincipal, string loadingDataType, string[] uids)
+        {
+            foreach (var uid in uids)
+            {
+                string _uid = uid != selfPrincipal? uid : "self";
+                //Debug.Log($"*** Start Loading   |   uid: {_uid.SimplifyAddress()}   |   type: {loadingDataType}");
+
+                if (!loadingData.TryGetValue(_uid, out HashSet<string> loadingDataTypes))
+                {
+                    loadingDataTypes = new HashSet<string>();
+                    loadingData.Add(_uid, loadingDataTypes);
+                }
+
+                loadingDataTypes.Add(loadingDataType);
+            }
+        }
     }
 
+    public static void RequestDataSelf<T>() where T : DataTypeRequestArgs.Base, new()
+    {
+        T arg = new()
+        {
+            uids = new string[0]
+        };
+
+        RequestData(arg);
+    }
+
+    //UPDATE
+
     /// <summary>
-    /// Data will be valid or ready after getting loaded into the game, it will not be ready if not initialized or whenever it is in a loading state
+    /// Use it to update the data of a given DataType, this will add or override entries, but will not remove them,
+    /// the entries are only removed by calling CleanUpUserData()
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public static bool IsDataValid<T>() where T : DataTypes.Base
+    /// <param name="newVals"></param>
+
+    public static void UpdateData<T>(string uid, params T[] newVals) where T : DataTypes.Base
     {
-        if (BroadcastState.TryRead<DataState<Data<T>>>(out var val) == false)
+        //#if UNITY_EDITOR
+        //if (newVals != null) $">>> DATA of type {typeof(T).Name}, key: {uid}, has been fetched.\nKeys to store:\n{newVals.Reduce(e => $"* {e.GetKey()}, value: {JsonConvert.SerializeObject(e)}", ",\n")}".Log(nameof(UserUtil));
+        //#endif
+
+        if (IsUserLoggedIn(out var loginData) == false)
         {
+            Debug.LogError("Issue getting loginData!");
+
+            return;
+        }
+
+        if (loginData.asAnon)
+        {
+            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+
+            return;
+        }
+
+        if (uid == loginData.principal) uid = "self";
+
+
+        BroadcastState.ForceInvoke<Data<T>>(e =>
+        {
+            ////#if UNITY_EDITOR
+            //            $"Before Update of: {typeof(T).Name}\nCurrent Keys:\n{e.data.elements.Reduce(k => $"* {k.Key}, value: {JsonConvert.SerializeObject(k.Value)}", ",\n")}".Log(nameof(UserUtil));
+            ////#endif
+            ///
+
+            var loadingDataType = "";
+
+            switch (newVals)
+            {
+
+                case DataTypes.Entity[]:
+
+                    loadingDataType = nameof(DataTypes.Entity);
+                    break;
+
+                case DataTypes.ActionState[]:
+
+                    loadingDataType = nameof(DataTypes.ActionState);
+                    break;
+
+                case DataTypes.Token[]:
+
+                    loadingDataType = nameof(DataTypes.Token);
+                    break;
+
+                case DataTypes.NftCollection[]:
+
+                    loadingDataType = nameof(DataTypes.NftCollection);
+                    break;
+            }
+
+            //Debug.Log($"*** End Loading   |   uid: {uid.SimplifyAddress()}   |    type: {loadingDataType}");
+
+            if (loadingData.TryGetValue(uid, out var dependencies))
+            {
+                if (dependencies.Contains(loadingDataType)) dependencies.Remove(loadingDataType);
+                if (dependencies.Count == 0) loadingData.Remove(uid);
+            }
+
+
+            return new(uid, e, k => k.GetKey(), newVals);
+
+        }, uid);
+    }
+    public static void UpdateDataSelf<T>(params T[] newVals) where T : DataTypes.Base
+    {
+        UpdateData("self", newVals);
+    }
+
+    //GET
+
+
+    public static bool IsDataValid<T>(params string[] uids) where T : DataTypes.Base
+    {
+        if (IsUserLoggedIn(out var loginData) == false)
+        {
+            Debug.LogError("Issue getting loginData!");
+
             return false;
         }
 
-        $"Checking if data of type {typeof(T).Name} is valid\nIsReady: {val.IsReady()}  current state: {val.State}".Log();
-        return val.IsReady();
-    }
-
-    public static bool IsDataValid<T>(params string[] expectedEntires) where T : DataTypes.Base
-    {
-        if (BroadcastState.TryRead<DataState<Data<T>>>(out var val) == false)
+        if (loginData.asAnon)
         {
+            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+
             return false;
         }
 
-        if (!val.IsReady()) return false;
-        var hasAllEntries = expectedEntires.TrueForAll(e => val.data.elements.Has(k => k.Key == e));
-        return hasAllEntries;
+        for (int i = 0; i < uids.Length; i++)
+        {
+            var uid = uids[i];
+            if (uids[i] == loginData.principal) uid = "self";
+
+            if (BroadcastState.TryRead<Data<T>>(out var val, uid) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    public static bool IsDataValidSelf<T>() where T : DataTypes.Base
+    {
+        return IsDataValid<T>("self");
     }
 
-    #region Get
-    /// <summary>
-    /// Get the data state of some "T" Type that derive from DataTypes.Base
-    /// </summary>
-    /// <typeparam name="T">DataTypes.Base</typeparam>
-    /// <returns></returns>
-    public static UResult<DataState<Data<T>>, string> GetDataOfType<T>() where T : DataTypes.Base
+    public static bool IsFetchingData<T>(params string[] uids) where T : DataTypes.Base
     {
-        if (BroadcastState.TryRead<DataState<Data<T>>>(out var val) == false)
+        if (IsUserLoggedIn(out var loginData) == false)
+        {
+            Debug.LogError("Issue getting loginData!");
+
+            return false;
+        }
+
+        if (loginData.asAnon)
+        {
+            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+
+            return false;
+        }
+
+        var loadingDataType = typeof(T).Name;
+
+        if (uids.Length == 0)
+        {
+            foreach (var loadingTypes in loadingData.Values)
+            {
+                if (loadingTypes.Contains(loadingDataType)) return true;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < uids.Length; i++)
+            {
+                var uid = uids[i];
+                if (uids[i] == loginData.principal) uid = "self";
+
+                if (loadingData.TryGetValue(uid, out var loadingTypes))
+                {
+                    if (loadingTypes.Contains(loadingDataType)) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static bool IsDataLoadingSelf<T>() where T : DataTypes.Base
+    {
+        return IsFetchingData<T>("self");
+    }
+
+    //
+
+    public static UResult<Data<T>, string> GetData<T>(string uid) where T : DataTypes.Base
+    {
+        if (IsUserLoggedIn(out var loginData) == false)
+        {
+            return new("Issue getting loginData!");
+        }
+
+        if (loginData.asAnon)
+        {
+            return new("You cannot fetch your own shared data as an anon user!");
+        }
+
+        if (uid == loginData.principal) uid = "self";
+
+        if (BroadcastState.TryRead<Data<T>>(out var val, uid) == false)
         {
             return new($"Data could not be found for DataType: {typeof(T).Name}");
         }
-
-        if (val.IsReady() == false && val.IsLoading()) return new(string.IsNullOrEmpty(val.LoadingMsg)? $"{typeof(T).Name} Loading..." : val.LoadingMsg);
-
-        if (val.IsReady() == false) return new($"Data of type {typeof(T).Name} is not ready");
 
         return new(val);
     }
+
+    public static UResult<Data<T>, string> GetDataSelf<T>() where T : DataTypes.Base
+    {
+        return GetData<T>("self");
+    }
+
+    //
+
+        /// <summary>
+        /// Try get an element from collection of "T" Type that derive from Datatypes.Base
+        /// </summary>
+        /// <typeparam name="T">Datatypes.Base</typeparam>
+        /// <returns></returns>
+    public static UResult<T, string> GetElementOfType<T>(string uid, string elementId) where T : DataTypes.Base
+    {
+        var result = GetData<T>(uid);
+        if (result.IsErr)
+        {
+            return new(result.AsErr());
+        }
+
+        var asOk = result.AsOk();
+
+        if (asOk.elements.TryGetValue(elementId, out var element) == false) return new($"Data Type: {typeof(T).Name} does not contain element of id: {elementId}.\n\nValid Ids:\n\n{asOk.elements.Reduce(e => $"-{e.Key}", "\n\n")}\nend.");
+        return new(element);
+    }
+
+    public static UResult<T, string> GetElementOfTypeSelf<T>(string elementId) where T : DataTypes.Base
+    {
+        return GetElementOfType<T>("self", elementId);
+    }
+
     /// <summary>
-    /// Try get an element from collection of "T" Type that derive from Datatypes.Base
+    /// Get a collection of "T" Type that derive from Datatypes.Base
     /// </summary>
     /// <typeparam name="T">Datatypes.Base</typeparam>
     /// <returns></returns>
-    public static UResult<T, string> GetElementOfType<T>(string id) where T : DataTypes.Base
+    public static UResult<LinkedList<T>, string> GetElementsOfType<T>(string uid) where T : DataTypes.Base
     {
-        if (BroadcastState.TryRead<DataState<Data<T>>>(out var val) == false)
+        var result = GetData<T>(uid);
+        if (result.IsErr)
         {
-            return new($"Data could not be found for DataType: {typeof(T).Name}");
+            return new(result.AsErr());
         }
 
-        if (val.IsReady() == false) return new($"Data of type {typeof(T).Name} is not yet ready");
+        LinkedList<T> elements = new();
+        result.AsOk().elements.Iterate(e =>
+        {
+            elements.AddLast(e.Value);
+        });
 
-        if (val.data.elements.TryGetValue(id, out var element) == false) return new($"Data Type: {typeof(T).Name} does not contain element of id: {id}.\n\nValid Ids:\n\n{val.data.elements.Reduce(e=>$"-{e.Key}","\n\n")}\nend.");
-        return new(element);
+        return new(elements);
     }
+    public static UResult<LinkedList<T>, string> GetElementsOfTypeSelf<T>() where T : DataTypes.Base
+    {
+        return GetElementsOfType<T>("self");
+    }
+
     /// <summary>
     /// Try get a property value from an element from collection of "T" Type that derive from Datatypes.Base
     /// </summary>
     /// <typeparam name="T">Datatypes.Base</typeparam>
     /// <returns></returns>
-    public static UResult<PropertyType, string> GetPropertyFromType<T, PropertyType>(string id, Func<T, PropertyType> getter) where T : DataTypes.Base
+    public static UResult<PropertyType, string> GetPropertyFromType<T, PropertyType>(string uid, string elementId, Func<T, PropertyType> getter) where T : DataTypes.Base
     {
-        var restult = GetElementOfType<T>(id);
+        var restult = GetElementOfType<T>(uid, elementId);
 
         if (restult.Tag == UResultTag.Err)
         {
@@ -367,12 +669,21 @@ public static class UserUtil
             return new(e.Message);
         }
     }
-    public static PropertyType GetPropertyFromType<T, PropertyType>(string id, Func<T, PropertyType> getter, PropertyType defaultVal = default) where T : DataTypes.Base
+    public static UResult<PropertyType, string> GetPropertyFromTypeSelf<T, PropertyType>(string elementId, Func<T, PropertyType> getter) where T : DataTypes.Base
     {
-        var restult = GetElementOfType<T>(id);
+        return GetPropertyFromType<T, PropertyType>("self", elementId, getter);
+    }
+
+    public static PropertyType GetPropertyFromType<T, PropertyType>(string uid, string elementId, Func<T, PropertyType> getter, PropertyType defaultVal = default) where T : DataTypes.Base
+    {
+        var restult = GetElementOfType<T>(uid, elementId);
 
         if (restult.Tag == UResultTag.Err)
         {
+#if UNITY_EDITOR
+            Debug.LogWarning("Failure to find property of element: " + elementId);
+#endif
+
             return defaultVal;
         }
 
@@ -380,82 +691,68 @@ public static class UserUtil
 
         return propertyType;
     }
-
-    /// <summary>
-    /// Get a collection of "T" Type that derive from Datatypes.Base
-    /// </summary>
-    /// <typeparam name="T">Datatypes.Base</typeparam>
-    /// <returns></returns>
-    public static UResult<List<T>, string> GetElementsOfType<T>() where T : DataTypes.Base
+    public static PropertyType GetPropertyFromTypeSelf<T, PropertyType>(string elementId, Func<T, PropertyType> getter, PropertyType defaultVal = default) where T : DataTypes.Base
     {
-        if (BroadcastState.TryRead<DataState<Data<T>>>(out var val) == false)
-        {
-            return new($"Data could not be found for DataType: {typeof(T).Name}");
-        }
-
-        if (val.IsReady() == false) return new("Data is not yet ready");
-
-        List<T> elements = new();
-        val.data.elements.Iterate(e =>
-        {
-            elements.Add(e.Value);
-        });
-
-        return new(elements);
+        return GetPropertyFromType<T, PropertyType>("self", elementId, getter, defaultVal); 
     }
-    #endregion
+
+#endregion
+
+    #region DataTypes Main
+
+    public static void AddListenerMainDataChange<T>(this System.Action<T> action, bool invokeOnRegistration = false) where T : MainDataTypes.Base, new()
+    {
+        BroadcastState.Register<T>(action, invokeOnRegistration);
+    }
+    public static void RemoveListenerMainDataChange<T>(this System.Action<T> action) where T : MainDataTypes.Base, new()
+    {
+        BroadcastState.Unregister<T>(action);
+    }
+
+
+    //CLEAR
 
     /// <summary>
     /// Clean up user data handled by type
     /// </summary>
-    public static void Clean<T>() where T : DataTypes.Base
+    //
+    public static void ClearMainData<T>() where T : MainDataTypes.Base, new()
     {
-        BroadcastState.ForceInvoke<DataState<Data<T>>>(e =>
+        BroadcastState.TryDispose<T>(out var disposedValue);
+    }
+
+    //UPDATE
+
+    public static void UpdateMainData<T>(T newVal) where T : MainDataTypes.Base, new()
+    {
+        //#if UNITY_EDITOR
+        //if (newVal != null) $"DATA of type {typeof(T).Name}, has been fetched, value: {JsonConvert.SerializeObject(newVal)}".Log(nameof(UserUtil));
+        //#endif
+
+        BroadcastState.ForceInvoke<T>(newVal);
+    }
+
+    //GET
+    public static bool IsMainDataValid<T>() where T : MainDataTypes.Base, new()
+    {
+        if (BroadcastState.TryRead<T>(out var val) == false)
         {
-            e.Clear();
-            return e;
-        });
+            return false;
+        }
+
+        return true;
     }
 
-    /// <summary>
-    /// Use it to update the data of a given DataType, this will add or override entries, but will not remove them,
-    /// the entries are only removed by calling CleanUpUserData()
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="newVals"></param>
-    public static void UpdateData<T>(params T[] newVals) where T : DataTypes.Base
+    public static UResult<T, string> GetMainData<T>() where T : MainDataTypes.Base, new()
     {
-//#if UNITY_EDITOR
-        if(newVals != null) $"DATA of type {typeof(T).Name} has been fetched.\nKeys to store:\n{newVals.Reduce(e=>$"* {e.GetKey()}, value: {JsonConvert.SerializeObject(e)}", ",\n")}".Log(nameof(UserUtil));
-//#endif
-
-        BroadcastState.ForceInvoke<DataState<Data<T>>>(e =>
+        if (BroadcastState.TryRead<T>(out var val) == false)
         {
-//#if UNITY_EDITOR
-            $"Before Update of: {typeof(T).Name}\nCurrent Keys:\n{e.data.elements.Reduce(k => $"* {k.Key}, value: {JsonConvert.SerializeObject(k.Value)}", ",\n")}".Log(nameof(UserUtil));
-//#endif
+            return new($"Data could not be found for DataType: {typeof(T).Name}");
+        }
 
-            //Set as Ready
-            e.SetAsReady(new(
-                //Pass PrevData
-                e.data,
-                //Pass Key Getter
-                e => e.GetKey(),
-                //Pass Tokens to Override or Add
-                newVals
-                ));
-            return e;
-        });
+        return new(val);
     }
 
-    #endregion ^
+    #endregion
 
-    public static ulong GetTokenBaseUnitAmount(string canisterId)
-    {
-        var tokenResult = GetElementOfType<DataTypes.Token>(canisterId);
-
-        if (tokenResult.IsErr) return 0;
-
-        return tokenResult.AsOk().baseUnitAmount;
-    }
 }

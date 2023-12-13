@@ -1,8 +1,3 @@
-using worldId = System.String;
-using groupId = System.String;
-using entityId = System.String;
-using configId = System.String;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
@@ -13,11 +8,11 @@ namespace Candid.World.Models
 	[Variant]
 	public class TransferError
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public TransferErrorTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public TransferError(TransferErrorTag tag, object? value)
 		{
@@ -210,17 +205,11 @@ namespace Candid.World.Models
 
 	public enum TransferErrorTag
 	{
-		
 		BadBurn,
-		
 		BadFee,
-		
 		CreatedInFuture,
-		
 		Duplicate,
-		
 		GenericError,
-		
 		InsufficientFunds,
 		TemporarilyUnavailable,
 		TooOld

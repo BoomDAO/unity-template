@@ -14,9 +14,9 @@ public static class NftUtil
     /// </summary>
     /// <param name="collectionId"></param>
     /// <returns></returns>
-    public static UResult<DataTypes.NftCollection, string> TryGetCollection(string collectionId)
+    public static UResult<DataTypes.NftCollection, string> TryGetCollection(string uid, string collectionId)
     {
-        var result = UserUtil.GetElementOfType<DataTypes.NftCollection>(collectionId);
+        var result = UserUtil.GetElementOfTypeSelf<DataTypes.NftCollection>(collectionId);
 
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
@@ -30,9 +30,9 @@ public static class NftUtil
     /// <param name="collectionId"></param>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public static UResult<int, string> GetNftCount(string collectionId, Predicate<string> predicate = null)
+    public static UResult<int, string> GetNftCount(string uid, string collectionId, Predicate<string> predicate = null)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
 
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
@@ -57,9 +57,9 @@ public static class NftUtil
     /// <param name="collectionId"></param>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public static UResult<DataTypes.NftCollection.Nft, string> TryGetNextNft(string collectionId, Predicate<string> predicate = null)
+    public static UResult<DataTypes.NftCollection.Nft, string> TryGetNextNft(string uid, string collectionId, Predicate<string> predicate = null)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
         var tokens = result.AsOk().tokens;
@@ -84,9 +84,9 @@ public static class NftUtil
     /// <param name="collectionId"></param>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public static UResult<uint, string> TryGetNextNftIndex(string collectionId, Predicate<string> predicate = null)
+    public static UResult<uint, string> TryGetNextNftIndex(string uid, string collectionId, Predicate<string> predicate = null)
     {
-        var result = TryGetNextNft(collectionId, predicate);
+        var result = TryGetNextNft(uid, collectionId, predicate);
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
         return new(result.AsOk().index);
@@ -98,9 +98,9 @@ public static class NftUtil
     /// <param name="collectionId"></param>
     /// <param name="index"></param>
     /// <returns></returns>
-    public static UResult<DataTypes.NftCollection.Nft, string> TryGetNft(string collectionId, long index)
+    public static UResult<DataTypes.NftCollection.Nft, string> TryGetNft(string uid, string collectionId, long index)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
         var tokens = result.AsOk().tokens;
@@ -118,9 +118,9 @@ public static class NftUtil
 
         return new(dabNftDetails);
     }
-    public static bool HasNft(string collectionId, long index)
+    public static bool HasNft(string uid, string collectionId, long index)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return false;
 
         var tokens = result.AsOk().tokens;
@@ -133,9 +133,9 @@ public static class NftUtil
             return e.index == index;
         });
     }
-    public static bool HasNft<T>(string collectionId, Func<DataTypes.NftCollection.Nft, T, bool>  predicate, params T[] requirements)
+    public static bool HasNft<T>(string uid, string collectionId, Func<DataTypes.NftCollection.Nft, T, bool>  predicate, params T[] requirements)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return false;
 
         var tokens = result.AsOk().tokens;
@@ -154,9 +154,9 @@ public static class NftUtil
 
         return true;
     }
-    public static UResult<List<DataTypes.NftCollection.Nft>, string> Filter<T>(string collectionId, Func<DataTypes.NftCollection.Nft, T, bool> predicate, params T[] requirements)
+    public static UResult<List<DataTypes.NftCollection.Nft>, string> Filter<T>(string uid, string collectionId, Func<DataTypes.NftCollection.Nft, T, bool> predicate, params T[] requirements)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return new($"You were not able to find any local data on collection of id: {collectionId}");
 
         var tokens = result.AsOk().tokens;
@@ -187,9 +187,9 @@ public static class NftUtil
     /// <param name="collectionId"></param>
     /// <param name="index"></param>
     /// <returns></returns>
-    public static UResult<Null, string> TryRemoveNftByIndex(string collectionId, long index)
+    public static UResult<DataTypes.NftCollection.Nft, string> TryRemoveNftByIndex(string uid, string collectionId, long index)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
         var collection = result.AsOk();
@@ -203,17 +203,40 @@ public static class NftUtil
             bool success = tokens.Remove(token);
             if (success)
             {
-                UserUtil.UpdateData<DataTypes.NftCollection>(null);
+                UserUtil.UpdateData<DataTypes.NftCollection>(uid);
             }
-            return new(new Null());
+            return new(token);
         }
 
         return new($"You have no nft on the collection of id: {collectionId} of index: {index}"); ;
     }
-
-    public static UResult<Null, string> TryRemoveNextNft(string collectionId)
+    public static UResult<DataTypes.NftCollection.Nft, string> TryRemoveNftByIdentifier(string uid, string collectionId, string identifier)
     {
-        var result = TryGetCollection(collectionId);
+        var result = TryGetCollection(uid, collectionId);
+        if (result.Tag == UResultTag.Err) return new(result.AsErr());
+
+        var collection = result.AsOk();
+        var tokens = collection.tokens;
+        tokens ??= new();
+
+        if (tokens.Count == 0) return new($"You have no nft on the collection of id: {collectionId}");
+
+        if (tokens.TryLocate(e => e.tokenIdentifier == identifier, out var token))
+        {
+            bool success = tokens.Remove(token);
+            if (success)
+            {
+                UserUtil.UpdateData<DataTypes.NftCollection>(uid);
+            }
+            return new(token);
+        }
+
+        return new($"You have no nft on the collection of id: {collectionId} of identifier: {identifier}"); ;
+    }
+
+    public static UResult<Null, string> TryRemoveNextNft(string uid, string collectionId)
+    {
+        var result = TryGetCollection(uid, collectionId);
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 
         var collection = result.AsOk();
@@ -223,24 +246,26 @@ public static class NftUtil
         if (tokens.Count == 0) return new($"You have no nft on the collection of id: {collectionId}");
 
         tokens.RemoveAt(0);
-        UserUtil.UpdateData<DataTypes.NftCollection>(null);
+        UserUtil.UpdateData<DataTypes.NftCollection>(uid);
         return new(new Null());
     }
 
-    public async static void TryAddMintedNft(params MintNft[] mintedNfts)
+    public async static void TryAddMintedNft(string uid, params MintNft[] mintedNfts)
     {
         bool update = false;
         foreach (var mintedNft in mintedNfts)
         {
-            if (mintedNft.Index.HasValue == false)
-            {
-                $"Could not add some nft from collection: {mintedNft.Canister} cuz doesn't haven an index specified".Warning();
-                continue;
-            }
+            UnityEngine.Debug.Log($"ADDING NFT: {mintedNft.Canister} : {-1}");
 
-            var nftIndex = mintedNft.Index.ValueOrDefault;
+            //if (mintedNft.Index.HasValue == false)
+            //{
+            //    $"Could not add some nft from collection: {mintedNft.Canister} cuz doesn't haven an index specified".Warning();
+            //    continue;
+            //}
 
-            var result = TryGetCollection(mintedNft.Canister);
+            uint nftIndex = 0;
+
+            var result = TryGetCollection(uid, mintedNft.Canister);
 
             if (result.IsErr)
             {
@@ -261,24 +286,24 @@ public static class NftUtil
                     mintedNft.Canister,
                     nftIndex,
                     tokenIdentifier,
-                    $"https://{collection.canister}.raw.icp0.io/?&tokenid={tokenIdentifier}&type=thumbnail",
+                    $"https://{collection.canisterId}.raw.icp0.io/?&tokenid={tokenIdentifier}&type=thumbnail",
                     mintedNft.Metadata));
 
                 update = true;
             }
         }
 
-        if(update) UserUtil.UpdateData<DataTypes.NftCollection>(null);
+        if(update) UserUtil.UpdateData<DataTypes.NftCollection>(uid);
     }
 
-    public async static void TryAddMintedNft(params DataTypes.NftCollection.Nft[] mintedNfts)
+    public async static void TryAddMintedNft(string uid, params DataTypes.NftCollection.Nft[] mintedNfts)
     {
         bool update = false;
         foreach (var mintedNft in mintedNfts)
         {
             var nftIndex = mintedNft.index;
 
-            var result = TryGetCollection(mintedNft.canister);
+            var result = TryGetCollection(uid, mintedNft.canister);
 
             if (result.IsErr)
             {
@@ -300,6 +325,6 @@ public static class NftUtil
             }
         }
 
-        if (update) UserUtil.UpdateData<DataTypes.NftCollection>(null);
+        if (update) UserUtil.UpdateData<DataTypes.NftCollection>(uid);
     }
 }

@@ -1,8 +1,3 @@
-using worldId = System.String;
-using groupId = System.String;
-using entityId = System.String;
-using configId = System.String;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.World.Models;
 using System;
@@ -12,11 +7,11 @@ namespace Candid.World.Models
 	[Variant]
 	public class Result
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public ResultTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public Result(ResultTag tag, object? value)
 		{
@@ -33,7 +28,7 @@ namespace Candid.World.Models
 			return new Result(ResultTag.Err, info);
 		}
 
-		public static Result Ok(Result__1 info)
+		public static Result Ok(Result1 info)
 		{
 			return new Result(ResultTag.Ok, info);
 		}
@@ -44,10 +39,10 @@ namespace Candid.World.Models
 			return (Result.ErrInfo)this.Value!;
 		}
 
-		public Result__1 AsOk()
+		public Result1 AsOk()
 		{
 			this.ValidateTag(ResultTag.Ok);
-			return (Result__1)this.Value!;
+			return (Result1)this.Value!;
 		}
 
 		private void ValidateTag(ResultTag tag)
@@ -61,11 +56,11 @@ namespace Candid.World.Models
 		[Variant]
 		public class ErrInfo
 		{
-			[VariantTagProperty()]
+			[VariantTagProperty]
 			public Result.ErrInfoTag Tag { get; set; }
 
-			[VariantValueProperty()]
-			public System.Object? Value { get; set; }
+			[VariantValueProperty]
+			public object? Value { get; set; }
 
 			public ErrInfo(Result.ErrInfoTag tag, object? value)
 			{
@@ -110,9 +105,7 @@ namespace Candid.World.Models
 
 		public enum ErrInfoTag
 		{
-			
 			Err,
-			
 			TxErr
 		}
 	}
@@ -120,10 +113,8 @@ namespace Candid.World.Models
 	public enum ResultTag
 	{
 		[CandidName("err")]
-		
 		Err,
 		[CandidName("ok")]
-		
 		Ok
 	}
 }

@@ -1,35 +1,19 @@
-using TokenIndex__1 = System.UInt32;
-using TokenIdentifier__2 = System.String;
-using TokenIdentifier__1 = System.String;
-using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
-using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
-using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
-using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField__1 = System.ValueTuple<System.String, System.String>;
-using Extension = System.String;
-using ChunkId = System.UInt32;
-using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
-using AssetHandle__1 = System.String;
-using AccountIdentifier__2 = System.String;
-using AccountIdentifier__1 = System.String;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.Extv2Boom.Models;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using TokenIndex = System.UInt32;
 
 namespace Candid.Extv2Boom.Models
 {
 	[Variant]
 	public class PaymentType
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public PaymentTypeTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public PaymentType(PaymentTypeTag tag, object? value)
 		{
@@ -41,12 +25,12 @@ namespace Candid.Extv2Boom.Models
 		{
 		}
 
-		public static PaymentType Nft(TokenIndex__1 info)
+		public static PaymentType Nft(TokenIndex info)
 		{
 			return new PaymentType(PaymentTypeTag.Nft, info);
 		}
 
-		public static PaymentType Nfts(List<TokenIndex__1> info)
+		public static PaymentType Nfts(PaymentType.NftsInfo info)
 		{
 			return new PaymentType(PaymentTypeTag.Nfts, info);
 		}
@@ -56,16 +40,16 @@ namespace Candid.Extv2Boom.Models
 			return new PaymentType(PaymentTypeTag.Sale, info);
 		}
 
-		public TokenIndex__1 AsNft()
+		public TokenIndex AsNft()
 		{
 			this.ValidateTag(PaymentTypeTag.Nft);
-			return (TokenIndex__1)this.Value!;
+			return (TokenIndex)this.Value!;
 		}
 
-		public List<TokenIndex__1> AsNfts()
+		public PaymentType.NftsInfo AsNfts()
 		{
 			this.ValidateTag(PaymentTypeTag.Nfts);
-			return (List<TokenIndex__1>)this.Value!;
+			return (PaymentType.NftsInfo)this.Value!;
 		}
 
 		public ulong AsSale()
@@ -81,18 +65,22 @@ namespace Candid.Extv2Boom.Models
 				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
 			}
 		}
+
+		public class NftsInfo : List<TokenIndex>
+		{
+			public NftsInfo()
+			{
+			}
+		}
 	}
 
 	public enum PaymentTypeTag
 	{
 		[CandidName("nft")]
-		
 		Nft,
 		[CandidName("nfts")]
-		
 		Nfts,
 		[CandidName("sale")]
-		
 		Sale
 	}
 }

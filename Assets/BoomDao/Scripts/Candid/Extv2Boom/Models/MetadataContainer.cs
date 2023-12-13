@@ -1,35 +1,19 @@
-using TokenIndex__1 = System.UInt32;
-using TokenIdentifier__2 = System.String;
-using TokenIdentifier__1 = System.String;
-using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
-using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
-using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
-using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField__1 = System.ValueTuple<System.String, System.String>;
-using Extension = System.String;
-using ChunkId = System.UInt32;
-using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
-using AssetHandle__1 = System.String;
-using AccountIdentifier__2 = System.String;
-using AccountIdentifier__1 = System.String;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.Extv2Boom.Models;
 using System.Collections.Generic;
 using System;
+using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValueValue_1>;
 
 namespace Candid.Extv2Boom.Models
 {
 	[Variant]
 	public class MetadataContainer
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public MetadataContainerTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public MetadataContainer(MetadataContainerTag tag, object? value)
 		{
@@ -46,7 +30,7 @@ namespace Candid.Extv2Boom.Models
 			return new MetadataContainer(MetadataContainerTag.Blob, info);
 		}
 
-		public static MetadataContainer Data(List<MetadataValue> info)
+		public static MetadataContainer Data(MetadataContainer.DataInfo info)
 		{
 			return new MetadataContainer(MetadataContainerTag.Data, info);
 		}
@@ -62,10 +46,10 @@ namespace Candid.Extv2Boom.Models
 			return (List<byte>)this.Value!;
 		}
 
-		public List<MetadataValue> AsData()
+		public MetadataContainer.DataInfo AsData()
 		{
 			this.ValidateTag(MetadataContainerTag.Data);
-			return (List<MetadataValue>)this.Value!;
+			return (MetadataContainer.DataInfo)this.Value!;
 		}
 
 		public string AsJson()
@@ -81,18 +65,22 @@ namespace Candid.Extv2Boom.Models
 				throw new InvalidOperationException($"Cannot cast '{this.Tag}' to type '{tag}'");
 			}
 		}
+
+		public class DataInfo : List<MetadataValue>
+		{
+			public DataInfo()
+			{
+			}
+		}
 	}
 
 	public enum MetadataContainerTag
 	{
 		[CandidName("blob")]
-		
 		Blob,
 		[CandidName("data")]
-		
 		Data,
 		[CandidName("json")]
-		
 		Json
 	}
 }

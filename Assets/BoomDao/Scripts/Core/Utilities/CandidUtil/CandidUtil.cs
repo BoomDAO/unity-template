@@ -1,5 +1,8 @@
 using Boom.Utility;
+using Candid;
 using Candid.World.Models;
+using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -93,5 +96,12 @@ public static class CandidUtil
         Regex regex = new Regex(pattern);
 
         return regex.IsMatch(address);
+    }
+
+    internal static async UniTask<string> ToAddress(string principal)
+    {
+        var userAccountIdentity = await CandidApiManager.Instance.WorldHub.GetAccountIdentifier(principal);
+
+        return userAccountIdentity;
     }
 }

@@ -2,89 +2,27 @@ namespace Boom
 {
     using System;
     using System.Collections.Generic;
-    using EdjCase.ICP.Agent.Agents;
     using Boom.Patterns.Broadcasts;
 
-    public enum DataState
-    {
-        None, Loading, Ready
-    }
-    public interface IDataState { }
     public interface IDisposable
     {
         public void ScheduleDisposal();
         public bool CanDispose();
     }
-    public class DataState<T> : IBroadcastState where T : IDataState, new()
+    public class Data<T> : IBroadcastState where T : IDisposable
     {
-        public DataState State { get; private set; } = DataState.None;
-        public string LoadingMsg { get; private set; } = "";
-        public T data;
-        public int UpdateCount { get; private set; }
-
-        public DataState()
-        {
-            State = DataState.None;
-            this.data = new();
-        }
-        public DataState(T data)
-        {
-            State = DataState.Ready;
-            this.data = data;
-        }
-
-        public void Clear()
-        {
-            LoadingMsg = "";
-            data = new();
-            State = DataState.None;
-            UpdateCount = 0;
-        }
-        public bool IsLoading()
-        {
-            return State == DataState.Loading;
-        }
-        public bool IsReady()
-        {
-            return State == DataState.Ready;
-        }
-        public bool IsNull()
-        {
-            return State == DataState.None;
-        }
-
-        public void SetAsLoading(string loadingMsg = "Loading...")
-        {
-            this.LoadingMsg = loadingMsg;
-            State = DataState.Loading;
-        }
-        public void SetAsReady(T data)
-        {
-            LoadingMsg = "";
-            this.data = data;
-            State = DataState.Ready;
-            ++UpdateCount;
-        }
-    }
-    public class Data<T> : IDataState where T : IDisposable
-    {
+        private string owner;
         public Dictionary<string, T> elements;
+
         public Data()
         {
+            this.owner = "";
             this.elements = new();
         }
-        public Data(List<T> elements, Func<T, string> getKey)
-        {
-            elements ??= new();
-            this.elements = new();
 
-            foreach (var item in elements)
-            {
-                this.elements.Add(getKey(item), item);
-            }
-        }
-        public Data(Data<T> tokenData, Func<T, string> getKey, params T[] tokensUpdate)
+        public Data(string owner, Data<T> tokenData, Func<T, string> getKey, params T[] tokensUpdate)
         {
+            this.owner = owner;
             tokenData.elements ??= new();
             elements = tokenData.elements;
 
@@ -110,6 +48,11 @@ namespace Boom
                     }
                 }
             }
+        }
+
+        public void Clear()
+        {
+            elements = new();
         }
     }
 
@@ -147,13 +90,13 @@ namespace Boom
     #endregion
 
     #region Fetch Data Request
-    public struct FetchDataReq<T> : IBroadcast where T : DataTypes.Base
+    public struct FetchDataReq<T> : IBroadcast where T : DataTypeRequestArgs.Base
     {
-        public object optional;
+        public T arg;
 
-        public FetchDataReq(object optional)
+        public FetchDataReq(T arg)
         {
-            this.optional = optional;
+            this.arg = arg;
         }
     }
 
@@ -169,25 +112,19 @@ namespace Boom
             this.value = value;
         }
     }
-    public struct StartLogin : IBroadcast
-    {
-    }
-    public struct LoginData : IDataState
-    {
-        public IAgent agent;
-        public string principal;
-        public string accountIdentifier;
-        public bool asAnon;
-        public LoginData(IAgent agent, string principal, string accountIdentifier, bool asAnon)
-        {
-            this.agent = agent;
-            this.principal = principal;
-            this.accountIdentifier = accountIdentifier;
-            this.asAnon = asAnon;
-        }
-    }
 
+    public struct UserLoginRequest : IBroadcast { }
     public struct UserLogout : IBroadcast { }
+    public struct FetchListings : IBroadcast { }
     #endregion
 
+    public struct OnActionInProcessCountChange : IBroadcast
+    {
+        public string actionId;
+
+        public OnActionInProcessCountChange(string actionId)
+        {
+            this.actionId = actionId;
+        }
+    }
 }

@@ -108,7 +108,7 @@ window.addEventListener('message', function(e) {
     if (e.origin !== sanitizedUrl)
         return;
 
-    gameInstance.SendMessage('GameManagers', 'ExecuteCallbackWithJson', e.data);
+    gameInstance.SendMessage('GameManagers', 'CreateIdentityWithJson', e.data);
 }, false);
 
     </script>

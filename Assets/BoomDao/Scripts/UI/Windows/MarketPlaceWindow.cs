@@ -12,6 +12,7 @@ namespace Boom.UI
     using UnityEngine.UI;
     using Cysharp.Threading.Tasks;
     using static DataTypes;
+    using System.Collections.Generic;
 
     public class MarketPlaceWindow : Window
     {
@@ -31,7 +32,7 @@ namespace Boom.UI
         [SerializeField] Button cancelListingButton;
         [SerializeField] TMP_InputField priceInputField;
         [SerializeField, ShowOnly] double nftPrice;
-        [SerializeField, ShowOnly] string selectedCollectionId;
+        [SerializeField, ShowOnly] string selectedNftCollectionCanisterId;
         [SerializeField, ShowOnly] string selectedNftIdentifier;
         [SerializeField, ShowOnly] long selectedNftIndex;
 
@@ -61,10 +62,11 @@ namespace Boom.UI
             confirmListingButton.onClick.AddListener(ListNftHandler);
             cancelListingButton.onClick.AddListener(CancelMakeOfferPanel);
 
-            UserUtil.RegisterToDataChange<DataTypes.NftCollection>(UpdateWindow, true);
-            UserUtil.RegisterToDataChange<DataTypes.Listing>(UpdateWindow);
+            UserUtil.AddListenerDataChangeSelf<DataTypes.NftCollection>(UpdateWindow, true);
+            UserUtil.AddListenerMainDataChange<MainDataTypes.AllListings>(UpdateWindow);
 
-            UserUtil.RequestData<DataTypes.Listing>();
+
+            Broadcast.Invoke<FetchListings>();
         }
 
         private void OnDestroy()
@@ -73,14 +75,14 @@ namespace Boom.UI
             confirmListingButton.onClick.RemoveListener(ListNftHandler);
             cancelListingButton.onClick.RemoveListener(CancelMakeOfferPanel);
 
-            UserUtil.UnregisterToDataChange<DataTypes.NftCollection>(UpdateWindow);
-            UserUtil.UnregisterToDataChange<DataTypes.Listing>(UpdateWindow);
+            UserUtil.RemoveListenerDataChangeSelf<DataTypes.NftCollection>(UpdateWindow);
+            UserUtil.RemoveListenerMainDataChange<MainDataTypes.AllListings>(UpdateWindow);
         }
         private void InputPriceChangeHandler(string arg0)
         {
             if (arg0.TryParseValue<double>(out var val)) nftPrice = val;
         }
-        private void UpdateWindow(DataState<Data<DataTypes.Listing>> state)
+        private void UpdateWindow(MainDataTypes.AllListings state)
         {
             foreach (Transform child in listingContent)
             {
@@ -104,74 +106,86 @@ namespace Boom.UI
 
             var loginData = getLoginDataResult.AsOk();
 
-            if (state.IsReady() == false)
+            if (UserUtil.IsMainDataValid<MainDataTypes.AllListings>() == false)
             {
-                //Is Fetching
-                if(state.IsLoading())
-                {
-                    Debug.LogWarning("Fetching Listings");
-                    loadingVisualListing.text = "Loading...";
-                }
-                else Debug.LogWarning("Problem Fetching Listing");
+                Debug.LogWarning("Listings is not yet valit");
                 return;
             }
 
-            if (state.data.elements.Count == 0)
+            if (state.listings.Count == 0)
             {
                 loadingVisualListing.text = "No listings yet";
 
                 Debug.LogWarning("There is no listing yet");
             }
 
-            foreach (var element in state.data.elements)
+            foreach (var element in state.listings)
             {
                 if (element.Value.details.Seller.ToText() == loginData.principal)
                 {
                     WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
-                        id = $"{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.details.Seller}",
+                        id = $"{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.details.Seller}",
                         content = $"Nft ID:\n{element.Value.tokenIdentifier.SimplifyAddress()}\n\nIndex:\n{element.Value.index}\n\nPrice:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU",
                         textButtonContent = "UNLIST",
                         action = (a, b) => UnlistNft(a, b).Forget(),
 
                         customData = (
-                            Env.Nfts.BOOM_COLLECTION_CANISTER_ID,
+                            CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID,
                             element.Value.tokenIdentifier,
                             $"{element.Value.details.Seller}",
                             element.Value.details.Price),
 
-                        imageContentType = new ImageContentType.Url($"https://{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}.raw.icp0.io/?&tokenid={element.Value.tokenIdentifier}&type=thumbnail"),
-                        infoWindowData = new($"Your NFT Listing Info", $"Price:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU\n\nNft ID:\n{element.Value.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.SimplifyAddress()}")
+                        imageContentType = new ImageContentType.Url($"https://{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID}.raw.icp0.io/?&tokenid={element.Value.tokenIdentifier}&type=thumbnail"),
+                        infoWindowData = new($"Your NFT Listing Info", $"Price:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: YOU\n\nNft ID:\n{element.Value.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID.SimplifyAddress()}")
                     }, listingContent);
                 }
                 else
                 {
                     WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
                     {
-                        id = $"{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.details.Seller}",
+                        id = $"{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID}|{element.Key}|{element.Value.details.Seller}",
                         content = $"Nft ID:\n{element.Value.tokenIdentifier.SimplifyAddress()}\n\nSeller:\n{element.Value.details.Seller.ToText().SimplifyAddress()}",
                         textButtonContent = $"BUY {element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
                         action = (a, b) => Buy(a, b).Forget(),
 
                         customData = (
-                            Env.Nfts.BOOM_COLLECTION_CANISTER_ID,
+                            CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID,
                             element.Value.tokenIdentifier,
                             $"{element.Value.details.Seller}",
                             element.Value.details.Price),
 
-                        imageContentType = new ImageContentType.Url($"https://{Env.Nfts.BOOM_COLLECTION_CANISTER_ID}.raw.icp0.io/?&tokenid={element.Value.tokenIdentifier}&type=thumbnail"),
-                        infoWindowData = new($"NFT Listing Info", $"Price:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: {element.Value.details.Seller.ToText().SimplifyAddress()}\n\nNft ID:\n{element.Value.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.SimplifyAddress()}")
+                        imageContentType = new ImageContentType.Url($"https://{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID}.raw.icp0.io/?&tokenid={element.Value.tokenIdentifier}&type=thumbnail"),
+                        infoWindowData = new($"NFT Listing Info", $"Price:\n{element.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nSeller: {element.Value.details.Seller.ToText().SimplifyAddress()}\n\nNft ID:\n{element.Value.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID.SimplifyAddress()}")
                     }, listingContent);
                 }
             }
 
+            var principalResult = UserUtil.GetPrincipal();
 
-            var dataTypeResult = UserUtil.GetDataOfType<DataTypes.NftCollection>();
-            if (dataTypeResult.Tag == Values.UResultTag.Ok) UpdateWindow(dataTypeResult.AsOk());
-            else Debug.LogWarning(dataTypeResult.AsErr());
+            if (principalResult.Tag == UResultTag.Err)
+            {
+                Debug.Log(principalResult.AsErr());
+                return;
+            }
+            var principal = principalResult.AsOk().Value;
+
+            var nftCollectionsResult = UserUtil.GetDataSelf<DataTypes.NftCollection>();
+
+            if (nftCollectionsResult.Tag == Values.UResultTag.Ok) UpdateWindow(nftCollectionsResult.AsOk());
+            else Debug.LogWarning(nftCollectionsResult.AsErr());
         }
-        private void UpdateWindow(DataState<Data<DataTypes.NftCollection>> nftsState)
+        private void UpdateWindow(Data<DataTypes.NftCollection> nftsState)
         {
+            var principalResult = UserUtil.GetPrincipal();
+
+            if (principalResult.Tag == UResultTag.Err)
+            {
+                Debug.Log(principalResult.AsErr());
+                return;
+            }
+            var principal = principalResult.AsOk().Value;
+
             foreach (Transform child in nftToListContent)
             {
                 Destroy(child.gameObject);
@@ -180,13 +194,13 @@ namespace Boom.UI
             loadingVisualNftToList.text = "";
             //
 
-            var listingResult = UserUtil.GetElementsOfType<DataTypes.Listing>();
+            var listingResult = UserUtil.GetMainData<MainDataTypes.AllListings>();
 
             if (listingResult.Tag == UResultTag.Err)
             {
                 //Is Fetching
                 Debug.LogWarning("Fetching Listings, msg: "+ listingResult.AsErr());
-                if (nftsState.IsLoading())
+                if (UserUtil.IsFetchingData<DataTypes.NftCollection>())
                 {
                     loadingVisualNftToList.text = "Loading...";
                 }
@@ -194,7 +208,9 @@ namespace Boom.UI
                 return;
             }
 
-            var nftCountResult = NftUtil.GetNftCount(Env.Nfts.BOOM_COLLECTION_CANISTER_ID);
+            var listings = listingResult.AsOk();
+
+            var nftCountResult = NftUtil.GetNftCount(principal, CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID);
 
             if (nftCountResult.Tag == Boom.Values.UResultTag.Err)
             {
@@ -211,58 +227,61 @@ namespace Boom.UI
                 //There is no listings. No need to return.
                 loadingVisualNftToList.text = "You don't have any NFTs to list";
 
-                Debug.LogWarning("You dont have any Nft from collection: "+ Env.Nfts.BOOM_COLLECTION_CANISTER_ID);
+                Debug.LogWarning("You dont have any Nft from collection: "+ CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID);
             }
-
-            nftsState.data.elements.Once(plethoraCollection =>
+            else
             {
-                plethoraCollection.Value.tokens.Iterate(token =>
+                if(nftsState.elements.TryGetValue(CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID, out var nftCollection))
                 {
-
-                    var url = token.url;
-                    if (listingResult.AsOk().TryLocate(e=> e.tokenIdentifier == token.tokenIdentifier, out var listing))
+                    nftCollection.tokens.Iterate(token =>
                     {
-                        //if u own the token and is listed
-                        WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
+                        var url = "https://i.postimg.cc/65smkh6B/BoomDao.jpg"; //token.url;
+                        if (listings.listings.TryLocate(e => e.Value.tokenIdentifier == token.tokenIdentifier, out var listing))
                         {
-                            id = $"{plethoraCollection.Value.canister}|{token.tokenIdentifier}",
-                            content = $"Nft ID:\n{token.tokenIdentifier.SimplifyAddress()}\n\nPrice:\n{listing.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
-                            textButtonContent = "UNLIST",
-                            action = (a, b) => UnlistNft(a, b).Forget(),
+                            //if u own the token and is listed
+                            WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
+                            {
+                                id = $"{nftCollection.canisterId}|{token.tokenIdentifier}",
+                                content = $"Nft ID:\n{token.tokenIdentifier.SimplifyAddress()}\n\nPrice:\n{listing.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP",
+                                textButtonContent = "UNLIST",
+                                action = (a, b) => UnlistNft(a, b).Forget(),
 
-                            customData = (
-                                plethoraCollection.Value.canister,
-                                token.tokenIdentifier,
-                                //we ignore the two values below
-                                "",(ulong)0),
+                                customData = (
+                                    nftCollection.canisterId,
+                                    token.tokenIdentifier,
+                                    //we ignore the two values below
+                                    "", (ulong)0),
 
-                            imageContentType = new ImageContentType.Url(url),
-                            infoWindowData = new($"NFT Listing Info", $"Price:\n{listing.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nNft ID:\n{token.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.SimplifyAddress()}")
-                        }, nftToListContent);
-                    }
-                    else
-                    {
-                        WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
+                                imageContentType = new ImageContentType.Url(url),
+                                infoWindowData = new($"NFT Listing Info", $"Price:\n{listing.Value.details.Price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nNft ID:\n{token.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID.SimplifyAddress()}")
+                            }, nftToListContent);
+                        }
+                        else
                         {
-                            id = $"{plethoraCollection.Value.canister}|{token.tokenIdentifier}",
-                            content = $"Nft ID:\n{token.tokenIdentifier.SimplifyAddress()}",
-                            textButtonContent = "LIST",
-                            action = OpenMakeOfferPanel,
+                            WindowManager.Instance.AddWidgets<ActionWidget>(new ActionWidget.WindowData()
+                            {
+                                id = $"{nftCollection.canisterId}|{token.tokenIdentifier}",
+                                content = $"Nft ID:\n{token.tokenIdentifier.SimplifyAddress()}",
+                                textButtonContent = "LIST",
+                                action = OpenMakeOfferPanel,
 
-                            customData = (
-                                plethoraCollection.Value.canister,
-                                token.tokenIdentifier,
-                                token.index),
+                                customData = (
+                                    nftCollection.canisterId,
+                                    token.tokenIdentifier,
+                                    token.index),
 
-                            imageContentType = new ImageContentType.Url(url),
-                            infoWindowData = new($"NFT Info", $"Nft ID:\n{token.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{Env.Nfts.BOOM_COLLECTION_CANISTER_ID.SimplifyAddress()}")
-                        }, nftToListContent);
-                    }
-                });
-            }, plethoraCollection =>
-            {
-                return plethoraCollection.Value.canister == Env.Nfts.BOOM_COLLECTION_CANISTER_ID;
-            });
+                                imageContentType = new ImageContentType.Url(url),
+                                infoWindowData = new($"NFT Info", $"Nft ID:\n{token.tokenIdentifier.SimplifyAddress()}\n\nCanister ID:\n{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID.SimplifyAddress()}")
+                            }, nftToListContent);
+                        }
+                    });
+                }
+                else
+                {
+                    Debug.LogError($"Failure to find config of nft collectionId: {CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID}");
+                    return;
+                }
+            }
         }
 
 
@@ -290,21 +309,25 @@ namespace Boom.UI
         {
             //await UniTask.SwitchToMainThread();
 
+
             BroadcastState.Invoke(new WaitingForResponse(true));
             (string collectionId, string nftIdentifier, string seller, ulong price) = ((string, string, string, ulong))customData;
 
-            var getAccountIdentifierResult = UserUtil.GetAccountIdentifier();
+            var loginDataResult = UserUtil.GetLogInData();
 
-            if (getAccountIdentifierResult.IsErr)
+            if (loginDataResult.IsErr)
             {
-                Debug.LogError(getAccountIdentifierResult.AsErr().Value);
+                Debug.LogError(loginDataResult.AsErr());
                 return;
             }
 
-            var accountIdentifier = getAccountIdentifierResult.AsOk().Value;
+            var loginData = loginDataResult.AsOk();
 
+            var accountIdentifier = loginData.accountIdentifier;
+            var principal = loginData.principal;
+            var agent = loginData.agent;
 
-            var tokenDataResult = TokenUtil.GetTokenDetails(Env.CanisterIds.ICP_LEDGER);
+            var tokenDataResult = TokenUtil.GetTokenDetails(principal, Env.CanisterIds.ICP_LEDGER);
 
             if (tokenDataResult.IsErr)
             {
@@ -318,20 +341,11 @@ namespace Boom.UI
                 WindowManager.Instance.OpenWindow<InfoPopupWindow>(new InfoPopupWindow.WindowData("You don't have enough ICP", $"Requirements:\n{$"{price.ConvertToDecimal(CandidUtil.ICP_DECIMALS)} ICP\n\nYou need to deposit some ICP"}"), 3);
                 return;
             }
-
-            var getAgentResult = UserUtil.GetAgent();
-
-            if (getAgentResult.Tag == UResultTag.Err)
-            {
-                Debug.Log(getAgentResult.AsErr());
-                return;
-            }
-
-            Extv2BoomApiClient collectionInterface = new(getAgentResult.AsOk(), Principal.FromText(collectionId));
+            Extv2BoomApiClient collectionInterface = new(agent, Principal.FromText(collectionId));
 
             var lockResult = await collectionInterface.Lock(nftIdentifier, price, accountIdentifier, new());
 
-            if (lockResult.Tag == Candid.Extv2Boom.Models.Result_9Tag.Err)
+            if (lockResult.Tag == Candid.Extv2Boom.Models.Result7Tag.Err)
             {
                 BroadcastState.Invoke(new WaitingForResponse(false));
 
@@ -344,7 +358,7 @@ namespace Boom.UI
             var addressToTransferTo = lockResult.AsOk();
             Debug.Log("Transfer from: " + accountIdentifier + " Price: " + price);
 
-            var transferResult = await ActionUtil.Transfer.TransferIcp(CandidUtil.ConvertToDecimal(price, tokenData.configs.decimals), addressToTransferTo);
+            var transferResult = await ActionUtil.Transfer.TransferIcp(new Candid.World.Models.IcpTx(CandidUtil.ConvertToDecimal(price, tokenData.configs.decimals), addressToTransferTo));
 
             if (transferResult.Tag == Values.UResultTag.Err)
             {
@@ -356,13 +370,13 @@ namespace Boom.UI
 
             var settleResult = await collectionInterface.Settle(nftIdentifier);
 
-            if (settleResult.Tag == Candid.Extv2Boom.Models.Result_5Tag.Err)
+            if (settleResult.Tag == Candid.Extv2Boom.Models.Result3Tag.Err)
             {
                 BroadcastState.Invoke(new WaitingForResponse(false));
 
                 var err = settleResult.AsErr();
 
-                if(err.Tag == Candid.Extv2Boom.Models.CommonError__1Tag.InvalidToken)
+                if(err.Tag == Candid.Extv2Boom.Models.CommonErrorTag.InvalidToken)
                 {
                     Debug.LogError($"Settle failure, invalid token, msg: {err.AsInvalidToken()}");
                 }
@@ -380,7 +394,7 @@ namespace Boom.UI
 
             //
 
-            if (EntityUtil.QueryConfigsByTag("nft", out var nftConfigs))
+            if (ConfigUtil.QueryConfigsByTag(CandidApiManager.Instance.WORLD_CANISTER_ID, "nft", out var nftConfigs))
             {
                 nftConfigs.Iterate(e =>
                 {
@@ -413,15 +427,17 @@ namespace Boom.UI
                         return;
                     }
 
-                     UserUtil.RequestData<DataTypes.NftCollection>(new NftCollectionToFetch(collectionId, collectionName, description, urlLogo, isStandard));
+                     UserUtil.RequestData(new DataTypeRequestArgs.NftCollection(new[] { collectionId }, principal));
                 });
             }
 
             //
 
             BroadcastState.Invoke(new WaitingForResponse(false));
-            UserUtil.Clean<DataTypes.Listing>();
-            UserUtil.RequestData<DataTypes.Listing>();
+
+            UserUtil.ClearMainData<MainDataTypes.AllListings>();
+
+            Broadcast.Invoke<FetchListings>();
         }
         private void OpenMakeOfferPanel(string id, object customData)
         {
@@ -429,9 +445,9 @@ namespace Boom.UI
             newListingPanel.SetActive(true);
             confirmListingButton.enabled = true;
 
-            (selectedCollectionId, selectedNftIdentifier, selectedNftIndex) = ((string, string, uint))customData;
+            (selectedNftCollectionCanisterId, selectedNftIdentifier, selectedNftIndex) = ((string, string, uint))customData;
 
-            newListingContentText.text = $"Canister ID:\n{selectedCollectionId.SimplifyAddress()}\n\nNft ID:\n{selectedNftIdentifier.SimplifyAddress()}\n\nNft Index: {selectedNftIndex}";
+            newListingContentText.text = $"Canister ID:\n{CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID.SimplifyAddress()}\n\nNft ID:\n{selectedNftIdentifier.SimplifyAddress()}\n\nNft Index: {selectedNftIndex}";
         }
         private void CancelMakeOfferPanel()
         {
@@ -467,16 +483,17 @@ namespace Boom.UI
                 return;
             }
 
-            Extv2BoomApiClient collectionInterface = new(getAgentResult.AsOk(), Principal.FromText(selectedCollectionId));
+            Extv2BoomApiClient collectionInterface = new(getAgentResult.AsOk(), Principal.FromText(CandidApiManager.Instance.WORLD_COLLECTION_CANISTER_ID));
 
             var listingReqResult = await collectionInterface.List(new Candid.Extv2Boom.Models.ListRequest(new(), new(nftPrice.ConvertToBaseUnit(CandidUtil.ICP_DECIMALS)), selectedNftIdentifier));
 
-            if (listingReqResult.Tag == Candid.Extv2Boom.Models.Result_5Tag.Ok)
+            if (listingReqResult.Tag == Candid.Extv2Boom.Models.Result3Tag.Ok)
             {
                 BroadcastState.Invoke(new WaitingForResponse(false));
                 newListingPanel.SetActive(false);
                 Close();
-                UserUtil.RequestData<DataTypes.Listing>();
+
+                Broadcast.Invoke<FetchListings>();
 
                 Debug.Log("Listing success");
 
@@ -510,7 +527,7 @@ namespace Boom.UI
 
             var unlistingReqResult = await collectionInterface.List(new Candid.Extv2Boom.Models.ListRequest(new(), new(), nftIdentifier));
 
-            if (unlistingReqResult.Tag == Candid.Extv2Boom.Models.Result_5Tag.Err)
+            if (unlistingReqResult.Tag == Candid.Extv2Boom.Models.Result3Tag.Err)
             {
                 Debug.LogWarning("Error unListing, msg: " + unlistingReqResult.AsErr().Value.ToString());
                 return;
@@ -521,8 +538,9 @@ namespace Boom.UI
             BroadcastState.Invoke(new WaitingForResponse(false));
             newListingPanel.SetActive(false);
 
-            UserUtil.Clean<DataTypes.Listing>();
-            UserUtil.RequestData<DataTypes.Listing>();
+            UserUtil.ClearMainData<MainDataTypes.AllListings>();
+
+            Broadcast.Invoke<FetchListings>();
         }
 
         public override void Close()

@@ -1,35 +1,19 @@
-using TokenIndex__1 = System.UInt32;
-using TokenIdentifier__2 = System.String;
-using TokenIdentifier__1 = System.String;
-using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
-using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
-using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
-using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField__1 = System.ValueTuple<System.String, System.String>;
-using Extension = System.String;
-using ChunkId = System.UInt32;
-using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
-using AssetHandle__1 = System.String;
-using AccountIdentifier__2 = System.String;
-using AccountIdentifier__1 = System.String;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.Extv2Boom.Models;
 using EdjCase.ICP.Candid.Models;
 using System;
+using AccountIdentifier = System.String;
 
 namespace Candid.Extv2Boom.Models
 {
 	[Variant]
 	public class User
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public UserTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public User(UserTag tag, object? value)
 		{
@@ -41,7 +25,7 @@ namespace Candid.Extv2Boom.Models
 		{
 		}
 
-		public static User Address(AccountIdentifier__1 info)
+		public static User Address(AccountIdentifier info)
 		{
 			return new User(UserTag.Address, info);
 		}
@@ -51,10 +35,10 @@ namespace Candid.Extv2Boom.Models
 			return new User(UserTag.Principal, info);
 		}
 
-		public AccountIdentifier__1 AsAddress()
+		public AccountIdentifier AsAddress()
 		{
 			this.ValidateTag(UserTag.Address);
-			return (AccountIdentifier__1)this.Value!;
+			return (AccountIdentifier)this.Value!;
 		}
 
 		public Principal AsPrincipal()
@@ -75,10 +59,8 @@ namespace Candid.Extv2Boom.Models
 	public enum UserTag
 	{
 		[CandidName("address")]
-		
 		Address,
 		[CandidName("principal")]
-		
 		Principal
 	}
 }

@@ -1,50 +1,29 @@
-using worldId = System.String;
-using groupId = System.String;
-using entityId = System.String;
-using configId = System.String;
-using BlockIndex = System.UInt64;
 using EdjCase.ICP.Candid.Mapping;
-using Candid.World.Models;
 using EdjCase.ICP.Candid.Models;
+using Candid.World.Models;
 
 namespace Candid.World.Models
 {
 	public class Action
 	{
-		[CandidName("actionConstraint")]
-		public OptionalValue<ActionConstraint> ActionConstraint { get; set; }
-
-		[CandidName("actionPlugin")]
-		public OptionalValue<ActionPlugin> ActionPlugin { get; set; }
-
-		[CandidName("actionResult")]
-		public ActionResult ActionResult { get; set; }
-
 		[CandidName("aid")]
 		public string Aid { get; set; }
 
-		[CandidName("description")]
-		public OptionalValue<string> Description { get; set; }
+		[CandidName("callerAction")]
+		public OptionalValue<SubAction> CallerAction { get; set; }
 
-		[CandidName("imageUrl")]
-		public OptionalValue<string> ImageUrl { get; set; }
+		[CandidName("targetAction")]
+		public OptionalValue<SubAction> TargetAction { get; set; }
 
-		[CandidName("name")]
-		public OptionalValue<string> Name { get; set; }
+		[CandidName("worldAction")]
+		public OptionalValue<SubAction> WorldAction { get; set; }
 
-		[CandidName("tag")]
-		public OptionalValue<string> Tag { get; set; }
-
-		public Action(OptionalValue<ActionConstraint> actionConstraint, OptionalValue<ActionPlugin> actionPlugin, ActionResult actionResult, string aid, OptionalValue<string> description, OptionalValue<string> imageUrl, OptionalValue<string> name, OptionalValue<string> tag)
+		public Action(string aid, OptionalValue<SubAction> callerAction, OptionalValue<SubAction> targetAction, OptionalValue<SubAction> worldAction)
 		{
-			this.ActionConstraint = actionConstraint;
-			this.ActionPlugin = actionPlugin;
-			this.ActionResult = actionResult;
 			this.Aid = aid;
-			this.Description = description;
-			this.ImageUrl = imageUrl;
-			this.Name = name;
-			this.Tag = tag;
+			this.CallerAction = callerAction;
+			this.TargetAction = targetAction;
+			this.WorldAction = worldAction;
 		}
 
 		public Action()

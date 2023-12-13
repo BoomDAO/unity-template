@@ -1,34 +1,20 @@
-using TokenIndex__1 = System.UInt32;
-using TokenIdentifier__2 = System.String;
-using TokenIdentifier__1 = System.String;
-using Time = EdjCase.ICP.Candid.Models.UnboundedInt;
-using SubAccount__1 = System.Collections.Generic.List<System.Byte>;
-using SubAccount = System.Collections.Generic.List<System.Byte>;
-using MetadataValue = System.ValueTuple<System.String, Candid.Extv2Boom.Models.MetadataValue>;
-using Memo = System.Collections.Generic.List<System.Byte>;
-using HeaderField__1 = System.ValueTuple<System.String, System.String>;
-using Extension = System.String;
-using ChunkId = System.UInt32;
-using Balance__1 = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
-using AssetId = System.UInt32;
-using AssetHandle__1 = System.String;
-using AccountIdentifier__2 = System.String;
-using AccountIdentifier__1 = System.String;
 using EdjCase.ICP.Candid.Mapping;
 using Candid.Extv2Boom.Models;
 using System;
+using TokenIdentifier = System.String;
+using Balance = EdjCase.ICP.Candid.Models.UnboundedUInt;
+using AccountIdentifier = System.String;
 
 namespace Candid.Extv2Boom.Models
 {
 	[Variant]
 	public class TransferResponse
 	{
-		[VariantTagProperty()]
+		[VariantTagProperty]
 		public TransferResponseTag Tag { get; set; }
 
-		[VariantValueProperty()]
-		public System.Object? Value { get; set; }
+		[VariantValueProperty]
+		public object? Value { get; set; }
 
 		public TransferResponse(TransferResponseTag tag, object? value)
 		{
@@ -73,11 +59,11 @@ namespace Candid.Extv2Boom.Models
 		[Variant]
 		public class ErrInfo
 		{
-			[VariantTagProperty()]
+			[VariantTagProperty]
 			public TransferResponse.ErrInfoTag Tag { get; set; }
 
-			[VariantValueProperty()]
-			public System.Object? Value { get; set; }
+			[VariantValueProperty]
+			public object? Value { get; set; }
 
 			public ErrInfo(TransferResponse.ErrInfoTag tag, object? value)
 			{
@@ -89,7 +75,7 @@ namespace Candid.Extv2Boom.Models
 			{
 			}
 
-			public static TransferResponse.ErrInfo CannotNotify(AccountIdentifier__1 info)
+			public static TransferResponse.ErrInfo CannotNotify(AccountIdentifier info)
 			{
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.CannotNotify, info);
 			}
@@ -99,7 +85,7 @@ namespace Candid.Extv2Boom.Models
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.InsufficientBalance, null);
 			}
 
-			public static TransferResponse.ErrInfo InvalidToken(TokenIdentifier__1 info)
+			public static TransferResponse.ErrInfo InvalidToken(TokenIdentifier info)
 			{
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.InvalidToken, info);
 			}
@@ -114,21 +100,21 @@ namespace Candid.Extv2Boom.Models
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.Rejected, null);
 			}
 
-			public static TransferResponse.ErrInfo Unauthorized(AccountIdentifier__1 info)
+			public static TransferResponse.ErrInfo Unauthorized(AccountIdentifier info)
 			{
 				return new TransferResponse.ErrInfo(TransferResponse.ErrInfoTag.Unauthorized, info);
 			}
 
-			public AccountIdentifier__1 AsCannotNotify()
+			public AccountIdentifier AsCannotNotify()
 			{
 				this.ValidateTag(TransferResponse.ErrInfoTag.CannotNotify);
-				return (AccountIdentifier__1)this.Value!;
+				return (AccountIdentifier)this.Value!;
 			}
 
-			public TokenIdentifier__1 AsInvalidToken()
+			public TokenIdentifier AsInvalidToken()
 			{
 				this.ValidateTag(TransferResponse.ErrInfoTag.InvalidToken);
-				return (TokenIdentifier__1)this.Value!;
+				return (TokenIdentifier)this.Value!;
 			}
 
 			public string AsOther()
@@ -137,10 +123,10 @@ namespace Candid.Extv2Boom.Models
 				return (string)this.Value!;
 			}
 
-			public AccountIdentifier__1 AsUnauthorized()
+			public AccountIdentifier AsUnauthorized()
 			{
 				this.ValidateTag(TransferResponse.ErrInfoTag.Unauthorized);
-				return (AccountIdentifier__1)this.Value!;
+				return (AccountIdentifier)this.Value!;
 			}
 
 			private void ValidateTag(TransferResponse.ErrInfoTag tag)
@@ -154,15 +140,11 @@ namespace Candid.Extv2Boom.Models
 
 		public enum ErrInfoTag
 		{
-			
 			CannotNotify,
 			InsufficientBalance,
-			
 			InvalidToken,
-			
 			Other,
 			Rejected,
-			
 			Unauthorized
 		}
 	}
@@ -170,10 +152,8 @@ namespace Candid.Extv2Boom.Models
 	public enum TransferResponseTag
 	{
 		[CandidName("err")]
-		
 		Err,
 		[CandidName("ok")]
-		
 		Ok
 	}
 }
