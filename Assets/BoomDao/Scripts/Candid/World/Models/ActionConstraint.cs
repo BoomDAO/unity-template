@@ -40,21 +40,36 @@ namespace Candid.World.Models
 			[CandidName("actionExpirationTimestamp")]
 			public OptionalValue<UnboundedUInt> ActionExpirationTimestamp { get; set; }
 
-			[CandidName("actionsPerInterval")]
-			public UnboundedUInt ActionsPerInterval { get; set; }
+			[CandidName("actionTimeInterval")]
+			public OptionalValue<ActionConstraint.TimeConstraintValue.ActionTimeIntervalValue> ActionTimeInterval { get; set; }
 
-			[CandidName("intervalDuration")]
-			public UnboundedUInt IntervalDuration { get; set; }
-
-			public TimeConstraintValue(OptionalValue<UnboundedUInt> actionExpirationTimestamp, UnboundedUInt actionsPerInterval, UnboundedUInt intervalDuration)
+			public TimeConstraintValue(OptionalValue<UnboundedUInt> actionExpirationTimestamp, OptionalValue<ActionConstraint.TimeConstraintValue.ActionTimeIntervalValue> actionTimeInterval)
 			{
 				this.ActionExpirationTimestamp = actionExpirationTimestamp;
-				this.ActionsPerInterval = actionsPerInterval;
-				this.IntervalDuration = intervalDuration;
+				this.ActionTimeInterval = actionTimeInterval;
 			}
 
 			public TimeConstraintValue()
 			{
+			}
+
+			public class ActionTimeIntervalValue
+			{
+				[CandidName("actionsPerInterval")]
+				public UnboundedUInt ActionsPerInterval { get; set; }
+
+				[CandidName("intervalDuration")]
+				public UnboundedUInt IntervalDuration { get; set; }
+
+				public ActionTimeIntervalValue(UnboundedUInt actionsPerInterval, UnboundedUInt intervalDuration)
+				{
+					this.ActionsPerInterval = actionsPerInterval;
+					this.IntervalDuration = intervalDuration;
+				}
+
+				public ActionTimeIntervalValue()
+				{
+				}
 			}
 		}
 	}

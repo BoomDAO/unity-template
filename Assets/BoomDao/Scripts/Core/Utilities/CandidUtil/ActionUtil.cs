@@ -416,17 +416,23 @@ public static class ActionUtil
             return true;
         }
 
+        if(subAction.TimeConstraint.actionTimeInterval == null)
+        {
+            triesLeft = 1;
+            return true;
+        }
+
         var intervalStartTs = UserUtil.GetPropertyFromTypeSelf<DataTypes.ActionState, ulong>(actionId, e => e.intervalStartTs, 0);
         var actionCount = UserUtil.GetPropertyFromTypeSelf<DataTypes.ActionState, ulong>(actionId, e => e.actionCount, 0);
 
-        var actionsPerInterval = subAction.TimeConstraint.ActionsPerInterval;
+        var actionsPerInterval = subAction.TimeConstraint.actionTimeInterval.ActionsPerInterval;
 
         if (actionsPerInterval == 0)
         {
             return false;
         }
 
-        var intervalDuration = subAction.TimeConstraint.IntervalDuration;
+        var intervalDuration = subAction.TimeConstraint.actionTimeInterval.IntervalDuration;
 
         var timeConstrainToCompareWith = intervalStartTs.NanoToMilliseconds() + intervalDuration.NanoToMilliseconds();
         if (timeConstrainToCompareWith < MainUtil.Now())

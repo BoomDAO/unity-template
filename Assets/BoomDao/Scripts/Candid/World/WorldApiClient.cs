@@ -7,7 +7,6 @@ using EdjCase.ICP.Agent.Responses;
 using System.Collections.Generic;
 using EdjCase.ICP.Candid.Mapping;
 using WorldId = System.String;
-using UserId = System.String;
 using EntityId = System.String;
 
 namespace Candid.World
@@ -135,11 +134,11 @@ namespace Candid.World
 			return reply.ToObjects<Models.StableConfig>(this.Converter);
 		}
 
-		public async Task<WorldApiClient.EditEntityReturnArg0> EditEntity(WorldApiClient.EditEntityArg0 arg0)
+		public async Task<Models.EntitySchema> EditEntity(WorldApiClient.EditEntityArg0 arg0)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0, this.Converter));
 			CandidArg reply = await this.Agent.CallAndWaitAsync(this.CanisterId, "editEntity", arg);
-			return reply.ToObjects<WorldApiClient.EditEntityReturnArg0>(this.Converter);
+			return reply.ToObjects<Models.EntitySchema>(this.Converter);
 		}
 
 		public async Task<List<Models.Action>> ExportActions()
@@ -337,6 +336,12 @@ namespace Candid.World
 			return reply.ToObjects<Models.Result2>(this.Converter);
 		}
 
+		public async Task UpdateOwnership(Principal arg0)
+		{
+			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0, this.Converter));
+			await this.Agent.CallAndWaitAsync(this.CanisterId, "updateOwnership", arg);
+		}
+
 		public async Task<bool> ValidateEntityConstraints(List<Models.StableEntity> arg0, List<Models.EntityConstraint> arg1)
 		{
 			CandidArg arg = CandidArg.FromCandid(CandidTypedValue.FromObject(arg0, this.Converter), CandidTypedValue.FromObject(arg1, this.Converter));
@@ -512,25 +517,6 @@ namespace Candid.World
 			}
 
 			public EditEntityArg0()
-			{
-			}
-		}
-
-		public class EditEntityReturnArg0
-		{
-			[CandidName("entity")]
-			public Models.StableEntity Entity { get; set; }
-
-			[CandidName("uid")]
-			public UserId Uid { get; set; }
-
-			public EditEntityReturnArg0(Models.StableEntity entity, UserId uid)
-			{
-				this.Entity = entity;
-				this.Uid = uid;
-			}
-
-			public EditEntityReturnArg0()
 			{
 			}
 		}

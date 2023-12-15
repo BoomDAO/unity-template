@@ -7,6 +7,7 @@ using EdjCase.ICP.Agent.Agents;
 using EdjCase.ICP.Candid.Models;
 using EdjCase.ICP.WebSockets;
 using Candid;
+using EdjCase.ICP.BLS;
 
 public class WebSocketManager : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class WebSocketManager : MonoBehaviour
     [SerializeField] string gatewayUri = "wss://gateway.icws.io";//"ws://127.0.0.1:8080";
 
     private IWebSocketAgent<AppMessage> agent;
-    private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+    private CancellationTokenSource cancellationTokenSource = new();
 
     async void Start()
     {
@@ -34,18 +35,9 @@ public class WebSocketManager : MonoBehaviour
             .OnMessage(this.OnMessage)
             .OnOpen(this.OnOpen)
             .OnError(this.OnError)
-            .OnClose(this.OnClose);
+            .OnClose(this.OnClose);//.WithCustomBlsCryptography(new BypassedBlsCryptography());
 
-        //if (development)
-        //{
-        //    // Set the root key as the dev network key
-        //    SubjectPublicKeyInfo devRootKey = await new HttpAgent(
-        //        httpBoundryNodeUrl: new(devBoundryNodeUri)
-        //    ).GetRootKeyAsync();
-        //    builder = builder.WithRootKey(devRootKey);
-        //}
-
-        this.agent = await builder.BuildAsync(cancellationToken: cancellationTokenSource.Token);
+        this.agent = await builder.BuildAndConnectAsync(cancellationToken: cancellationTokenSource.Token);
         await this.agent.ReceiveAllAsync(cancellationTokenSource.Token);
     }
 

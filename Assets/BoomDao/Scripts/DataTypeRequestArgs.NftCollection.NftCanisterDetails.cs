@@ -461,22 +461,38 @@ public static class EntityConstrainTypes
 
 public class TimeConstraint
 {
-    public TimeConstraint(ulong actionsPerInterval, ulong intervalDuration)
+    public class ActionTimeInterval
     {
-        ActionsPerInterval = actionsPerInterval;
-        IntervalDuration = intervalDuration;
+        public ActionTimeInterval(ulong actionsPerInterval, ulong intervalDuration)
+        {
+            ActionsPerInterval = actionsPerInterval;
+            IntervalDuration = intervalDuration;
+        }
+
+        public ulong ActionsPerInterval { get; set; }
+        public ulong IntervalDuration { get; set; }
     }
     public TimeConstraint(Candid.World.Models.ActionConstraint.TimeConstraintValue timeConstraint)
     {
-        timeConstraint.ActionsPerInterval.TryToUInt64(out ulong actionsPerInterval);
-        timeConstraint.IntervalDuration.TryToUInt64(out ulong intervalDuration);
+        if (timeConstraint.ActionTimeInterval.HasValue)
+        {
+            var _actionTimeInterval = timeConstraint.ActionTimeInterval.ValueOrDefault;
+            _actionTimeInterval.ActionsPerInterval.TryToUInt64(out ulong actionsPerInterval);
+            _actionTimeInterval.IntervalDuration.TryToUInt64(out ulong intervalDuration);
+            actionTimeInterval = new(actionsPerInterval, intervalDuration);
+        }
 
-        ActionsPerInterval = actionsPerInterval;
-        IntervalDuration = intervalDuration;
+        if (timeConstraint.ActionExpirationTimestamp.HasValue)
+        {
+            timeConstraint.ActionExpirationTimestamp.ValueOrDefault.TryToUInt64(out ulong _actionExpirationTimestamp);
+            actionExpirationTimestamp = actionExpirationTimestamp;
+        }
+        else actionExpirationTimestamp = null;
     }
 
-    public ulong ActionsPerInterval { get; set; }
-    public ulong IntervalDuration { get; set; }
+    public ulong? actionExpirationTimestamp { get; set; }
+    public ActionTimeInterval actionTimeInterval { get; set; }
+
 }
 public class SubAction
 {
