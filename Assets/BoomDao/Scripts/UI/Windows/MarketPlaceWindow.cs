@@ -200,7 +200,7 @@ namespace Boom.UI
             {
                 //Is Fetching
                 Debug.LogWarning("Fetching Listings, msg: "+ listingResult.AsErr());
-                if (UserUtil.IsFetchingData<DataTypes.NftCollection>())
+                if (UserUtil.IsDataLoadingSelf<DataTypes.NftCollection>())
                 {
                     loadingVisualNftToList.text = "Loading...";
                 }

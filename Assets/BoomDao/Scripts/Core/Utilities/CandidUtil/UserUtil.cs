@@ -9,41 +9,27 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
-using System.Linq;
-using static Env;
 
 public static class UserUtil
 {
     #region Login
-    public enum LoginType { User, Anon }
+    public enum LoginType { User, Anon, None }
 
     public static void SetAsLoginIn()
     {
-        var result = GetLogInData();
-
-        if (result.IsErr)
-        {
-            Debug.LogError(result.AsErr());
-
-            return;
-        }
-        var a = new MainDataTypes.LoginData(true, result.AsOk());
-        UserUtil.UpdateMainData(new MainDataTypes.LoginData(true, result.AsOk()));
+        UserUtil.UpdateMainData(new MainDataTypes.LoginData() { state = MainDataTypes.LoginData.State.LoginRequested});
     }
 
-    public static bool IsLoginIn() 
+    public static bool IsLoginRequestedPending() 
     {
         var loginDataResult = GetMainData<MainDataTypes.LoginData>();
 
-        if(loginDataResult.IsErr)
-        {
-            Debug.LogError(loginDataResult.AsErr());
+        if(loginDataResult.IsErr) return false;
 
-            return false;
-        }
+        var loginDataAsOk = loginDataResult.AsOk();
 
 
-        return loginDataResult.AsOk().isLoginIn;
+        return loginDataAsOk.state == MainDataTypes.LoginData.State.LoginRequested;
     }
 
     /// <summary>
@@ -109,30 +95,15 @@ public static class UserUtil
 
         return new(result.AsOk().agent);
     }
-
-    /// <summary>
-    /// If LoginData is ever initialized this function will return a result as an Ok, being this the LoginType which could be User or Anon
-    /// Otherwise it will return a result as an Err, being this an error message
-    /// </summary>
-    /// <returns></returns>
-    public static UResult<LoginType, string> GetLoginType()
-    {
-        var getLogInDataResult = UserUtil.GetLogInData();
-
-        if (getLogInDataResult.Tag == UResultTag.Err)
-        {
-            return new(getLogInDataResult.AsErr());
-        }
-
-        return getLogInDataResult.AsOk().asAnon ? new(LoginType.Anon) : new(LoginType.User);
-    }
     /// <summary>
     /// If LoginData is ever initialized this function will return a result as an Ok, being this true if Login Data is from an User
     /// Otherwise it will return a result as an Err, being this an error message
     /// </summary>
     /// <returns></returns>
-    public static bool IsUserLoggedIn()
+    public static bool IsLoggedIn(out LoginType loginType)
     {
+        loginType = LoginType.None;
+
         var getLogInDataResult = UserUtil.GetLogInData();
 
         if (getLogInDataResult.Tag == UResultTag.Err)
@@ -140,50 +111,79 @@ public static class UserUtil
             return false;
         }
 
-        return !getLogInDataResult.AsOk().asAnon;
+        var asOk = getLogInDataResult.AsOk();
+
+        if (asOk.state == MainDataTypes.LoginData.State.LoggedIn)
+        {
+            loginType = LoginType.User;
+            return true;
+        }
+        else if (asOk.state == MainDataTypes.LoginData.State.LoggedInAsAnon)
+        {
+            loginType = LoginType.Anon;
+            return true;
+        }
+
+        return false;
+    }
+    public static LoginType GetLoginType()
+    {
+        IsLoggedIn(out LoginType loginType);
+        return loginType;
     }
     public static bool IsUserLoggedIn(out MainDataTypes.LoginData loginData)
     {
         loginData = default;
 
+
         var getLogInDataResult = UserUtil.GetLogInData();
 
         if (getLogInDataResult.Tag == UResultTag.Err)
         {
             return false;
         }
-        loginData = getLogInDataResult.AsOk();
-        return !loginData.asAnon;
+
+        var asOk = getLogInDataResult.AsOk();
+
+        if (asOk.state == MainDataTypes.LoginData.State.LoggedIn)
+        {
+            loginData = getLogInDataResult.AsOk();
+            return true;
+        }
+
+        return false;
     }
-    /// <summary>
-    /// If LoginData is ever initialized this function will return a result as an Ok, being this true if Login Data is from Anon
-    /// Otherwise it will return a result as an Err, being this an error message
-    /// </summary>
-    /// <returns></returns>
-    public static bool IsAnonLoggedIn()
+    public static bool IsUserLoggedIn()
     {
-        var getLogInDataResult = UserUtil.GetLogInData();
-
-        if (getLogInDataResult.Tag == UResultTag.Err)
-        {
-            return false;
-        }
-
-        return getLogInDataResult.AsOk().asAnon;
+        return IsLoggedIn(out LoginType loginType) && loginType == LoginType.User;
     }
     public static bool IsAnonLoggedIn(out MainDataTypes.LoginData loginData)
     {
         loginData = default;
 
+
         var getLogInDataResult = UserUtil.GetLogInData();
 
         if (getLogInDataResult.Tag == UResultTag.Err)
         {
             return false;
         }
-        loginData = getLogInDataResult.AsOk();
-        return loginData.asAnon;
+
+        var asOk = getLogInDataResult.AsOk();
+
+        if (asOk.state == MainDataTypes.LoginData.State.LoggedInAsAnon)
+        {
+            loginData = getLogInDataResult.AsOk();
+            return true;
+        }
+
+        return false;
     }
+    public static bool IsAnonLoggedIn()
+    {
+        return IsLoggedIn(out LoginType loginType) && loginType == LoginType.Anon;
+    }
+
     #endregion
 
     #region DataTypes
@@ -202,7 +202,7 @@ public static class UserUtil
 
     public static void AddListenerDataChange<T>(this System.Action<Data<T>> action, bool invokeOnRegistration = false, params string[] uids) where T : DataTypes.Base
     {
-        if (IsUserLoggedIn(out var loginData) == false || loginData.asAnon)
+        if (IsUserLoggedIn(out var loginData))
         {
             foreach (var uid in uids)
             {
@@ -219,7 +219,7 @@ public static class UserUtil
     }
     public static void RemoveListenerDataChange<T>(this System.Action<Data<T>> action, params string[] uids) where T : DataTypes.Base
     {
-        if (IsUserLoggedIn(out var loginData) == false || loginData.asAnon)
+        if (IsUserLoggedIn(out var loginData))
         {
             foreach (var uid in uids)
             {
@@ -316,9 +316,9 @@ public static class UserUtil
             return;
         }
 
-        if (loginData.asAnon)
+        if (loginData.state != MainDataTypes.LoginData.State.LoggedIn)
         {
-            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+            Debug.LogError("You cannot fetch shared data as an anon user!");
 
             return;
         }
@@ -408,7 +408,7 @@ public static class UserUtil
     public static void UpdateData<T>(string uid, params T[] newVals) where T : DataTypes.Base
     {
         //#if UNITY_EDITOR
-        //if (newVals != null) $">>> DATA of type {typeof(T).Name}, key: {uid}, has been fetched.\nKeys to store:\n{newVals.Reduce(e => $"* {e.GetKey()}, value: {JsonConvert.SerializeObject(e)}", ",\n")}".Log(nameof(UserUtil));
+        if (newVals != null) $">>> DATA of type {typeof(T).Name}, key: {uid}, has been fetched.\nKeys to store:\n{newVals.Reduce(e => $"* {e.GetKey()}, value: {JsonConvert.SerializeObject(e)}", ",\n")}".Log(nameof(UserUtil));
         //#endif
 
         if (IsUserLoggedIn(out var loginData) == false)
@@ -418,9 +418,9 @@ public static class UserUtil
             return;
         }
 
-        if (loginData.asAnon)
+        if (loginData.state != MainDataTypes.LoginData.State.LoggedIn)
         {
-            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+            Debug.LogError("You cannot update shared data as an anon user!");
 
             return;
         }
@@ -486,14 +486,14 @@ public static class UserUtil
     {
         if (IsUserLoggedIn(out var loginData) == false)
         {
-            Debug.LogError("Issue getting loginData!");
+            "Issue getting loginData!".Error();
 
             return false;
         }
 
-        if (loginData.asAnon)
+        if (loginData.state != MainDataTypes.LoginData.State.LoggedIn)
         {
-            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+            "You cannot check shared data as an anon user!".Error();
 
             return false;
         }
@@ -505,6 +505,7 @@ public static class UserUtil
 
             if (BroadcastState.TryRead<Data<T>>(out var val, uid) == false)
             {
+                //$"Could not find data of type {typeof(T)} of id: {uid.SimplifyAddress()}".Error();
                 return false;
             }
         }
@@ -516,7 +517,7 @@ public static class UserUtil
         return IsDataValid<T>("self");
     }
 
-    public static bool IsFetchingData<T>(params string[] uids) where T : DataTypes.Base
+    public static bool IsDataLoading<T>(params string[] uids) where T : DataTypes.Base
     {
         if (IsUserLoggedIn(out var loginData) == false)
         {
@@ -525,9 +526,9 @@ public static class UserUtil
             return false;
         }
 
-        if (loginData.asAnon)
+        if (loginData.state != MainDataTypes.LoginData.State.LoggedIn)
         {
-            Debug.LogError("You cannot fetch your own shared data as an anon user!");
+            Debug.LogError("You cannot check shared data as an anon user!");
 
             return false;
         }
@@ -560,7 +561,7 @@ public static class UserUtil
 
     public static bool IsDataLoadingSelf<T>() where T : DataTypes.Base
     {
-        return IsFetchingData<T>("self");
+        return IsDataLoading<T>("self");
     }
 
     //
@@ -572,9 +573,9 @@ public static class UserUtil
             return new("Issue getting loginData!");
         }
 
-        if (loginData.asAnon)
+        if (loginData.state != MainDataTypes.LoginData.State.LoggedIn)
         {
-            return new("You cannot fetch your own shared data as an anon user!");
+            return new("You cannot get shared data as an anon user!");
         }
 
         if (uid == loginData.principal) uid = "self";

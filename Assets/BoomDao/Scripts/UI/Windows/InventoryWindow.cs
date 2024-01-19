@@ -4,6 +4,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using Boom;
+using Candid;
 
 public class InventoryWindow : Window
 {
@@ -48,7 +49,7 @@ public class InventoryWindow : Window
             return;
         }
 
-        if (UserUtil.IsDataLoadingSelf<DataTypes.Entity>())
+        if (CandidApiManager.Instance.BoomDaoGameType == CandidApiManager.GameType.SinglePlayer? UserUtil.IsDataLoadingSelf<DataTypes.Entity>() : UserUtil.IsDataValidSelf<DataTypes.Entity>() == false)
         {
 
             loadingText.text = "Loading...";

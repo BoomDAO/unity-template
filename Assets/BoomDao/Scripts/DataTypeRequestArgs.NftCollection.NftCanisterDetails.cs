@@ -1010,7 +1010,7 @@ public class MainDataTypes
 
         public Dictionary<string, TokenConfig> configs; //canisterId -> config
 
-        public AllTokenConfigs() { }
+        public AllTokenConfigs() { configs = new(); }
 
         public AllTokenConfigs(Dictionary<string, TokenConfig> configs)
         {
@@ -1046,7 +1046,7 @@ public class MainDataTypes
 
         public Dictionary<string, NftConfig> configs; //canisterId -> config
 
-        public AllNftCollectionConfig() { }
+        public AllNftCollectionConfig() { configs = new(); }
 
         public AllNftCollectionConfig(Dictionary<string, NftConfig> configs)
         {
@@ -1058,30 +1058,28 @@ public class MainDataTypes
     [Serializable]
     public class LoginData : Base
     {
+        public enum State
+        {
+            Logedout,
+            LoginRequested,
+            LoggedIn,
+            LoggedInAsAnon,
+        }
         public IAgent agent;
         public string principal;
         public string accountIdentifier;
-        public bool isLoginIn;
-        public bool asAnon;
+        public State state;
         public long updateTs;
-
-        public LoginData() { }
-        public LoginData(bool isLoginIn, LoginData old) 
+        public LoginData() 
         {
-            this.isLoginIn = isLoginIn;
-
-            this.agent = old.agent;
-            this.principal = old.principal;
-            this.accountIdentifier = old.accountIdentifier;
-            this.asAnon = old.asAnon;
-            updateTs = MainUtil.Now();
+            this.state = State.Logedout;
         }
-        public LoginData(IAgent agent, string principal, string accountIdentifier, bool asAnon)
+        public LoginData(IAgent agent, string principal, string accountIdentifier, State state)
         {
             this.agent = agent;
             this.principal = principal;
             this.accountIdentifier = accountIdentifier;
-            this.asAnon = asAnon;
+            this.state = state;
             updateTs = MainUtil.Now();
         }
     }

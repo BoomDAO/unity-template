@@ -1520,10 +1520,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 77.5
-  m_fontSizeBase: 66.39
+  m_fontSize: 56.8
+  m_fontSizeBase: 56.8
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18.6
   m_fontSizeMax: 77.5
   m_fontStyle: 1
@@ -2246,8 +2246,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8ed2378a1359d34bac2740e8c631642, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logInBtn: {fileID: 7508893272695187221}
-  logOutBtn: {fileID: 1086336287078378497}
   logInStateTxt: {fileID: 1890393973598112863}
   loadingTxt: {fileID: 2820117815901678599}
   principalTxt: {fileID: 8475154867211560060}
@@ -2290,7 +2288,7 @@ GameObject:
   - component: {fileID: 1938854145873373756}
   - component: {fileID: 6906463912851091943}
   - component: {fileID: 7508893272695187221}
-  - component: {fileID: 9146607323310599802}
+  - component: {fileID: 8290735652419742238}
   m_Layer: 5
   m_Name: LogIn [Btn]
   m_TagString: Untagged
@@ -2401,7 +2399,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &9146607323310599802
+--- !u!114 &8290735652419742238
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2410,9 +2408,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5991191626183517542}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 4acc59e12e50db94cb34fa88a4ab4bf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  button: {fileID: 7508893272695187221}
 --- !u!1 &6028441068584661964
 GameObject:
   m_ObjectHideFlags: 0
@@ -2937,7 +2936,7 @@ GameObject:
   - component: {fileID: 8003790322938031590}
   - component: {fileID: 7810295517527738066}
   - component: {fileID: 1086336287078378497}
-  - component: {fileID: 7408585789872559425}
+  - component: {fileID: 72957575938658921}
   m_Layer: 5
   m_Name: LogOut [Btn]
   m_TagString: Untagged
@@ -3048,7 +3047,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &7408585789872559425
+--- !u!114 &72957575938658921
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3057,9 +3056,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6804949155636709857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ba5f09ad1bb3bb4c81be31e660431ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 6a77d83271178774b9e60ab56071b3ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  button: {fileID: 1086336287078378497}
 --- !u!1 &7273170971649347947
 GameObject:
   m_ObjectHideFlags: 0

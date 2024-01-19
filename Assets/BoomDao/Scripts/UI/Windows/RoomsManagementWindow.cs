@@ -5,9 +5,8 @@ using Boom;
 using Boom.Patterns.Broadcasts;
 using Boom.UI;
 using Boom.Utility;
-using Boom.Values;
 using Candid;
-using UnityEditor;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,11 +30,12 @@ public class RoomsManagementWindow : Window
 
     public override void Setup(object data)
     {
+        roomsPanel.SetActive(false);
+        emptyText.SetActive(false);
+
         UserUtil.AddListenerMainDataChange<MainDataTypes.AllRoomData>(UpdateWindow, true);
 
         createRoom.onClick.AddListener(CreateRoomHandler);
-        roomsPanel.SetActive(false);
-        emptyText.SetActive(false);
     }
     private void OnDestroy()
     {
@@ -45,7 +45,6 @@ public class RoomsManagementWindow : Window
 
     private void UpdateWindow(MainDataTypes.AllRoomData data)
     {
-
         foreach (Transform child in content.transform)
         {
             Destroy(child.gameObject);
@@ -53,9 +52,9 @@ public class RoomsManagementWindow : Window
 
 
         bool isRoomDataValid = UserUtil.IsMainDataValid<MainDataTypes.AllRoomData>();
-        bool isSelfEntityDataLoading = UserUtil.IsDataLoadingSelf<DataTypes.Entity>();
+        bool isWorldEntityDataValid = UserUtil.IsDataValid<DataTypes.Entity>(CandidApiManager.Instance.WORLD_CANISTER_ID);
 
-        if (isRoomDataValid && !isSelfEntityDataLoading)
+        if (isRoomDataValid && isWorldEntityDataValid)
         {
             var allRoomDataResult = UserUtil.GetMainData<MainDataTypes.AllRoomData>();
 
@@ -65,7 +64,6 @@ public class RoomsManagementWindow : Window
                 return;
             }
 
-
             var allRoomData = allRoomDataResult.AsOk();
 
             emptyText.SetActive(allRoomData.rooms.Count == 0);
@@ -73,20 +71,23 @@ public class RoomsManagementWindow : Window
             //CHECK IF USER IS ALREADY IN A ROOM TO AUTOMATICALLY OPEN THE ROOM WINDOW AND CLOSE THIS ONE
             if (allRoomData.inRoom)
             {
+                Debug.Log($"You are in a room already");
+
                 WindowManager.Instance.OpenWindow<RoomWindow>(2);
                 Close();
                 return;
             }
 
-
+            Debug.Log($"ROOMS: {JsonConvert.SerializeObject(allRoomData)}");
             allRoomData.rooms.Iterate((e, i) =>
             {
+                Debug.Log("ADD ROOM " + i);
                 var room = e.Value;
                 WindowManager.Instance.AddWidgets<ActionWidgetTwo>(new ActionWidgetTwo.WindowData($"- ROOM #{i}, User Count: {room.userCount}", "Join Room", JoinRoomHandler, room.roomId), content);
             });
         }
 
-        roomsPanel.SetActive(isRoomDataValid && !isSelfEntityDataLoading);
+        roomsPanel.SetActive(isRoomDataValid && isWorldEntityDataValid);
     }
 
     private async void JoinRoomHandler(object roomId)

@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2393423864867871022
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2393423864867871021}
+  - component: {fileID: 2393423864867871020}
+  - component: {fileID: 2393423864867871185}
+  - component: {fileID: 3245743282429210067}
+  - component: {fileID: 729251945005567232}
+  m_Layer: 0
+  m_Name: CandidManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2393423864867871021
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393423864867871022}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 938.3497, y: 563.4335, z: -0.36021423}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2393423864867871020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393423864867871022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 433d19b1e116451b819e0652fbe4d9bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WORLD_HUB_CANISTER_ID>k__BackingField: fgpem-ziaaa-aaaag-abi2q-cai
+  <WORLD_CANISTER_ID>k__BackingField: j4n55-giaaa-aaaap-qb3wq-cai
+  <WORLD_COLLECTION_CANISTER_ID>k__BackingField: 6uvic-diaaa-aaaap-abgca-cai
+  <BoomDaoGameType>k__BackingField: 0
+  cachedAnonAgent:
+    <IsInit>k__BackingField: 0
+  cachedUserAddress:
+    value: 
+    <IsInit>k__BackingField: 0
+    <InitialValue>k__BackingField: 
+  principal: 
+  nextUpdateIn: 0
+  secondsToUpdateClient: 20
+  lastClientUpdate: 0
+  inRoom: 0
+  currentRoomId: 
+  usersInRoom: []
+  multPlayerActionStateFetch: 0
+  multPlayerTokenFetch: 0
+  multPlayerCollectionFetch: 0
+--- !u!114 &2393423864867871185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393423864867871022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec74d1320ded4346b5b28c6f3854518, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prodGatewayUri: wss://gateway.icws.io
+  devMode: 0
+--- !u!114 &3245743282429210067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393423864867871022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a826ba9b8edac440a04bf58a01d1f94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  url: https://7p3gx-jaaaa-aaaal-acbda-cai.raw.ic0.app/
+--- !u!114 &729251945005567232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393423864867871022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b93462f6a2dc454469b5bde3592fd4f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

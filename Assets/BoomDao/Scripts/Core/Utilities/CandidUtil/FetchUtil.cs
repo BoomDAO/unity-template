@@ -87,7 +87,7 @@ public static class FetchUtil
         }
         else
         {
-            $"DATA of type{nameof(DataTypes.Token)} failed to load. Message: {response.AsErr()}".Warning(nameof(CandidApiManager));
+            $"DATA of type {nameof(DataTypes.Entity)} failed to load. Message: {response.AsErr()}".Warning(nameof(CandidApiManager));
         }
     }
 

@@ -16,7 +16,7 @@ public static class NftUtil
     /// <returns></returns>
     public static UResult<DataTypes.NftCollection, string> TryGetCollection(string uid, string collectionId)
     {
-        var result = UserUtil.GetElementOfTypeSelf<DataTypes.NftCollection>(collectionId);
+        var result = UserUtil.GetElementOfType<DataTypes.NftCollection>(uid, collectionId);
 
         if (result.Tag == UResultTag.Err) return new(result.AsErr());
 

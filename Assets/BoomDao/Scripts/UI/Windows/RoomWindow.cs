@@ -118,6 +118,7 @@ public class RoomWindow : Window
 
     private void UpdateWindow(MainDataTypes.AllRoomData data)
     {
+        if (content == null) return;
 
         foreach (Transform child in content.transform)
         {
@@ -338,6 +339,7 @@ public class RoomWindow : Window
             return;
         }
         base.Close();
+        Debug.Log("You have left the room");
     }
 
     private void OnDestroy()

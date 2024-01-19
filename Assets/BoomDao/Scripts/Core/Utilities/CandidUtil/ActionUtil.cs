@@ -831,12 +831,12 @@ public static class ActionUtil
 
             var getLoginTypeResult = UserUtil.GetLoginType();
 
-            if (getLoginTypeResult.Tag == UResultTag.Err)
+            if (getLoginTypeResult == UserUtil.LoginType.None)
             {
-                return new(new TransferErrType.LogIn(getLoginTypeResult.AsErr()));
+                return new(new TransferErrType.LogIn("You must log in"));
             }
 
-            if (getLoginTypeResult.AsOk() == UserUtil.LoginType.Anon)
+            if (getLoginTypeResult == UserUtil.LoginType.Anon)
             {
                 return new(new TransferErrType.LogIn("You cannot execute this function as anon"));
             }
