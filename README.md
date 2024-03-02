@@ -8,9 +8,6 @@
 3. Drag-and-drop the Unity Package into your Unity Project.
 4. Start building!
 
-## TEST IT BEFORE DOWNLOADING HERE
-https://prgg7-iaaaa-aaaal-acrfq-cai.raw.icp0.io/
-
 ## UNITY TEMPLATE
 
 This **Unity Template** has all the necessary code for integration with the **World Protocol** on the Internet Computer blockchain. Features include on-chain login authentication, payments, minting, burning, action system, entity datastore, white-label shop, and white-label NFT marketplace. We designed this template to streamline the blockchain game-building process, so that game developers can focus on crafting fun and enjoyable gameplay. 
