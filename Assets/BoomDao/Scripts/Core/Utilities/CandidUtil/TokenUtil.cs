@@ -2,7 +2,6 @@ using Boom.Utility;
 using Boom.Values;
 using System.Linq;
 using UnityEngine;
-using Wasmtime;
 using static Env;
 
 public static class TokenUtil
